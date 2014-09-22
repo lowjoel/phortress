@@ -63,6 +63,8 @@ class Cli {
 	 */
 	private static function executeProgram($file) {
 		$program = new Program($file);
+		$program->parse();
+		$program->verify(null);
 		return array($program);
 	}
 }
