@@ -1,5 +1,6 @@
 <?php
 namespace Phortress;
+use Phortress\Exception\UnboundIdentifierException;
 
 /**
  * Represents a mapping of symbols to its actual values (functions, constants, etc.)
@@ -9,6 +10,26 @@ namespace Phortress;
  * @package Phortress
  */
 class Environment {
+	/**
+	 * We are trying to resolve a namespace.
+	 */
+	const NAMESPACE_ = 1;
+
+	/**
+	 * We are trying to resolve a class name.
+	 */
+	const CLASS_     = 2;
+
+	/**
+	 * We are trying to resolve a function.
+	 */
+	const FUNCTION_  = 3;
+
+	/**
+	 * We are trying to resolve a function.
+	 */
+	const CONSTANT   = 4;
+
 	/**
 	 * The parent environment, or null if this is the global environment.
 	 *
@@ -45,50 +66,61 @@ class Environment {
 	 * we have to go to the global environment before we can resolve downwards. If we are
 	 * relative then we go downwards.
 	 *
+	 * Furthermore, PHP allows us to define the same symbol with different types in the same
+	 * scope...
+	 *
 	 * @param string $symbol The symbol to resolve. This can be fully or relatively qualified.
+	 * @param int $typeHint The type of the symbol we want to retrieve.
 	 *
 	 * @exception Exception\UnboundIdentifierException The identifier cannot be resolved.
 	 * @return AbstractNode The node representing the symbol
 	 */
-	public function resolve($symbol) {
+	public function resolve($symbol, $typeHint) {
 		$parent = $this->getParent();
 
 		if (is_null($parent)) {
 			$symbol = self::makeRelativelyQualifiedTo($symbol, '\\');
 		} else if (self::isAbsolutelyQualified($symbol)) {
-			return $parent->resolve($symbol);
+			return $parent->resolve($symbol, $typeHint);
 		}
 
-		return self::resolveRelative($symbol);
+		return self::resolveRelative($symbol, $typeHint);
 	}
 
 	/**
 	 * @param string $symbol The symbol to resolve. This must be relatively qualified or
 	 *                       unqualified.
+	 * @param int $typeHint The type of the symbol we want to retrieve.
 	 *
 	 * @exception Exception\UnboundIdentifierException The identifier cannot be resolved.
 	 * @return AbstractNode the node representing the symbol.
 	 */
-	private function resolveRelative($symbol) {
+	private function resolveRelative($symbol, $typeHint) {
 		assert(self::isRelativelyQualified($symbol) || self::isUnqualified($symbol));
 
 		list($current, $residue) = self::dequalifyOne($symbol);
 
-		$child = $this->resolveSelf($current);
-		if (!is_null(child)) {
-
+		$child = $this->resolveSelf($current, $typeHint);
+		if (empty($residue)) {
+			return $child;
+		} else if (!is_null(child)) {
+			return $child->resolve($residue);
+		} else {
+			throw new Exception\UnboundIdentifierException($current, $this);
 		}
-		return $child->resolve($residue);
 	}
 
 	/**
 	 * Resolves a symbol in the current environment.
+	 * @todo Implement type hint checking.
 	 *
 	 * @param string $symbol An unqualified symbol to resolve.
+	 * @param int $typeHint The type of the symbol we want to retrieve.
+	 *
 	 * @return AbstractNode The node representing the symbol or null if the symbol cannot be
 	 *                      resolved.
 	 */
-	private function resolveSelf($symbol) {
+	private function resolveSelf($symbol, $typeHint) {
 		assert(self::isUnqualified($symbol), 'Symbol must be unqualified.');
 
 		return $this->variables[$symbol];
