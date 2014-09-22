@@ -14,12 +14,18 @@ class SourceFile {
 	 */
 	private $path;
 
-
-
 	/**
+	 * Constructs a new Source File object.
+	 *
 	 * @param string $path The path to the source file to parse.
+	 *
+	 * @throws Exception\IOException When the file specified cannot be opened for parsing.
 	 */
 	public function __construct($path) {
+		if (!file_exists($path)) {
+			throw new Exception\IOException($path);
+		}
 
+		$this->path = $path;
 	}
-} 
+}
