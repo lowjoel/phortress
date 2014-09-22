@@ -72,7 +72,7 @@ class Environment {
 	 * @param string $symbol The symbol to resolve. This can be fully or relatively qualified.
 	 * @param int $typeHint The type of the symbol we want to retrieve.
 	 *
-	 * @exception Exception\UnboundIdentifierException The identifier cannot be resolved.
+	 * @throws Exception\UnboundIdentifierException The identifier cannot be resolved.
 	 * @return AbstractNode The node representing the symbol
 	 */
 	public function resolve($symbol, $typeHint) {
@@ -92,7 +92,7 @@ class Environment {
 	 *                       unqualified.
 	 * @param int $typeHint The type of the symbol we want to retrieve.
 	 *
-	 * @exception Exception\UnboundIdentifierException The identifier cannot be resolved.
+	 * @throws Exception\UnboundIdentifierException The identifier cannot be resolved.
 	 * @return AbstractNode the node representing the symbol.
 	 */
 	private function resolveRelative($symbol, $typeHint) {
