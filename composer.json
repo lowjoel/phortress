@@ -10,11 +10,13 @@
 		},
 		{
 			"name": "Naomi Leow",
-			"email": ""
+			"email": "naomileowwx@gmail.com"
 		},
 		{
-			"name": "Tan Wei Lin",
-			"email": ""
+			"name": "Tan Wei Lin"
 		}
-	]
+	],
+	"require": {
+		"nikic/php-parser": "~1.0.0"
+	}
 }
