@@ -48,6 +48,21 @@ class Cli {
 	 * @return int The exit code of the program.
 	 */
 	private static function execute() {
+		foreach (self::$files as $file) {
+			self::executeProgram($file);
+		}
+
 		return 0;
+	}
+
+	/**
+	 * Starts parsing the given PHP source file as the entry point to a program.
+	 *
+	 * @param string $file The path to the file to treat as the entry point.
+	 * @return array A tuple containing the program representing the file.
+	 */
+	private static function executeProgram($file) {
+		$program = new Program($file);
+		return array($program);
 	}
 }
