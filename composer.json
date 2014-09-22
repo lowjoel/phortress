@@ -16,6 +16,11 @@
 			"name": "Tan Wei Lin"
 		}
 	],
+	"autoload": {
+		"psr-4": {
+			"Phortress\\": "lib"
+		}
+	},
 	"require": {
 		"nikic/php-parser": "~1.0.0"
 	},
