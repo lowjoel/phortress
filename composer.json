@@ -1,0 +1,20 @@
+{
+	"name": "lowjoel/phortress",
+	"description": "A PHP Static analyser framework",
+	"minimum-stability": "stable",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Joel Low",
+			"email": "joel@joelsplace.sg"
+		},
+		{
+			"name": "Naomi Leow",
+			"email": ""
+		},
+		{
+			"name": "Tan Wei Lin",
+			"email": ""
+		}
+	]
+}
