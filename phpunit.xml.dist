@@ -16,5 +16,8 @@
 		<whitelist>
 			<directory suffix=".php">./lib/Phortress/</directory>
 		</whitelist>
+		<blacklist>
+			<directory suffix=".php">./test/Fixture/</directory>
+		</blacklist>
 	</filter>
 </phpunit>

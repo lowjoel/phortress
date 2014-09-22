@@ -75,7 +75,8 @@ class Program {
 			$statements = $parser->parse(file_get_contents($file));
 
 			// Convert to fully qualified names
-			$traverser = new \PhpParser\NodeVisitor\NameResolver;
+			$traverser = new \PhpParser\NodeTraverser;
+			$traverser->addVisitor(new \PhpParser\NodeVisitor\NameResolver);
 			$statements = $traverser->traverse($statements);
 
 			$this->files[$file] = $statements;
