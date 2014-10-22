@@ -14,7 +14,7 @@ use \MyCLabs\Enum\Enum;
 class Annotation extends Enum{
     //put your code here
     const UNASSIGNED = 0;
-    const TAINTED = 1;
-    const SAFE = 2;
-    const UNKNOWN = 3;
+    const SAFE = 1;
+    const UNKNOWN = 2;
+    const TAINTED = 3;
 }
