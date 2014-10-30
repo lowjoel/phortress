@@ -5,8 +5,7 @@ use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 
-class IncludeResolver extends NodeVisitorAbstract
-{
+class IncludeResolver extends NodeVisitorAbstract {
 	/**
 	 * The files and the statements including them.
 	 * @var array(String => \PhpParser\Node[])

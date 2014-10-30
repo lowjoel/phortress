@@ -148,6 +148,7 @@ abstract class Environment {
 	 * @param string $className The name of a class to resolve. This can either
 	 * be fully qualified, or relatively qualified.
 	 * @return AbstractNode
+	 * @throws UnboundIdentifierException When the class has not been declared.
 	 */
 	public function resolveClass($className) {
 		return $this->getNamespace()->resolveClass($className);
@@ -159,6 +160,8 @@ abstract class Environment {
 	 * @param string $functionName The name of a function to resolve. This can
 	 * either be fully qualified, or relatively qualified.
 	 * @return AbstractNode
+	 * @throws UnboundIdentifierException When the function has not been
+	 * declared.
 	 */
 	public function resolveFunction($functionName) {
 		return $this->getNamespace()->resolveFunction($functionName);
@@ -205,6 +208,8 @@ abstract class Environment {
 	 * @param string $constantName The name of a constant to resolve. This can
 	 * either be fully qualified, or relatively qualified.
 	 * @return AbstractNode
+	 * @throws UnboundIdentifierException When the constant has not been
+	 * declared.
 	 */
 	public function resolveConstant($constantName) {
 		return $this->getNamespace()->resolveConstant($constantName);

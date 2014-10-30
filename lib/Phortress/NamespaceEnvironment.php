@@ -1,6 +1,8 @@
 <?php
 namespace Phortress;
 
+use Phortress\Exception\UnboundIdentifierException;
+
 class NamespaceEnvironment extends Environment {
 	/**
 	 * The namespaces declared in this namespace.
@@ -29,6 +31,7 @@ class NamespaceEnvironment extends Environment {
 	 * @param string $namespaceName The name of the namespace to resolve. This
 	 * can either be fully qualified, or relatively qualified.
 	 * @return NamespaceEnvironment
+	 * @throws UnboundIdentifierException When the identifier cannot be found.
 	 */
 	public function resolveNamespace($namespaceName) {
 		if ($namespaceName === null) {
@@ -36,7 +39,11 @@ class NamespaceEnvironment extends Environment {
 		} else if (self::isAbsolutelyQualified($namespaceName)) {
 			return $this->getGlobal()->resolveNamespace($namespaceName);
 		} else if (self::isUnqualified($namespaceName)) {
-			return $this->namespaces[$namespaceName];
+			if (array_key_exists($namespaceName, $this->namespaces)) {
+				return $this->namespaces[$namespaceName];
+			} else {
+				throw new UnboundIdentifierException($namespaceName, $this);
+			}
 		} else {
 			list($nextNamespace, $namespaceName) =
 				self::extractNamespaceComponent($namespaceName);
@@ -49,7 +56,11 @@ class NamespaceEnvironment extends Environment {
 		if (self::isAbsolutelyQualified($className)) {
 			return $this->getGlobal()->resolveClass($className);
 		} else if (self::isUnqualified($className)) {
-			return $this->classes[$className];
+			if (array_key_exists($className, $this->classes)) {
+				return $this->classes[$className];
+			} else {
+				throw new UnboundIdentifierException($className, $this);
+			}
 		} else {
 			list($nextNamespace, $className) =
 				self::extractNamespaceComponent($className);
@@ -62,7 +73,11 @@ class NamespaceEnvironment extends Environment {
 		if (self::isAbsolutelyQualified($functionName)) {
 			return $this->getGlobal()->resolveFunction($functionName);
 		} else if (self::isUnqualified($functionName)) {
-			return $this->functions[$functionName];
+			if (array_key_exists($functionName, $this->functions)) {
+				return $this->functions[$functionName];
+			} else {
+				throw new UnboundIdentifierException($functionName, $this);
+			}
 		} else {
 			list($nextNamespace, $functionName) =
 				self::extractNamespaceComponent($functionName);
