@@ -130,7 +130,7 @@ class NamespaceEnvironment extends Environment {
 	 */
 	private static function isUnqualified($symbol) {
 		return self::isRelativelyQualified($symbol) &&
-			strpos($symbol, '\\') === false
+			strpos($symbol, '\\') === false;
 	}
 
 	public function createChild() {

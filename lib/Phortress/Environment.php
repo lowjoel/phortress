@@ -59,7 +59,7 @@ use Phortress\Exception\UnboundIdentifierException;
  *
  * @package Phortress
  */
-class Environment {
+abstract class Environment {
 	/**
 	 * The variable has been unset.
 	 */
