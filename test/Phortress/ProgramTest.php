@@ -34,6 +34,8 @@ class ProgramTest extends \PHPUnit_Framework_TestCase {
 		$program->parse();
 
 		// Check that we can find hello()
-		var_dump($program->environment->resolveFunction('hello'));
+		$function = $program->environment->resolveFunction('a');
+		$this->assertEquals('a', $function->name);
+		$this->assertEquals(0, count($function->params));
 	}
 }

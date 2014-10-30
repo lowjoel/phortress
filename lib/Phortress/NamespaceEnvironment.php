@@ -2,6 +2,7 @@
 namespace Phortress;
 
 use Phortress\Exception\UnboundIdentifierException;
+use PhpParser\Node\Stmt\Function_;
 
 class NamespaceEnvironment extends Environment {
 	/**
@@ -167,6 +168,26 @@ class NamespaceEnvironment extends Environment {
 		$result = new NamespaceEnvironment(sprintf('%s\%s',
 			$this->name, $namespaceName));
 		$result->parent = $this;
+
+		return $result;
+	}
+
+	/**
+	 * Creates a new Function environment.
+	 *
+	 * @param Function_ $function The function to create an environment for.
+	 * @return FunctionEnvironment
+	 */
+	public function createChildFunction(Function_ $function) {
+		$this->functions[$function->name] = $function;
+
+		$result = new FunctionEnvironment(sprintf('%s\%s',
+			$this->name, $function->name));
+		$result->parent = $this;
+
+		foreach ($function->params as $param) {
+			$result->variables[$param->name] = $param;
+		}
 
 		return $result;
 	}

@@ -36,6 +36,18 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 	}
 
 	public function enterNode(Node $node) {
-		if ($node instanceof )
+		if ($node instanceof Node\Stmt\Function_) {
+			$node->environment = $this->currentEnvironment()->
+				createChildFunction($node);
+		}
+	}
+
+	/**
+	 * Gets the current environment.
+	 *
+	 * @return Environment
+	 */
+	private function currentEnvironment() {
+		return $this->environmentStack[count($this->environmentStack) - 1];
 	}
 } 

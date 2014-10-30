@@ -122,8 +122,11 @@ class Program {
 	 * program.
 	 * @return AbstractNode
 	 */
-	private static function addEnvironment(array $statements) {
-
+	private function addEnvironment(array $statements) {
+		$traverser = new \PhpParser\NodeTraverser;
+		$environmentResolver = new EnvironmentResolver($this->environment);
+		$traverser->addVisitor($environmentResolver);
+		return $traverser->traverse($statements);
 	}
 
 	/**
