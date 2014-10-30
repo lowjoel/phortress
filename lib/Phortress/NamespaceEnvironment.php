@@ -2,9 +2,54 @@
 namespace Phortress;
 
 class NamespaceEnvironment extends Environment {
+	/**
+	 * The namespaces declared in this namespace.
+	 *
+	 * @var array(string => NamespaceEnvironment)
+	 */
+	private $namespaces = array();
+
+	/**
+	 * The classes declared in this namespace.
+	 *
+	 * @var array(string => Environment)
+	 */
+	private $classes = array();
+
+	/**
+	 * The functions declared in this namespace.
+	 *
+	 * @var array(string => FunctionEnvironment)
+	 */
+	private $functions = array();
+
+	/**
+	 * Resolves the given namespace to an environment.
+	 *
+	 * @param string $namespaceName The name of the namespace to resolve. This
+	 * can either be fully qualified, or relatively qualified.
+	 * @return NamespaceEnvironment
+	 */
+	public function resolveNamespace($namespaceName) {
+		if ($namespaceName === null) {
+			return self;
+		} else if (self::isAbsolutelyQualified($namespaceName)) {
+			return $this->getGlobal()->resolveNamespace($namespaceName);
+		} else if (self::isUnqualified($namespaceName)) {
+			return $this->namespaces[$namespaceName];
+		} else {
+			list($nextNamespace, $namespaceName) =
+				self::extractNamespaceComponent($namespaceName);
+			return $this->resolveNamespace($nextNamespace)->
+				resolveNamespace($namespaceName);
+		}
+	}
+
 	public function resolveClass($className) {
 		if (self::isAbsolutelyQualified($className)) {
 			return $this->getGlobal()->resolveClass($className);
+		} else if (self::isUnqualified($className)) {
+			return $this->classes[$className];
 		} else {
 			list($nextNamespace, $className) =
 				self::extractNamespaceComponent($className);
@@ -16,6 +61,8 @@ class NamespaceEnvironment extends Environment {
 	public function resolveFunction($functionName) {
 		if (self::isAbsolutelyQualified($functionName)) {
 			return $this->getGlobal()->resolveFunction($functionName);
+		} else if (self::isUnqualified($functionName)) {
+			return $this->functions[$functionName];
 		} else {
 			list($nextNamespace, $functionName) =
 				self::extractNamespaceComponent($functionName);
@@ -35,6 +82,25 @@ class NamespaceEnvironment extends Environment {
 		}
 	}
 
+	/**
+	 * Extracts the first namespace component from the given symbol, and returns
+	 * the namespace and the tail of the symbol.
+	 *
+	 * @param string $symbol
+	 * @return String[]
+	 */
+	private static function extractNamespaceComponent($symbol) {
+		assert(!self::isAbsolutelyQualified($symbol));
+		$firstSlash = strpos($symbol, '\\');
+		if ($firstSlash === false) {
+			return array(null, $symbol);
+		} else {
+			return array(
+				substr($symbol, 0, $firstSlash),
+				substr($symbol, $firstSlash + 1)
+			);
+		}
+	}
 
 	/**
 	 * Checks if the given symbol is absolutely qualified.
