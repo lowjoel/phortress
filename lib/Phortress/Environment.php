@@ -106,44 +106,64 @@ class Environment {
 	}
 
 	/**
+	 * Gets the namespace that this environment is in. For example, if this is
+	 * a function, it will get the namespace that this function is declared in.
+	 */
+	public function getNamespace() {
+		$parent = $this->getParent();
+		while ($parent !== null) {
+			if ($parent instanceof NamespaceEnvironment) {
+				break;
+			}
+		}
+
+		return $parent;
+	}
+
+	/**
 	 * Resolves the declaration of a class.
 	 *
-	 * @param $className string The name of a class to resolve. This can either
+	 * @param string $className The name of a class to resolve. This can either
 	 * be fully qualified, or relatively qualified.
 	 */
 	public function resolveClass($className) {
-		$parent = $this->getParent();
-
-		if (is_null($parent)) {
-			$symbol = self::makeRelativelyQualifiedTo($symbol, '\\');
-		} else if (self::isAbsolutelyQualified($symbol)) {
-			return $parent->resolve($symbol, $typeHint);
-		}
-
-		return self::resolveRelative($symbol, $typeHint);
+		return $this->getNamespace()->resolveClass($className);
 	}
 
 	/**
 	 * Resolves the declaration of a function.
 	 *
-	 * @param $functionName string The name of a function to resolve. This can
+	 * @param string $functionName The name of a function to resolve. This can
 	 * either be fully qualified, or relatively qualified.
 	 */
 	public function resolveFunction($functionName) {
+		return $this->getNamespace()->resolveFunction($functionName);
 	}
 
 	/**
 	 * Resolves the declaration of a variable.
 	 *
-	 * @param $variableName string The name of a variable to resolve.
+	 * @param string $variableName The name of a variable to resolve.
+	 * @throws UnboundIdentifierException When the variable has not been
+	 * declared.
 	 */
 	public function resolveVariable($variableName) {
+		if (array_key_exists($variableName, $this->variables)) {
+			$result = $this->variables[$variableName];
+			if ($result == self::UNSET_) {
+				throw new UnboundIdentifierException($variableName, $this);
+			} else {
+				return $result;
+			}
+		} else {
+			return $this->getParent()->resolveVariable($variableName);
+		}
 	}
 
 	/**
 	 * Resolves the declaration of a constant.
 	 *
-	 * @param $constantName The name of a constant to resolve. This can
+	 * @param string $constantName The name of a constant to resolve. This can
 	 * either be fully qualified, or relatively qualified.
 	 */
 	public function resolveConstant($constantName) {
@@ -194,7 +214,7 @@ class Environment {
 	 * @return Environment The new child environment.
 	 */
 	public function createChild() {
-		$environment = new Environment();
+		$environment = new Environment($this->name);
 		$environment->parent = $this;
 
 		return $environment;
