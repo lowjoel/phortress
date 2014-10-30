@@ -3,13 +3,63 @@ namespace Phortress;
 use Phortress\Exception\UnboundIdentifierException;
 
 /**
- * Represents a mapping of symbols to its actual values (functions, constants, etc.)
- * Symbol tables can be chained for use in nested environments (namespaces, function scopes or
- * closures)
+ * Represents a mapping of symbols to its actual values: functions, constants,
+ * variables. Symbol tables can be chained for use in nested environments
+ * (namespaces, function scopes or closures)
+ *
+ * Functions and Namespaces
+ *
+ * Functions and namespaces are the simplest. They are accessible anywhere in
+ * the parse tree. For this reason, they are not stored in our environment
+ * mapping, instead it is searched whenever we look for one.
+ *
+ * Constants and Variables
+ *
+ * Constants and variables are strange creatures in PHP. Constants are available
+ * only when they have been evaluated and is dependent on 'program order.'
+ * Variables are the same; however, where constants are accessible from any
+ * scope after they have been evaluated, variables can only be accessed inside
+ * the local environment. Globals need to be accessed with global $var or using
+ * superglobals (discussed later)
+ *
+ * For this reason, environments are mutable. To represent this in a static
+ * analyser, one can assume that the environments available at each expression
+ * is different. This is a waste of space, as such, in Phortress we represent
+ * them as chains of immutable environments. This allows us to preserve the
+ * behaviour that variables are undeclared until they have been evaluated.
+ *
+ * Furthermore, when a variable has been unset(), a dummy value is placed in the
+ * environment to indicate that the identifier is no longer bound (@see UNSET_).
+ * PHP has function-level variable scoping, but does not have hoisting like
+ * JavaScript does, and has unset(), hence the need for this strange behaviour.
+ *
+ * As a convention, Phortress stores variables as '$var' and constants without
+ * the preceding $.
+ *
+ * Globals and Superglobals
+ *
+ * There is also the concern of superglobals. Because PHP functions cannot
+ * access global variables unless using the $_GLOBALS or global keyword, all
+ * functions start out with an empty environment. The only variable which are
+ * bound at the start of the function are the superglobals, which are pointing
+ * by reference to the global environment's symbol table entry.
+ *
+ * Lambdas
+ *
+ * The next level of complexity arises from lambdas. Lambdas are able to either
+ * capture a variable by value or by reference. A closure is not formed in the
+ * normal sense. In this case, a new environment is created, with the variable
+ * captured either copied by value or by reference, depending on the capture,
+ * and included in the initial environment of the closure.
  *
  * @package Phortress
  */
 class Environment {
+	/**
+	 * The variable has been unset.
+	 */
+	const UNSET_ = null;
+
 	/**
 	 * We are trying to resolve a namespace.
 	 */
