@@ -1,6 +1,7 @@
 <?php
 namespace Phortress;
 use Phortress\Exception\UnboundIdentifierException;
+use PhpParser\Node\Expr\Assign;
 
 /**
  * Represents a mapping of symbols to its actual values: functions, constants,
@@ -37,9 +38,6 @@ use Phortress\Exception\UnboundIdentifierException;
  * environment to indicate that the identifier is no longer bound (@see UNSET_).
  * PHP has function-level variable scoping, but does not have hoisting like
  * JavaScript does, and has unset(), hence the need for this strange behaviour.
- *
- * As a convention, Phortress stores variables as '$var' and constants without
- * the preceding $.
  *
  * Globals and Superglobals
  *
@@ -225,17 +223,13 @@ abstract class Environment {
 	/**
 	 * Defines the given variable.
 	 *
-	 * @param string $symbol The symbol to register. This must be prefixed with
-	 * '$'.
-	 * @param AbstractNode $node The node to associate with the symbol.
+	 * @param Assign $node The symbol to register.
 	 * @return Environment A new environment with the given symbol defined
 	 * and parent environment set.
 	 */
-	public function defineVariableByValue($symbol, $node) {
-		assert(substr($symbol, 0, 1) === '$', 'Variables must start with $');
-
+	public function defineVariableByValue(Assign $node) {
 		$result = $this->createChild();
-		$result->variables[$symbol] = $node;
+		$result->variables[$node->var->name] = $node;
 
 		return $result;
 	}

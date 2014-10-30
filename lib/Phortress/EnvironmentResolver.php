@@ -1,9 +1,9 @@
 <?php
 namespace Phortress;
 
-
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
+use PhpParser\Node\Stmt;
 use PhpParser\Node\Expr;
 
 class EnvironmentResolver extends NodeVisitorAbstract {
@@ -36,9 +36,21 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 	}
 
 	public function enterNode(Node $node) {
-		if ($node instanceof Node\Stmt\Function_) {
+		if ($node instanceof Stmt\Function_) {
 			$node->environment = $this->currentEnvironment()->
 				createChildFunction($node);
+			$this->pushEnvironment($node->environment);
+		} else if ($node instanceof Expr\Assign) {
+			$node->environment = $this->currentEnvironment()->
+				defineVariableByValue($node);
+		} else if ($node instanceof Node\Expr) {
+			$node->environment = $this->currentEnvironment();
+		}
+	}
+
+	public function leaveNode(Node $node) {
+		if ($node instanceof Stmt\Function_) {
+			$this->popEnvironment();
 		}
 	}
 
@@ -47,7 +59,24 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 	 *
 	 * @return Environment
 	 */
-	private function currentEnvironment() {
+	private function &currentEnvironment() {
 		return $this->environmentStack[count($this->environmentStack) - 1];
+	}
+
+	/**
+	 * Pops the topmost environment from the environment stack.
+	 */
+	private function popEnvironment() {
+		array_pop($this->environmentStack);
+		assert(!empty($this->environmentStack), 'Cannot pop the global ' .
+			'environment off the environment stack.');
+	}
+
+	/**
+	 * Pushes a new environment to the top of the environment stack.
+	 * @param Environment $environment
+	 */
+	private function pushEnvironment(Environment $environment) {
+		array_push($this->environmentStack, $environment);
 	}
 } 
