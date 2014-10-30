@@ -7,6 +7,11 @@ use Phortress\Exception\UnboundIdentifierException;
  * variables. Symbol tables can be chained for use in nested environments
  * (namespaces, function scopes or closures)
  *
+ * The base Environment class only deals with variables and constants. There
+ * is a Namespace Environment which deals with classes and other namespaces,
+ * as well as a Global Environment which deals with superglobals and global
+ * constants.
+ *
  * Functions and Namespaces
  *
  * Functions and namespaces are the simplest. They are accessible anywhere in
@@ -61,71 +66,52 @@ class Environment {
 	const UNSET_ = null;
 
 	/**
-	 * We are trying to resolve a namespace.
-	 */
-	const NAMESPACE_ = 1;
-
-	/**
-	 * We are trying to resolve a class name.
-	 */
-	const CLASS_     = 2;
-
-	/**
-	 * We are trying to resolve a function.
-	 */
-	const FUNCTION_  = 3;
-
-	/**
-	 * We are trying to resolve a function.
-	 */
-	const CONSTANT   = 4;
-
-	/**
 	 * The parent environment, or null if this is the global environment.
 	 *
 	 * @var Environment
 	 */
-	private $parent;
+	protected $parent;
+
+	/**
+	 * The name of this environment, mainly for debugging.
+	 *
+	 * @var String
+	 */
+	protected $name;
 
 	/**
 	 * The variables defined in the current environment.
 	 *
-	 * @var AbstractNode[]
+	 * Remember that all variables are prefixed with $.
+	 *
+	 * @var array(String => AbstractNode)
 	 */
-	private $variables = array();
+	protected $variables = array();
 
 	/**
 	 * Constructs a new, empty environment.
 	 */
-	public function __construct() {
+	protected function __construct($name) {
+		$this->name = $name;
 	}
 
 	/**
 	 * Gets the parent environment for the current environment.
 	 *
-	 * @return IEnvironment The parent environment, or null if this is the global environment.
+	 * @return Environment The parent environment, or null if this is the global
+	 * environment.
 	 */
 	public function getParent() {
 		return $this->parent;
 	}
 
 	/**
-	 * Resolves the symbol to its real type.
+	 * Resolves the declaration of a class.
 	 *
-	 * This is a peculiar function because if we have an absolute path,
-	 * we have to go to the global environment before we can resolve downwards. If we are
-	 * relative then we go downwards.
-	 *
-	 * Furthermore, PHP allows us to define the same symbol with different types in the same
-	 * scope...
-	 *
-	 * @param string $symbol The symbol to resolve. This can be fully or relatively qualified.
-	 * @param int $typeHint The type of the symbol we want to retrieve.
-	 *
-	 * @throws Exception\UnboundIdentifierException The identifier cannot be resolved.
-	 * @return AbstractNode The node representing the symbol
+	 * @param $className string The name of a class to resolve. This can either
+	 * be fully qualified, or relatively qualified.
 	 */
-	public function resolve($symbol, $typeHint) {
+	public function resolveClass($className) {
 		$parent = $this->getParent();
 
 		if (is_null($parent)) {
@@ -135,6 +121,32 @@ class Environment {
 		}
 
 		return self::resolveRelative($symbol, $typeHint);
+	}
+
+	/**
+	 * Resolves the declaration of a function.
+	 *
+	 * @param $functionName string The name of a function to resolve. This can
+	 * either be fully qualified, or relatively qualified.
+	 */
+	public function resolveFunction($functionName) {
+	}
+
+	/**
+	 * Resolves the declaration of a variable.
+	 *
+	 * @param $variableName string The name of a variable to resolve.
+	 */
+	public function resolveVariable($variableName) {
+	}
+
+	/**
+	 * Resolves the declaration of a constant.
+	 *
+	 * @param $constantName The name of a constant to resolve. This can
+	 * either be fully qualified, or relatively qualified.
+	 */
+	public function resolveConstant($constantName) {
 	}
 
 	/**

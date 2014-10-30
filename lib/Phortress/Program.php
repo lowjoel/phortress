@@ -39,7 +39,7 @@ class Program {
 	 * @param string $entryFile The point of entry in the program.
 	 */
 	public function __construct($entryFile) {
-		$this->environment = new Environment();
+		$this->environment = new GlobalEnvironment();
 		$this->input[] = $entryFile;
 	}
 
