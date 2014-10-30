@@ -18,10 +18,11 @@ class SourceFile {
 	 * Constructs a new Source File object.
 	 *
 	 * @param string $path The path to the source file to parse.
+	 * @param \PhpParser\Node[] $statements The statements in the file.
 	 *
 	 * @throws Exception\IOException When the file specified cannot be opened for parsing.
 	 */
-	public function __construct($path) {
+	public function __construct($path, $statements) {
 		if (!file_exists($path)) {
 			throw new Exception\IOException($path);
 		}

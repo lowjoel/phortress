@@ -11,20 +11,27 @@ namespace Phortress;
  */
 class Program {
 	/**
-	 * The source files comprising the program.
+	 * The entry point of the program.
 	 *
-	 * @var string[]
+	 * @var string
 	 */
-	private $input = array();
+	private $input = null;
 
 	/**
 	 * The source files comprising the program.
 	 *
 	 * This is null until @see parse is called.
 	 *
-	 * @var SourceFile[]
+	 * @var array(String => SourceFile)
 	 */
 	private $files;
+
+	/**
+	 * The parse tree for the entire program.
+	 *
+	 * @var AbstractNode[]
+	 */
+	private $parseTree;
 
 	/**
 	 * The global environment for this program.
@@ -40,35 +47,45 @@ class Program {
 	 */
 	public function __construct($entryFile) {
 		$this->environment = new GlobalEnvironment();
-		$this->input[] = $entryFile;
+		$this->input = $entryFile;
 	}
 
 	/**
 	 * Parses the given program. This will load all dependent files.
+	 *
+	 * This method is idempotent.
 	 */
 	public function parse() {
-		// This function is idempotent.
-		if (empty($this->input)) {
+		if (!empty($this->parseTree)) {
 			return;
 		}
 
-		$this->files = array();
-		while (!empty($this->input)) {
-			$this->parseFile(array_shift($this->input));
+		// Parse the input recursively, resolving includes.
+		list($files, $parseTree) = self::parseFile($this->input);
+
+		// Adorn the parse tree with environment information.
+		$parseTree = $this->addEnvironment($parseTree);
+
+		// Map the raw statements into SourceFile objects.
+		foreach ($files as $path => &$file) {
+			$file = new SourceFile($path, $file);
 		}
 
-		// Don't run again.
-		$this->input = null;
+		// Memoise.
+		$this->files = $files;
+		$this->parseTree = $parseTree;
 	}
 
 	/**
 	 * Parses the given file.
 	 *
 	 * @param string $file The path to the file.
-	 *
-	 * @throws Exception\ParseErrorException When there is a syntax error in the input source.
+	 * @return array The statements in all included files file, and the complete
+	 * parse tree of the program after following requires and includes.
+	 * @throws Exception\ParseErrorException When there is a syntax error in the
+	 * input source.
 	 */
-	private function parseFile($file) {
+	private static function parseFile($file) {
 		$file = realpath($file);
 		$parser = new Parser($file);
 		try {
@@ -79,10 +96,34 @@ class Program {
 			$traverser->addVisitor(new \PhpParser\NodeVisitor\NameResolver);
 			$statements = $traverser->traverse($statements);
 
-			$this->files[$file] = $statements;
+			// Parse requires
+			$includer = new \PhpParser\NodeTraverser;
+			$includeResolver = new IncludeResolver;
+			$includer->addVisitor($includeResolver);
+			$parseTree = $includer->traverse(array_slice($statements, 0));
+
+			// Merge all the raw statements
+			$files = array(
+				$file => $statements
+			);
+			$files = array_merge($files, $includeResolver->getFiles());
+
+			return array($files, $parseTree);
 		} catch (\PhpParser\Error $e) {
-			throw new Exception\ParseErrorException($e->getMessage(), $e->getLine(), $e);
+			throw new Exception\ParseErrorException($e->getMessage(),
+				$e->getLine(), $e);
 		}
+	}
+
+	/**
+	 * Adds environment information to the given statements.
+	 *
+	 * @param \PhpParser\Node[] $statements The statements comprising the
+	 * program.
+	 * @return AbstractNode
+	 */
+	private static function addEnvironment(array $statements) {
+
 	}
 
 	/**
