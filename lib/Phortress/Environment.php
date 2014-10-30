@@ -117,6 +117,8 @@ class Environment {
 			}
 		}
 
+		assert($parent !== null, 'The namespace of any environment cannot be ' .
+			'null');
 		return $parent;
 	}
 
@@ -155,6 +157,11 @@ class Environment {
 			} else {
 				return $result;
 			}
+
+		// We can only check our own local environment. We cannot pass a
+		// function environment and check our namespace for variables.
+		} else if (get_class($this->getParent()) !== '\Phortress\Environment') {
+			throw new UnboundIdentifierException($variableName, $this);
 		} else {
 			return $this->getParent()->resolveVariable($variableName);
 		}
@@ -167,45 +174,7 @@ class Environment {
 	 * either be fully qualified, or relatively qualified.
 	 */
 	public function resolveConstant($constantName) {
-	}
-
-	/**
-	 * @param string $symbol The symbol to resolve. This must be relatively qualified or
-	 *                       unqualified.
-	 * @param int $typeHint The type of the symbol we want to retrieve.
-	 *
-	 * @throws Exception\UnboundIdentifierException The identifier cannot be resolved.
-	 * @return AbstractNode the node representing the symbol.
-	 */
-	private function resolveRelative($symbol, $typeHint) {
-		assert(self::isRelativelyQualified($symbol) || self::isUnqualified($symbol));
-
-		list($current, $residue) = self::dequalifyOne($symbol);
-
-		$child = $this->resolveSelf($current, $typeHint);
-		if (empty($residue)) {
-			return $child;
-		} else if (!is_null(child)) {
-			return $child->resolve($residue);
-		} else {
-			throw new Exception\UnboundIdentifierException($current, $this);
-		}
-	}
-
-	/**
-	 * Resolves a symbol in the current environment.
-	 * @todo Implement type hint checking.
-	 *
-	 * @param string $symbol An unqualified symbol to resolve.
-	 * @param int $typeHint The type of the symbol we want to retrieve.
-	 *
-	 * @return AbstractNode The node representing the symbol or null if the symbol cannot be
-	 *                      resolved.
-	 */
-	private function resolveSelf($symbol, $typeHint) {
-		assert(self::isUnqualified($symbol), 'Symbol must be unqualified.');
-
-		return $this->variables[$symbol];
+		return $this->getNamespace()->resolveConstant($constantName);
 	}
 
 	/**
@@ -221,64 +190,20 @@ class Environment {
 	}
 
 	/**
-	 * Defines the symbol in the given environment.
+	 * Defines the given variable.
 	 *
-	 * @param string $symbol The symbol to register. This must be relatively qualified.
+	 * @param string $symbol The symbol to register. This must be prefixed with
+	 * '$'.
 	 * @param AbstractNode $node The node to associate with the symbol.
+	 * @return Environment A new environment with the given symbol defined
+	 * and parent environment set.
 	 */
-	public function define($symbol, $node) {
-		assert(self::isUnqualified($symbol), 'Symbol must be unqualified.');
-	}
+	public function defineVariableByValue($symbol, $node) {
+		assert(substr($symbol, 0, 1) === '$', 'Variables must start with $');
 
-	/**
-	 * Takes a relatively qualified name and removes the first component of the name.
-	 *
-	 * @param $symbol The relatively or unqualified name to dequalify.
-	 * @return string[] The current component, and the residue after stripping the prefix.
-	 */
-	private static function dequalifyOne($symbol) {
-		return array('lol', 'others');
-	}
+		$result = $this->createChild();
+		$result->variables[$symbol] = $node;
 
-	/**
-	 * @todo Implement
-	 * @param $symbol
-	 * @return bool
-	 */
-	private static function isAbsolutelyQualified($symbol) {
-		return false;
-	}
-
-	/**
-	 * @todo Implement
-	 * @param $symbol
-	 * @return bool
-	 */
-	private static function isRelativelyQualified($symbol) {
-		return false;
-	}
-
-	/**
-	 * Checks whether the given symbol is unqualified.
-	 *
-	 * @param string $symbol The symbol to check.
-	 * @return bool True if the symbol is unqualified.
-	 */
-	private static function isUnqualified($symbol) {
-		return !self::isAbsolutelyQualified($symbol) && !self::isRelativelyQualified($symbol);
-	}
-
-	/**
-	 * Makes one symbol relative to the given namespace.
-	 * @todo implement
-	 *
-	 * @param string $symbol The symbol to make relative. This must be an absolutely qualified
-	 *                       symbol.
-	 * @param string $relativeTo The symbol to make relative to. This must be an absolutely
-	 *                           qualified symbol.
-	 * @return string The new, relatively qualified symbol.
-	 */
-	private static function makeRelativelyQualfiedTo($symbol, $relativeTo) {
-
+		return $result;
 	}
 }
