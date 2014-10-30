@@ -31,21 +31,4 @@ class GlobalEnvironment extends NamespaceEnvironment {
 
 		self::copyValueReferences($this->variables, $this->superglobals);
 	}
-
-	public function createChild() {
-		$result = parent::createChild();
-		self::copyValueReferences($result->variables, $this->superglobals);
-
-		return $result;
-	}
-
-	/**
-	 * Copy the values by reference from one array to another.
-	 */
-	private static function copyValueReferences($to, $from) {
-		// Copy the superglobals.
-		foreach ($from as $key => &$value) {
-			$to[$key] = &$value;
-		}
-	}
 }
