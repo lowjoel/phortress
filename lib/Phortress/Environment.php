@@ -183,11 +183,20 @@ class Environment {
 
 		// We can only check our own local environment. We cannot pass a
 		// function environment and check our namespace for variables.
-		} else if (get_class($this->getParent()) !== '\Phortress\Environment') {
+		} else if ($this->resolveVariablesInParentEnvironment()) {
 			throw new UnboundIdentifierException($variableName, $this);
 		} else {
 			return $this->getParent()->resolveVariable($variableName);
 		}
+	}
+
+	/**
+	 * Check if the current environment should check the parent environment for
+	 * variable resolutions.
+	 * @return bool
+	 */
+	protected function resolveVariablesInParentEnvironment() {
+		return true;
 	}
 
 	/**
@@ -206,12 +215,7 @@ class Environment {
 	 *
 	 * @return Environment The new child environment.
 	 */
-	public function createChild() {
-		$environment = new Environment($this->name);
-		$environment->parent = $this;
-
-		return $environment;
-	}
+	public abstract function createChild();
 
 	/**
 	 * Defines the given variable.
