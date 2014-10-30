@@ -20,6 +20,10 @@ class UnboundIdentifierException extends ParserException {
 	 */
 	private $environment;
 
+	/**
+	 * @param string $symbol
+	 * @param \Phortress\Environment $environment
+	 */
 	public function __construct($symbol, $environment) {
 		$this->symbol = $symbol;
 		$this->environment = $environment;
