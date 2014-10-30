@@ -148,3 +148,6 @@ class TestObject {
 		$property->setValue($this->object, $value);
 	}
 }
+
+ini_set('xdebug.max_nesting_level', 2000);
+ini_set('xdebug.var_display_max_depth', -1);
