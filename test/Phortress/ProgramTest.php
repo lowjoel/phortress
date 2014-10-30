@@ -10,10 +10,7 @@ class ProgramTest extends \PHPUnit_Framework_TestCase {
 		$program->parse();
 
 		// Check that we have statements for basic_program_test.php.
-		$this->assertEquals(2, count($program->files[$file]));
-
-		// And that it is idempotent
-		$this->assertEquals(null, $program->input);
+		$this->assertEquals(2, $program->files[$file]->getStatementCount());
 	}
 
 	public function testParsesRequires() {

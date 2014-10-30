@@ -15,6 +15,13 @@ class SourceFile {
 	private $path;
 
 	/**
+	 * The statements in this file.
+	 *
+	 * @var \PhpParser\Node[]
+	 */
+	private $statements;
+
+	/**
 	 * Constructs a new Source File object.
 	 *
 	 * @param string $path The path to the source file to parse.
@@ -28,5 +35,15 @@ class SourceFile {
 		}
 
 		$this->path = $path;
+		$this->statements = $statements;
+	}
+
+	/**
+	 * Gets the number of statements in this file.
+	 *
+	 * @return int
+	 */
+	public function getStatementCount() {
+		return count($this->statements);
 	}
 }

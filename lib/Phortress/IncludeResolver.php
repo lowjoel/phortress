@@ -15,7 +15,7 @@ class IncludeResolver extends NodeVisitorAbstract
 
 	/**
 	 * Gets the mapping from files to statements.
-	 * 
+	 *
 	 * @return array(string => Node[])
 	 */
 	public function getFiles() {
