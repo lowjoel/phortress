@@ -25,4 +25,15 @@ class ProgramTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, count($program->files[$file]));
 		$this->assertEquals(2, count($program->files[$included_file]));
 	}
+
+	public function testGeneratesEnvironment() {
+		// Load a program
+		$file = realpath(__DIR__ . '/Fixture/environment_test.php');
+		$program = new Program($file);
+		$program = new \TestObject($program);
+		$program->parse();
+
+		// Check that we can find hello()
+		var_dump($program->environment->resolveFunction('hello'));
+	}
 }
