@@ -183,7 +183,7 @@ class Environment {
 
 		// We can only check our own local environment. We cannot pass a
 		// function environment and check our namespace for variables.
-		} else if ($this->resolveVariablesInParentEnvironment()) {
+		} else if ($this->shouldResolveVariablesInParentEnvironment()) {
 			throw new UnboundIdentifierException($variableName, $this);
 		} else {
 			return $this->getParent()->resolveVariable($variableName);
@@ -195,7 +195,7 @@ class Environment {
 	 * variable resolutions.
 	 * @return bool
 	 */
-	protected function resolveVariablesInParentEnvironment() {
+	protected function shouldResolveVariablesInParentEnvironment() {
 		return true;
 	}
 

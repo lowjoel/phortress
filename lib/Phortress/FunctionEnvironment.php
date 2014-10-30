@@ -2,7 +2,7 @@
 namespace Phortress;
 
 class FunctionEnvironment extends Environment {
-	public function resolveVariablesInParentEnvironment() {
+	public function shouldResolveVariablesInParentEnvironment() {
 		return get_class($this->getParent()) !== '\Phortress\Environment';
 	}
 
