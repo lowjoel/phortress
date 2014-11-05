@@ -150,7 +150,7 @@ class NamespaceEnvironment extends Environment {
 	}
 
 	public function createChild() {
-		$environment = new NamespaceEnvironment($this->name);
+		$environment = new NamespaceContinuationEnvironment($this->name);
 		$environment->parent = $this;
 
 		return $environment;

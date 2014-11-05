@@ -43,6 +43,7 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 		} else if ($node instanceof Expr\Assign) {
 			$node->environment = $this->currentEnvironment()->
 				defineVariableByValue($node);
+			$this->setCurrentEnvironment($node->environment);
 		} else if ($node instanceof Node\Expr) {
 			$node->environment = $this->currentEnvironment();
 		}
@@ -61,6 +62,18 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 	 */
 	private function &currentEnvironment() {
 		return $this->environmentStack[count($this->environmentStack) - 1];
+	}
+
+	/**
+	 * Sets the new environment.
+	 *
+	 * @param Environment $environment The new environment to replace the topmost
+	 *                                 environment.
+	 */
+	private function setCurrentEnvironment(Environment $environment) {
+		assert(!empty($this->environmentStack), 'Environment stack cannot be empty.');
+		$this->environmentStack[count($this->environmentStack) - 1] =
+			$environment;
 	}
 
 	/**
