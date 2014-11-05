@@ -149,5 +149,18 @@ class TestObject {
 	}
 }
 
+/**
+ * Loads the given file as a Program, then returns it wrapped in a TestClass.
+ * @param string $file The path to the file to load.
+ * @return \Phortress\Program
+ */
+function loadGlassBoxProgram($file) {
+	$program = new \Phortress\Program($file);
+	$program = new \TestObject($program);
+	$program->parse();
+
+	return $program;
+}
+
 ini_set('xdebug.max_nesting_level', 2000);
 ini_set('xdebug.var_display_max_depth', -1);
