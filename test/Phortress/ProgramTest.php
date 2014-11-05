@@ -2,34 +2,48 @@
 namespace Phortress;
 
 class ProgramTest extends \PHPUnit_Framework_TestCase {
-	public function testParsesEntryFile() {
-		// Load a program
-		$file = realpath(__DIR__ . '/Fixture/basic_program_test.php');
-		$program = loadGlassBoxProgram($file);
+	/**
+	 * The file we loaded the program from.
+	 *
+	 * @var String
+	 */
+	private $file;
 
+	/**
+	 * The file which the program is supposed to include.
+	 *
+	 * @var String
+	 */
+	private $included_file;
+
+	/**
+	 * @var Program
+	 */
+	private $program;
+
+	public function setUp() {
+		// Load a program
+		$this->file = realpath(__DIR__ . '/Fixture/basic_program_test.php');
+		$this->included_file = realpath(__DIR__ . '/Fixture/basic_program_test.php');
+		$this->program = loadGlassBoxProgram($this->file);
+	}
+
+	public function testParsesEntryFile() {
 		// Check that we have statements for basic_program_test.php.
-		$this->assertEquals(2, $program->files[$file]->getStatementCount());
+		$this->assertEquals(2,
+			$this->program->files[$this->file]->getStatementCount());
 	}
 
 	public function testParsesRequires() {
-		// Load a program
-		$file = realpath(__DIR__ . '/Fixture/require_program.php');
-		$included_file = realpath(__DIR__ . '/Fixture/basic_program_test.php');
-		$program = loadGlassBoxProgram($file);
-
 		// Check that we have statements for basic_program_test.php.
-		$this->assertEquals(1, count($program->files[$file]));
-		$this->assertEquals(2, count($program->files[$included_file]));
+		$this->assertEquals(1, count($this->program->files[$this->file]));
+		$this->assertEquals(2, count($this->program->files[$this->included_file]));
 	}
 
 	public function testGeneratesEnvironment() {
-		// Load a program
-		$file = realpath(__DIR__ . '/Fixture/environment_test.php');
-		$program = loadGlassBoxProgram($file);
-
-		// Check that we can find a()
-		$function = $program->environment->resolveFunction('a');
-		$this->assertEquals('a', $function->name);
+		// Check that we can find hello()
+		$function = $this->program->environment->resolveFunction('hello');
+		$this->assertEquals('hello', $function->name);
 		$this->assertEquals(0, count($function->params));
 	}
 }
