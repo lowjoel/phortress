@@ -9,7 +9,7 @@ trait EnvironmentHasFunctionsTrait {
 	 *
 	 * @var array(string => FunctionEnvironment)
 	 */
-	private $functions = array();
+	protected $functions = array();
 
 	public function resolveFunction($functionName) {
 		if (self::isAbsolutelyQualified($functionName)) {

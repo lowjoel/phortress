@@ -2,6 +2,7 @@
 namespace Phortress;
 
 use Phortress\Exception\UnboundIdentifierException;
+use PhpParser\Node\Stmt\Class_;
 
 class NamespaceEnvironment extends Environment {
 	use EnvironmentHasFunctionsTrait;
@@ -11,14 +12,14 @@ class NamespaceEnvironment extends Environment {
 	 *
 	 * @var array(string => NamespaceEnvironment)
 	 */
-	private $namespaces = array();
+	protected $namespaces = array();
 
 	/**
 	 * The classes declared in this namespace.
 	 *
 	 * @var array(string => Environment)
 	 */
-	private $classes = array();
+	protected $classes = array();
 
 	/**
 	 * Resolves the given namespace to an environment.
@@ -105,16 +106,26 @@ class NamespaceEnvironment extends Environment {
 	/**
 	 * Creates a new Child namespace.
 	 *
-	 * @param string $namespaceName The name of the namespace. This must be
-	 * unqualified.
-	 * @return NamespaceEnvironment The new namespace environment, with the
-	 * parent properly set.
+	 * @param string $namespaceName The name of the namespace. This must be unqualified.
+	 * @return NamespaceEnvironment The new namespace environment, with the parent properly set.
 	 */
 	public function createNamespace($namespaceName) {
 		$result = new NamespaceEnvironment(sprintf('%s\%s',
 			$this->name, $namespaceName));
 		$result->parent = $this;
 
+		return $result;
+	}
+
+	/**
+	 * Creates a new Class in this namespace.
+	 *
+	 * @param Class_ $class The class parse tree node.
+	 * @return ClassEnvironment The new class environment, with the parent properly set.
+	 */
+	public function createClass(Class_ $class) {
+		$result = new ClassEnvironment(sprintf('%s\%s', $this->name, $class->name));
+		$result->parent = $this;
 		return $result;
 	}
 
