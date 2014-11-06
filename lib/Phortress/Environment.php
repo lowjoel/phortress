@@ -215,6 +215,7 @@ abstract class Environment {
 
 	/**
 	 * Constructs a new environment with the current environment as a parent.
+	 * This is used for variable definitions.
 	 *
 	 * @return Environment The new child environment.
 	 */

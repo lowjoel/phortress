@@ -34,7 +34,7 @@ trait EnvironmentHasFunctionsTrait {
 	 * @param Function_ $function The function to create an environment for.
 	 * @return FunctionEnvironment
 	 */
-	public function createChildFunction(Function_ $function) {
+	public function createFunction(Function_ $function) {
 		$this->functions[$function->name] = $function;
 
 		$result = new FunctionEnvironment(sprintf('%s\%s',

@@ -2,7 +2,6 @@
 namespace Phortress;
 
 use Phortress\Exception\UnboundIdentifierException;
-use PhpParser\Node\Stmt\Function_;
 
 class NamespaceEnvironment extends Environment {
 	use EnvironmentHasFunctionsTrait;
@@ -111,7 +110,7 @@ class NamespaceEnvironment extends Environment {
 	 * @return NamespaceEnvironment The new namespace environment, with the
 	 * parent properly set.
 	 */
-	public function createChildNamespace($namespaceName) {
+	public function createNamespace($namespaceName) {
 		$result = new NamespaceEnvironment(sprintf('%s\%s',
 			$this->name, $namespaceName));
 		$result->parent = $this;

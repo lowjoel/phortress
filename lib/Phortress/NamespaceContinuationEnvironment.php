@@ -10,12 +10,12 @@ use PhpParser\Node\Stmt\Function_;
  * namespace.
  */
 class NamespaceContinuationEnvironment extends NamespaceEnvironment {
-	public function createChildNamespace($namespaceName) {
-		$this->getNamespaceEnvironment()->createChildNamespace($namespaceName);
+	public function createNamespace($namespaceName) {
+		$this->getNamespaceEnvironment()->createNamespace($namespaceName);
 	}
 
-	public function createChildFunction(Function_ $function) {
-		return $this->getNamespaceEnvironment()->createChildFunction($function);
+	public function createFunction(Function_ $function) {
+		return $this->getNamespaceEnvironment()->createFunction($function);
 	}
 
 	/**

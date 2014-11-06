@@ -38,7 +38,7 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 	public function enterNode(Node $node) {
 		if ($node instanceof Stmt\Function_) {
 			$node->environment = $this->currentEnvironment()->
-				createChildFunction($node);
+				createFunction($node);
 			$this->pushEnvironment($node->environment);
 		} else if ($node instanceof Expr\Assign) {
 			$node->environment = $this->currentEnvironment()->
