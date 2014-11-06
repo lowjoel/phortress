@@ -34,12 +34,6 @@ class ProgramTest extends \PHPUnit_Framework_TestCase {
 			$this->program->files[$this->file]->getStatementCount());
 	}
 
-	public function testParsesRequires() {
-		// Check that we have statements for basic_program_test.php.
-		$this->assertEquals(1, count($this->program->files[$this->file]));
-		$this->assertEquals(2, count($this->program->files[$this->included_file]));
-	}
-
 	public function testGeneratesEnvironment() {
 		// Check that we can find hello()
 		$function = $this->program->environment->resolveFunction('hello');

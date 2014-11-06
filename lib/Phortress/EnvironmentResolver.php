@@ -46,6 +46,8 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 			$this->setCurrentEnvironment($node->environment);
 		} else if ($node instanceof Node\Expr) {
 			$node->environment = $this->currentEnvironment();
+		} else {
+
 		}
 	}
 
