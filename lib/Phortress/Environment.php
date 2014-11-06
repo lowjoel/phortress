@@ -233,4 +233,35 @@ abstract class Environment {
 
 		return $result;
 	}
+
+	/**
+	 * Checks if the given symbol is absolutely qualified.
+	 *
+	 * @param $symbol The name of the symbol.
+	 * @return bool
+	 */
+	protected static function isAbsolutelyQualified($symbol) {
+		return substr($symbol, 0, 1) === '\\';
+	}
+
+	/**
+	 * Checks if the given symbol is relatively qualfied.
+	 *
+	 * @param $symbol The name of the symbol.
+	 * @return bool
+	 */
+	protected static function isRelativelyQualified($symbol) {
+		return !self::isAbsolutelyQualified($symbol);
+	}
+
+	/**
+	 * Checks whether the given symbol is unqualified.
+	 *
+	 * @param string $symbol The symbol to check.
+	 * @return bool True if the symbol is unqualified.
+	 */
+	protected static function isUnqualified($symbol) {
+		return self::isRelativelyQualified($symbol) &&
+		strpos($symbol, '\\') === false;
+	}
 }
