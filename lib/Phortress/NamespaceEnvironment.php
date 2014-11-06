@@ -5,6 +5,8 @@ use Phortress\Exception\UnboundIdentifierException;
 use PhpParser\Node\Stmt\Function_;
 
 class NamespaceEnvironment extends Environment {
+	use EnvironmentHasFunctionsTrait;
+
 	/**
 	 * The namespaces declared in this namespace.
 	 *
@@ -18,13 +20,6 @@ class NamespaceEnvironment extends Environment {
 	 * @var array(string => Environment)
 	 */
 	private $classes = array();
-
-	/**
-	 * The functions declared in this namespace.
-	 *
-	 * @var array(string => FunctionEnvironment)
-	 */
-	private $functions = array();
 
 	/**
 	 * Resolves the given namespace to an environment.
@@ -67,23 +62,6 @@ class NamespaceEnvironment extends Environment {
 				self::extractNamespaceComponent($className);
 			return $this->resolveNamespace($nextNamespace)->
 				resolveClass($className);
-		}
-	}
-
-	public function resolveFunction($functionName) {
-		if (self::isAbsolutelyQualified($functionName)) {
-			return $this->getGlobal()->resolveFunction($functionName);
-		} else if (self::isUnqualified($functionName)) {
-			if (array_key_exists($functionName, $this->functions)) {
-				return $this->functions[$functionName];
-			} else {
-				throw new UnboundIdentifierException($functionName, $this);
-			}
-		} else {
-			list($nextNamespace, $functionName) =
-				self::extractNamespaceComponent($functionName);
-			return $this->resolveNamespace($nextNamespace)->
-				resolveFunction($functionName);
 		}
 	}
 
@@ -168,26 +146,6 @@ class NamespaceEnvironment extends Environment {
 		$result = new NamespaceEnvironment(sprintf('%s\%s',
 			$this->name, $namespaceName));
 		$result->parent = $this;
-
-		return $result;
-	}
-
-	/**
-	 * Creates a new Function environment.
-	 *
-	 * @param Function_ $function The function to create an environment for.
-	 * @return FunctionEnvironment
-	 */
-	public function createChildFunction(Function_ $function) {
-		$this->functions[$function->name] = $function;
-
-		$result = new FunctionEnvironment(sprintf('%s\%s',
-			$this->name, $function->name));
-		$result->parent = $this;
-
-		foreach ($function->params as $param) {
-			$result->variables[$param->name] = $param;
-		}
 
 		return $result;
 	}
