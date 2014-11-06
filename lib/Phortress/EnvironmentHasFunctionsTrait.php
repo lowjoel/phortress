@@ -1,6 +1,8 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Stmt;
+use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;
 
 trait EnvironmentHasFunctionsTrait {
@@ -31,10 +33,12 @@ trait EnvironmentHasFunctionsTrait {
 	/**
 	 * Creates a new Function environment.
 	 *
-	 * @param Function_ $function The function to create an environment for.
+	 * @param Function_|ClassMethod $function The function to create an environment for.
 	 * @return FunctionEnvironment
 	 */
-	public function createFunction(Function_ $function) {
+	public function createFunction(Stmt $function) {
+		assert($function instanceof Function_ ||
+			$function instanceof ClassMethod);
 		$this->functions[$function->name] = $function;
 
 		$result = new FunctionEnvironment(sprintf('%s\%s',

@@ -1,8 +1,8 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
-use PhpParser\Node\Stmt\Function_;
 
 /**
  * Namespace Continuation Environments: these are continuation of namespaces
@@ -19,7 +19,7 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 		return $this->getNamespaceEnvironment()->createClass($class);
 	}
 
-	public function createFunction(Function_ $function) {
+	public function createFunction(Stmt $function) {
 		return $this->getNamespaceEnvironment()->createFunction($function);
 	}
 

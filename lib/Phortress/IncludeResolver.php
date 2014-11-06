@@ -26,4 +26,4 @@ class IncludeResolver extends NodeVisitorAbstract {
 			assert(false, 'Includes not currently supported');
 		}
 	}
-} 
+}

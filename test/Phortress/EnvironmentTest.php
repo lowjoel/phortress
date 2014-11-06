@@ -38,7 +38,8 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('A',
 			(new \TestObject($this->program->environment))->classes);
 
-		$class_environment = (new \TestObject($this->program->environment))->classes;
+		$class_environment = new \TestObject(
+			(new \TestObject($this->program->environment))->classes['A']->environment);
 		$this->assertArrayHasKey('testA',
 			$class_environment->functions);
 	}
