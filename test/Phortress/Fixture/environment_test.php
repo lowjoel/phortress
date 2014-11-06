@@ -5,3 +5,6 @@ function a() {
 }
 
 $b = a();
+
+class A {
+}

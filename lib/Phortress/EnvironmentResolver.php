@@ -40,6 +40,10 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 			$node->environment = $this->currentEnvironment()->
 				createFunction($node);
 			$this->pushEnvironment($node->environment);
+		} else if ($node instanceof Stmt\Class_) {
+			$node->environment = $this->currentEnvironment()->
+				createClass($node);
+			$this->pushEnvironment($node->environment);
 		} else if ($node instanceof Expr\Assign) {
 			$node->environment = $this->currentEnvironment()->
 				defineVariableByValue($node);
@@ -53,6 +57,8 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 
 	public function leaveNode(Node $node) {
 		if ($node instanceof Stmt\Function_) {
+			$this->popEnvironment();
+		} else if ($node instanceof Stmt\Class_) {
 			$this->popEnvironment();
 		}
 	}

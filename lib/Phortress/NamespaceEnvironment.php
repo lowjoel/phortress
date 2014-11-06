@@ -124,6 +124,7 @@ class NamespaceEnvironment extends Environment {
 	 * @return ClassEnvironment The new class environment, with the parent properly set.
 	 */
 	public function createClass(Class_ $class) {
+		$this->classes[$class->name] = $class;
 		$result = new ClassEnvironment(sprintf('%s\%s', $this->name, $class->name));
 		$result->parent = $this;
 		return $result;
