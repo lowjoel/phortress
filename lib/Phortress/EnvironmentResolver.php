@@ -47,6 +47,8 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 		} else if ($node instanceof Stmt\ClassMethod) {
 			$node->environment = $this->currentEnvironment()->createFunction($node);
 			$this->pushEnvironment($node->environment);
+		} else if ($node instanceof Stmt\Property) {
+			$this->currentEnvironment()->defineVariableByValue($node);
 		} else if ($node instanceof Expr\Assign) {
 			$node->environment = $this->currentEnvironment()->
 				defineVariableByValue($node);
@@ -54,7 +56,14 @@ class EnvironmentResolver extends NodeVisitorAbstract {
 		} else if ($node instanceof Node\Expr) {
 			$node->environment = $this->currentEnvironment();
 		} else {
-
+			$className = get_class($node);
+			switch ($className) {
+				case 'PhpParser\Node\Name':
+				case 'PhpParser\Node\Stmt\PropertyProperty':
+					break;
+				default:
+					printf('Unknown node type: %s'."\n", $className);
+			}
 		}
 	}
 

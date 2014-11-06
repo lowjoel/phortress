@@ -1,7 +1,9 @@
 <?php
 namespace Phortress;
 use Phortress\Exception\UnboundIdentifierException;
-use PhpParser\Node\Expr\Assign;
+use PhpParser\Node;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Stmt;
 
 /**
  * Represents a mapping of symbols to its actual values: functions, constants,
@@ -224,13 +226,20 @@ abstract class Environment {
 	/**
 	 * Defines the given variable.
 	 *
-	 * @param Assign $node The symbol to register.
+	 * @param Expr\Assign|Stmt\Property $node The symbol to register.
 	 * @return Environment A new environment with the given symbol defined
 	 * and parent environment set.
 	 */
-	public function defineVariableByValue(Assign $node) {
+	public function defineVariableByValue(Node $node) {
+		assert($node instanceof Expr\Assign || $node instanceof Stmt\Property);
 		$result = $this->createChild();
-		$result->variables[$node->var->name] = $node;
+		if ($node instanceof Expr\Assign) {
+			$result->variables[$node->var->name] = $node;
+		} else if ($node instanceof Stmt\Property) {
+			foreach ($node->props as $prop) {
+				$result->variables[$prop->name] = $node;
+			}
+		}
 
 		return $result;
 	}

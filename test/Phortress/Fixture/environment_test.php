@@ -7,6 +7,8 @@ function a() {
 $b = a();
 
 class A {
+	private $b;
+
 	public function testA() {
 	}
 }
