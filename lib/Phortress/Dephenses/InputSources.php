@@ -1,6 +1,7 @@
 <?php
 namespace Phortress\Dephenses;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 /**
  * Contains the list of input sources
  * Has a method which checks if the variable is an input variable, 
@@ -9,7 +10,7 @@ use PhpParser\Node;
  * @author naomileow
  */
 class InputSources {
-    public static $USER_INPUT_GLOBALS = array(
+    const USER_INPUT_GLOBALS = array(
         '_GET',
         '_POST',
         '_COOKIE',
@@ -20,7 +21,7 @@ class InputSources {
         'argv' //argc should be safe? since it's just the number of arguments
     );
     
-    public static $FILE_READ_FUNCTIONS = array(
+    const FILE_READ_FUNCTIONS = array(
     'fread', 
     'fopen', 
     'popen',
@@ -42,7 +43,7 @@ class InputSources {
     'scandir',
     );
     
-    public static $DATABASE_READ_FUNCTIONS = array(
+    const DATABASE_READ_FUNCTIONS = array(
     'mysql_fetch_array',
     'mysql_fetch_row',
     'mysql_fetch_assoc',
@@ -88,6 +89,20 @@ class InputSources {
 
 
     public static function isInputVariable(Node\Expr\Variable $var){
-        return in_array($var->name, $USER_INPUT_GLOBALS);
+        return in_array($var->name, USER_INPUT_GLOBALS);
+    }
+    
+    public static function isInputVariableName(String $name){
+        return in_array($name, USER_INPUT_GLOBALS);
+    }
+    
+    public static function isDatabaseRead(FuncCall $func){
+        $name = $func->name->getLast();
+        return in_array($name, DATABASE_READ_FUNCTIONS);
+    }
+    
+    public static function isFileRead(FuncCall $func){
+        $name = $func->name->getLast();
+        return in_array($name, FILE_READ_FUNCTIONS);
     }
 }
