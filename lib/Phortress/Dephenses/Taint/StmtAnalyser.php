@@ -1,6 +1,9 @@
 <?php
 namespace Phortress\Dephenses\Taint;
 
+use \Phortress\Dephenses;
+use PhpParser\Node;
+use PhpParser\Node\Expr;
 /**
  *  Most basic unit of the taint analyser. Takes in a statement and outputs 
  * an array of variables modified by the statement, annotated based on a set 
@@ -10,12 +13,6 @@ namespace Phortress\Dephenses\Taint;
 class StmtAnalyser {
     private $statement;
     
-    /**
-     * Array of variables modified by the statement
-     * @var AnnotVariable[]
-     */
-    private $annotations;
-    
     public function __construct() {
         
     }
@@ -24,42 +21,54 @@ class StmtAnalyser {
         
     }
     
-    private function applyBasicRule(\PhpParser\Node\Expr\AssignOp $assignOp, $resolvedVars){
-        $var = $assignOp->var;
-        $exp = $assignOp->expr;
+    private function applyBasicRule(Expr $assign){
+        if(!$assign instanceof Assign || !$assign instanceof \PhpParser\Node\Expr\AssignOP){
+            return;
+        }
+        
+        $var = $assign->var;
+        $exp = $assign->expr;
         $LHSName = $var->name;
         
-        $annot = $this->createAnnotVariable($var, UNASSIGNED);
-        if($exp instanceof \PhpParser\Node\Scalar){
-            $annot->annotation = SAFE;
-        }elseif ($exp instanceof \PhpParser\Node\Variable) {
-            $RHSName = $exp->name;
-            $RHSAnnot = array_filter($resolvedVars, 
-                            function($v) use ($RHSName){
-                                return $v->name == $RHSName;
-                            });
-            if(!empty($RHSAnnot)){
-                $RHS = $RHSAnnot[0];
-                $annot->annotation = $RHS->annotation;
-            }else{
-                $annot->annotation = UNKNOWN;
-            }
+        if($exp instanceof Scalar){
+           $this->annotateVariable($var, Annotation::SAFE, $exp);
+        } else if($exp instanceof  Expr){
+           $taint = $this->resolveExprTaint($exp);
+           $this->annotateVariable($var, $taint);
         }
-        return $this->mergeAnnotationState($resolvedVars, $annot);
     }
     
-    private function mergeAnnotationState($resolvedVars, $annotVariable){
-        $name = $annotVariable->name;
-        $merged = array_Filter($resolvedVars,
-                    function($v) use ($name){
-                        return $v->name != $name;
-                    }
-                );
-        $merged[] = $annotVariable;
-        return $merged;
+    private function resolveExprTaint(Expr $exp){
+        if ($exp instanceof Variable) {
+             //This should apply the taint value of $exp to $var. 
+            //If $exp is not marked, go up the environment chain to mark the taint value of $exp,
+            //marking the taint value of the variables along the way.
+            $annot = $exp->taint;
+            if(!empty($annot)){
+                return $annot;
+            }
+            if(Dephenses\InputSources::isInputVariable($exp)){
+                annotateVariable($exp, Annotation::TAINTED);
+                return $exp->taint;
+            }
+            
+        }else if($exp instanceof ArrayDimFetch){
+            
+        }else if($exp instanceof ClassConstFetch){
+            
+        }else if($exp instanceof ConstFetch){
+            
+        }else if($exp instanceof PropertyFetch){
+            
+        }else if($exp instanceof StaticPropertyFetch){
+            
+        }
     }
     
-    private function createAnnotVariable($var, $annot){
-        return new Node\AnnotVariable($var->name, $var.getAttributes(), $annot);
+    
+    private function annotateVariable($var, $annot, $source=NULL){
+        $var->taint = $annot;
+        $var->taintSource = $source;
     }
+    
 }

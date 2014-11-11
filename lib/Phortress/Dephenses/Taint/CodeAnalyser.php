@@ -10,21 +10,7 @@ namespace Phortress\Dephenses\Taint;
 class CodeAnalyser {
     private $parseTree;
     
-    /**
-     * Array of annotated variables
-     * @var AnnotVariable[]; 
-     */
-    private $variables = array();
-    
     private $warnings;
-    
-    /**
-     * Dictionary of function names to FunctionAnalysers
-     * @var array(String => FunctionAnalyser)
-     */
-    private $functions;
-    
-    
     
     function __construct($tree) {
         $this->parseTree = $tree;
@@ -37,11 +23,5 @@ class CodeAnalyser {
                 
             }
         }
-    }
-    
-    private function createFunctionAnalyser($func){
-        $name = $func->name;
-        $analyser = new FunctionAnalyser($func);
-        $this->functions[$name] = $analyser;
     }
 }

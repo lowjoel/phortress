@@ -4,17 +4,6 @@ namespace Phortress\Dephenses;
  * Contains the predefined PHP variables and function names
  */
 
-$USER_INPUT_GLOBALS = array(
-    '_GET',
-    '_POST',
-    '_COOKIE',
-    '_REQUEST',
-    '_FILES',
-    '_SERVER',
-    '_ENV',
-    'argv' //argc should be safe? since it's just the number of arguments
-);
-
 $FILE_READ_FUNCTIONS = array(
     'fread', 
     'fopen', 
