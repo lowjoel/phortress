@@ -102,7 +102,7 @@ class StmtAnalyser {
         
     }
     
-    private static function resolveExprTaint(Expr $exp){
+    public static function resolveExprTaint(Expr $exp){
         if($exp instanceof Node\Scalar){
             return Annotation::SAFE;
         }else if ($exp instanceof Expr\Variable) {
@@ -259,8 +259,8 @@ class StmtAnalyser {
                 return Annotation::UNKNOWN;
             }
             $func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
-            $taint_val = $func_analyser->analyseFunctionCall($exp->args);
-            return $taint_val;
+            $analysis_res = $func_analyser->analyseFunctionCall($exp->args); //TODO: figure out how to include the sanitising functions
+            return $analysis_res[0];
         }
     }
     

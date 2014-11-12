@@ -48,7 +48,6 @@ class FunctionAnalyser{
         $this->functionStmts = $this->function->stmts;
         $this->params = $this->function->params;
         $this->analyseReturnStatementsDependencies($this->functionStmts);
-//        $this->function->analyser = self;
     }
     
     public static function getFunctionAnalyser(\Phortress\Environment $env, $functionName){
@@ -64,10 +63,43 @@ class FunctionAnalyser{
     
     /**
      * Takes in an array of Node\Args[]
-     * Returns the taint value of the value returned by the function
+     * Returns an array containing taint value of the value returned by the function,
+     * and the array of sanitising functions applied
      */
     public function analyseFunctionCall($args){
-        
+        $result = array(Annotation::UNASSIGNED, array());
+        foreach($this->returnStmts as $return){
+            $ret_effect = $this->analyseArgumentsEffectOnReturn($args, $return);
+            $result = array(max($result[0], $ret_effect[0]), merge_array($result[1], $ret_effect[1]));
+        }
+        return $result;
+    }
+    
+    private function analyseArgumentsEffectOnReturn($args, $return){
+        $taint_mappings = $this->getParametersToTaintMappings($args);
+        $sanitising_funcs = array();
+        $taint_val = Annotation::UNASSIGNED;
+        foreach($return as $var_name => $var_info){
+            $sanitising_funcs = array_merge($sanitising_funcs, $var_info[self::SANITISATION_KEY]);
+            if(!empty($var_info[self::TAINT_KEY])){
+                $taint_val = max($taint_val, $var_info[self::TAINT_KEY]);
+            }
+            if(array_key_exists($var_name, $taint_mappings)){
+                $taint_val = max($taint_val, $taint_mappings[$var_name]);
+            }
+        }
+        return array($taint_val, $sanitising_funcs);
+    }
+    
+    private function getParametersToTaintMappings($args){
+        $mappings = array();
+        for($i = 0; $i<count($args);$i++){
+            $param = $this->params[$i];
+            $arg_val = $args[$i]->value;
+            $taint_val = StmtAnalyser::resolveExprTaint($arg_val);
+            $mappings[$param->name] = $taint_val;
+        }
+        return $mappings;
     }
 
     private function analyseReturnStatementsDependencies($stmts){
@@ -259,7 +291,7 @@ class FunctionAnalyser{
         return !empty(array_filter($this->params, $filter));
     }
     
-    private function constructVariableDetails($var, $taint = Annotation::UNASSIGNED, $sanitising = array()){
+    private function constructVariableDetails(Expr\Variable $var, $taint = Annotation::UNASSIGNED, $sanitising = array()){
         return array(self::VARIABLE_KEY => $var,
                     self::TAINT_KEY => $taint,
                     self::SANITISATION_KEY => $sanitising);
