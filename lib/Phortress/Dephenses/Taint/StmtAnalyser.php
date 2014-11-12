@@ -40,9 +40,11 @@ class StmtAnalyser {
                 $taint = $this->resolveExprTaint($exp);
                 $this->annotateVariable($var, $taint);
             }
-        }else{
+        }else if($var instanceof List_){
             
+        }else{
         }
+        
     }
     
     private function resolveExprTaint(Expr $exp){
@@ -53,9 +55,13 @@ class StmtAnalyser {
         }else if($exp instanceof PreInc || $exp instanceof PreDec || $exp instanceof PostInc || $exp instanceof PostDec){
             $var = $exp->var;
             return resolveExprTaint($var);
+        }else if($exp instanceof BinaryOp){
+            return $this->resolveBinaryOpTaint($exp);
+        }else if($exp instanceof UnaryMinus || $exp instanceof UnaryPlus){
+            $var = $exp->expr;
+            return $this->resolveExprTaint($exp);
         }else if($exp instanceof ArrayDimFetch){
-            
-            
+            $this->resolveArrayFieldTaint($exp);
         }else if($exp instanceof PropertyFetch){
             $var = $exp->var;
             return $this->resolveVariableTaint($exp);
@@ -68,11 +74,22 @@ class StmtAnalyser {
         }else if($exp instanceof Ternary){
             //If-else block
             return $this->resolveTernaryTaint($exp);
+        }else if($exp instanceof Eval_){
+            return $this->resolveExprTaint($exp->expr);
         }else{
             //Other expressions we will not handle.
             return Annotation::UNKNOWN;
         }
     }
+    
+    private function resolveBinaryOpTaint(BinaryOp $exp){
+        $left = $exp->left;
+        $right = $exp->right;
+        $left_taint = $this->resolveExprTaint($left);
+        $right_taint = $this->resolveExprTaint($right);
+        return $this->mergeTaintValues($left_taint, $right_taint);
+    }
+    
     private function resolveArrayFieldTaint(ArrayDimFetch $exp){
         $array_var = $exp->var->name;
         $array_field = $exp->var->dim;
@@ -85,10 +102,7 @@ class StmtAnalyser {
     private function resolveClassPropertyTaint(StaticPropertyFetch $exp){
         //$exp->class is of type Name|Expr
         $classEnv = $exp->environment->resolveClass($exp->class);
-        $name = $exp->name;
-        $assign = $classEnv->resolveVariable($name);
-        $this->applyAssignmentRule($assign);
-        return $assign->var->taint;
+        return $this->resolveVariableTaintInEnvironment($classEnv, $exp);
     }
     
     private function resolveVariableTaint(Variable $exp){
@@ -105,12 +119,34 @@ class StmtAnalyser {
         }
         $env = $exp->environment;
         if(!empty($env)){
-            $assign = $env->resolveVariable($exp->name);
-            //$exp name is actiually of type string|Expr, but not handling dynamic naming for now.
-            $this->applyAssignmentRule($assign);
-            return $exp->taint;
+            return $this->resolveVariableTaintInEnvironment($env, $exp);
+        }else{
+            
         }
     }
+    
+    private function resolveVariableTaintInEnvironment(Environment $env, Variable $var){
+        $name = $var->name;
+        if($name instanceof Expr){
+            $this->annotateVariable($var, Annotation::UNKNOWN);
+            return Annotation::UNKNOWN;
+        }else{
+            try{
+                $assign = $env->resolveVariable($name);
+                $this->applyAssignmentRule($assign);
+                return $var->taint;
+            }catch(UnboundIdentifierException $e){
+                $this->annotateVariable($var, Annotation::UNASSIGNED);
+                return Annotation::UNASSIGNED;
+            }
+        }
+    }
+    
+    private function mergeTaintValues(){
+        $taints = func_get_args();
+        return max($taints);
+    }
+    
     private function resolveTernaryTaint(Ternary $exp){
         
     }

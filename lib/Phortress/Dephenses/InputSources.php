@@ -53,7 +53,6 @@ class InputSources {
     'mysql_fetch_object',
     //the above functions are DEPRECATED as of PHP5.5
     
-    //these functions only open the db connection. must we handle these?
     'dba_open',
     'dba_popen',
     
