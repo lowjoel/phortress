@@ -107,7 +107,7 @@ class StmtAnalyser {
             return self::resolveBinaryOpTaint($exp);
         }else if($exp instanceof UnaryMinus || $exp instanceof UnaryPlus){
             $var = $exp->expr;
-            return self::resolveExprTaint($exp);
+            return self::resolveExprTaint($var);
         }else if($exp instanceof Array_){
             $taint_values = self::resolveTaintOfExprsInArray($exp);
             return max($taint_values);
@@ -115,7 +115,7 @@ class StmtAnalyser {
             return self::resolveArrayFieldTaint($exp);
         }else if($exp instanceof PropertyFetch){
             $var = $exp->var;
-            return self::resolveVariableTaint($exp);
+            return self::resolveVariableTaint($var);
         }else if($exp instanceof StaticPropertyFetch){
             return self::resolveClassPropertyTaint($exp);
         }else if($exp instanceof FuncCall){
@@ -127,8 +127,6 @@ class StmtAnalyser {
             return self::resolveTernaryTaint($exp);
         }else if($exp instanceof Eval_){
             return self::resolveExprTaint($exp->expr);
-        }else if($exp instanceof ClosureUse){
-            return self::resolveClosureResultTaint($exp);
         }else{
             //Other expressions we will not handle.
             return Annotation::UNKNOWN;
@@ -249,11 +247,6 @@ class StmtAnalyser {
         }else{
             
         }
-    }
-    
-    private static function resolveClosureResultTaint(ClosureUse $exp){
-        //For now, lambdas are not supported.
-        return Annotation::UNKNOWN;
     }
     
     private static function resolveMethodResultTaint(MethodCall $exp){
