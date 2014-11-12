@@ -35,9 +35,9 @@ class Cli {
 	/**
 	 * Parses the given options specified by getopt.
 	 *
-	 * @param $options The options given by getopt.
+	 * @param array $options The options given by getopt.
 	 */
-	private static function parseOptions($options) {
+	private static function parseOptions(array $options) {
 		if (isset($options['f'])) {
 			self::$files = (array)$options['f'];
 		} else {

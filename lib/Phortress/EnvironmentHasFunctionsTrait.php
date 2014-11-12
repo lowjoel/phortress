@@ -1,6 +1,7 @@
 <?php
 namespace Phortress;
 
+use Phortress\Exception\UnboundIdentifierException;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;

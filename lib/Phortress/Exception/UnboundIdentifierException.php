@@ -1,5 +1,6 @@
 <?php
 namespace Phortress\Exception;
+use Phortress\Environment;
 
 /**
  * Represents a failed attempt to resolve an identifier in an environment.

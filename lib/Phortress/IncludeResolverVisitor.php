@@ -1,11 +1,12 @@
 <?php
 namespace Phortress;
 
+use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 
-class IncludeResolver extends NodeVisitorAbstract {
+class IncludeResolverVisitor extends NodeVisitorAbstract {
 	/**
 	 * The parser to use for parsing includes.
 	 * @var Parser
@@ -36,6 +37,8 @@ class IncludeResolver extends NodeVisitorAbstract {
 		if ($node instanceof Expr\Include_) {
 			return $this->includeFile($node->type, $node->expr);
 		}
+
+		return null;
 	}
 
 	/**
@@ -54,10 +57,13 @@ class IncludeResolver extends NodeVisitorAbstract {
 				if (array_key_exists($file, $this->files)) {
 					return true;
 				}
+				// fall through
 			case Expr\Include_::TYPE_INCLUDE:
 			case Expr\Include_::TYPE_REQUIRE:
 				$this->files[$file] = $this->parse($file);
 				return $this->files[$file];
+			default:
+				return null;
 		}
 	}
 
@@ -76,7 +82,7 @@ class IncludeResolver extends NodeVisitorAbstract {
 		} else if ($expression instanceof Node\Scalar) {
 			return (string)$expression->value;
 		} else {
-			assert(false, 'Unknown expression type for static evaluation');
+			return assert(false, 'Unknown expression type for static evaluation');
 		}
 	}
 
@@ -90,7 +96,7 @@ class IncludeResolver extends NodeVisitorAbstract {
 		if (self::ignoresIncludePath($path)) {
 			return realpath($path);
 		} else {
-			assert(false, 'Include path not currently supported');
+			return assert(false, 'Include path not currently supported');
 		}
 	}
 
@@ -101,7 +107,7 @@ class IncludeResolver extends NodeVisitorAbstract {
 	 * @return \PhpParser\Node[] The parse tree for the file, with all the includes expanded.
 	 */
 	private function parse($path) {
-		$includer = new \PhpParser\NodeTraverser;
+		$includer = new NodeTraverser;
 		$includer->addVisitor($this);
 		return $includer->traverse($this->parser->parseFile($path));
 	}

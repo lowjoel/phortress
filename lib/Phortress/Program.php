@@ -1,5 +1,9 @@
 <?php
 namespace Phortress;
+use PhpParser\Error;
+use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor\NameResolver;
+use Phortress\Dephenses\Dephense;
 
 /**
  * Represents a PHP program. A program is a compilation of all source files needed to run
@@ -92,14 +96,14 @@ class Program {
 			$statements = $parser->parseFile($file);
 
 			// Parse requires
-			$includer = new \PhpParser\NodeTraverser;
-			$includeResolver = new IncludeResolver($parser);
+			$includer = new NodeTraverser;
+			$includeResolver = new IncludeResolverVisitor($parser);
 			$includer->addVisitor($includeResolver);
 			$parseTree = $includer->traverse(array_slice($statements, 0));
 
 			// Convert to fully qualified names
-			$traverser = new \PhpParser\NodeTraverser;
-			$traverser->addVisitor(new \PhpParser\NodeVisitor\NameResolver);
+			$traverser = new NodeTraverser;
+			$traverser->addVisitor(new NameResolver);
 			$statements = $traverser->traverse($statements);
 
 			// Merge all the raw statements
@@ -109,7 +113,7 @@ class Program {
 			$files = array_merge($files, $includeResolver->getFiles());
 
 			return array($files, $parseTree);
-		} catch (\PhpParser\Error $e) {
+		} catch (Error $e) {
 			throw new Exception\ParseErrorException($e->getMessage(),
 				$e->getLine(), $e);
 		}
@@ -123,8 +127,8 @@ class Program {
 	 * @return \PhpParser\Node[]
 	 */
 	private function addEnvironment(array $statements) {
-		$traverser = new \PhpParser\NodeTraverser;
-		$environmentResolver = new EnvironmentResolver($this->environment);
+		$traverser = new NodeTraverser;
+		$environmentResolver = new EnvironmentResolverVisitor($this->environment);
 		$traverser->addVisitor($environmentResolver);
 		return $traverser->traverse($statements);
 	}

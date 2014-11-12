@@ -6,7 +6,7 @@ use PhpParser\Node;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Expr;
 
-class EnvironmentResolver extends NodeVisitorAbstract {
+class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 	/**
 	 * The global environment for the program.
 	 *
