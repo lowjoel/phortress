@@ -75,6 +75,8 @@ class FunctionAnalyser{
         }else if($exp instanceof Array_){
             return $this->traceVariablesInArray($exp);
         }else if($exp instanceof ArrayDimFetch){
+            //For now treat all array dimension fields as one
+            $var = $exp->var;
             
         }else if($exp instanceof PropertyFetch){
             
@@ -95,8 +97,15 @@ class FunctionAnalyser{
     }
     
     private function traceVariablesInArray(Array_ $arr){
-        
+        $arr_items = $arr->items;
+        $var_traces = array();
+        foreach($arr_items as $item){
+            $exp = $item->value;
+            $var_traces[] = $this->traceExpressionVariables($exp);
+        }
+        return $this->mergeVariables($var_traces);
     }
+    
     private function traceBinaryOp(BinaryOp $exp){
         $left = $exp->left;
         $right = $exp->right;
@@ -143,6 +152,11 @@ class FunctionAnalyser{
         }
         $var_details = $this->getVariableDetails($var);
         $details_ret = array($name => $var_details);
+        
+        if(\Phortress\Dephenses\InputSources::isInputVariable($var)){
+            $var_details[self::TAINT_KEY] = Annotation::TAINTED;
+            return $details_ret;
+        }
         
         if(!$this->isFunctionParameter($var)){
             $assign = $var_details[self::VARIABLE_DEF];
