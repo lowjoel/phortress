@@ -6,11 +6,18 @@ namespace Phortress\Dephenses;
  * @author naomileow
  */
 abstract class Dephense {
-    //put your code here
+    /**
+     * Gets all registered Dephenses.
+     *
+     * @return Dephense[] The list of registered Dephenses.
+     */
+    public static function getAll() {
+        return array();
+    }
     
     /**
      * Runs the analysis of the program
      * @param $files array containing AST of program files to be analysed
      */
-    public function run($files);
+    public abstract function run($files);
 }
