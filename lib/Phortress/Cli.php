@@ -87,7 +87,9 @@ class Cli {
 
 			echo $result->getMessage();
 			echo ' at ';
-			echo $color('line ' . $result->getNode()->getLine())->yellow;
+			echo $color(sprintf('%sline %d',
+					empty($result->getNode()->file) ? '' : $result->getNode()->file . ' ',
+					$result->getNode()->getLine()))->yellow;
 			echo PHP_EOL;
 		}
 	}
