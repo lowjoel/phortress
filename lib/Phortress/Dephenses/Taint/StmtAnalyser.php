@@ -2,7 +2,6 @@
 namespace Phortress\Dephenses\Taint;
 
 use \Phortress\Dephenses;
-use PhpParser\Node;
 use PhpParser\Node\Expr;
 /**
  *  Most basic unit of the taint analyser. Takes in a statement and outputs 
@@ -11,7 +10,7 @@ use PhpParser\Node\Expr;
  * @author naomileow
  */
 class StmtAnalyser {
-    private $statement;
+    private $statement;    
     
     public function __construct() {
         
@@ -34,21 +33,31 @@ class StmtAnalyser {
         }
         
         if($var instanceof Expr\Variable){
-            if($exp instanceof Scalar){
-                $this->annotateVariable($var, Annotation::SAFE, $exp);
-            } else if($exp instanceof  Expr){
-                $taint = $this->resolveExprTaint($exp);
-                $this->annotateVariable($var, $taint);
-            }
+            $taint = $this->resolveExprTaint($exp);
+            $this->annotateVariable($var, $taint, $exp);
         }else if($var instanceof List_){
-            
+            $this->resolveListAssignment($assign);
         }else{
+//            $this->resolveExprTaint($var);
+        }
+        
+    }
+    
+    private function resolveListAssignment(Assign $assign){
+        assert($assign->var instanceof List_);
+        $list_of_vars = $assign->var->vars;
+        $exp = $assign->expr;
+
+        if($exp instanceof Array_){
+            
         }
         
     }
     
     private function resolveExprTaint(Expr $exp){
-        if ($exp instanceof Variable) {
+        if($exp instanceof Scalar){
+            return Annotation::SAFE;
+        }else if ($exp instanceof Variable) {
             return $this->resolveVariableTaint($exp);
         }else if($exp instanceof ClassConstFetch || ConstFetch){
             return Annotation::SAFE;
@@ -60,8 +69,10 @@ class StmtAnalyser {
         }else if($exp instanceof UnaryMinus || $exp instanceof UnaryPlus){
             $var = $exp->expr;
             return $this->resolveExprTaint($exp);
+        }else if($exp instanceof Array_){
+            
         }else if($exp instanceof ArrayDimFetch){
-            $this->resolveArrayFieldTaint($exp);
+            return $this->resolveArrayFieldTaint($exp);
         }else if($exp instanceof PropertyFetch){
             $var = $exp->var;
             return $this->resolveVariableTaint($exp);
@@ -76,10 +87,30 @@ class StmtAnalyser {
             return $this->resolveTernaryTaint($exp);
         }else if($exp instanceof Eval_){
             return $this->resolveExprTaint($exp->expr);
+        }else if($exp instanceof ClosureUse){
+            return $this->resolveClosureResultTaint($exp);
         }else{
             //Other expressions we will not handle.
             return Annotation::UNKNOWN;
         }
+    }
+    
+    /**
+     * Takes in an array of Nodes and resolves their taint values if they are are variables.
+     * Returns an array containing the taint value of each item in the array.
+     */
+    private function resolveTaintOfExprsInArray(Array_ $arr){
+        $arr_items = $arr->items;
+        $taint_vals = array();
+        foreach($arr_items as $item){
+            $exp = $item->value;
+            $taint_val = Annotation::UNKNOWN;
+            if($exp instanceof Expr){
+                $taint_val = $this->resolveExprTaint($exp);
+            }
+            $taint_vals[] = $taint_val;
+        }
+        return $taint_vals;
     }
     
     private function resolveBinaryOpTaint(BinaryOp $exp){
@@ -91,16 +122,24 @@ class StmtAnalyser {
     }
     
     private function resolveArrayFieldTaint(ArrayDimFetch $exp){
-        $array_var = $exp->var->name;
-        $array_field = $exp->var->dim;
-        if(Dephenses\InputSources::isInputVariableName($array_var)){
+        //TODO: This is merely a stub which treats all the fields in an array as a single entity
+        //i.e. They all have the same taint value.
+        $array_var = $exp->var;
+        $array_var_name = $array_var->name;
+//        $array_field = $exp->var->dim;
+        if(Dephenses\InputSources::isInputVariableName($array_var_name)){
             $this->annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }
-        //TODO:
+        $env = $array_var->environment;
+        if(!empty($env)){
+            return resolveVariableTaintInEnvironment($env, $array_var);
+        }else{
+            $this->annotateVariable($array_var, Annotation::UNASSIGNED);
+            return Annotation::UNASSIGNED;
+        }
     }
     private function resolveClassPropertyTaint(StaticPropertyFetch $exp){
-        //$exp->class is of type Name|Expr
         $classEnv = $exp->environment->resolveClass($exp->class);
         return $this->resolveVariableTaintInEnvironment($classEnv, $exp);
     }
@@ -109,19 +148,27 @@ class StmtAnalyser {
         //This should apply the taint value of $exp to $var. 
         //If $exp is not marked, go up the environment chain to mark the taint value of $exp,
         //marking the taint value of the variables along the way.
+        if(!isset($exp)){
+            return Annotation::UNASSIGNED;
+        }
+        
         $annot = $exp->taint;
         if(!empty($annot)){
             return $annot;
         }
+        
         if(Dephenses\InputSources::isInputVariable($exp)){
             $this->annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }
         $env = $exp->environment;
+        
         if(!empty($env)){
             return $this->resolveVariableTaintInEnvironment($env, $exp);
         }else{
-            
+            //TODO:
+            $this->annotateVariable($exp, Annotation::UNASSIGNED);
+            return Annotation::UNASSIGNED;
         }
     }
     
@@ -148,11 +195,24 @@ class StmtAnalyser {
     }
     
     private function resolveTernaryTaint(Ternary $exp){
-        
+        $if = $exp->if;
+        $else = $exp->else;
+        $if_taint = $this->resolveExprTaint($if);
+        $else_taint = $this->resolveExprTaint($else);
+        return $this->mergeTaintValues($if_taint, $else_taint);
     }
     
     private function resolveFuncResultTaint(FuncCall $exp){
-        //$exp->name is of type Node|Name|Expr
+        //$exp->name is of type Name|Expr
+        if(InputSources::isInputRead($exp)){
+            return Annotation::TAINTED;
+        }else{
+            
+        }
+    }
+    
+    private function resolveClosureResultTaint(ClosureUse $exp){
+        
     }
     
     private function resolveMethodResultTaint(MethodCall $exp){
