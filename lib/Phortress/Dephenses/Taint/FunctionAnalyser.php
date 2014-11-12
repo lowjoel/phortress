@@ -48,7 +48,26 @@ class FunctionAnalyser{
         $this->functionStmts = $this->function->stmts;
         $this->params = $this->function->params;
         $this->analyseReturnStatementsDependencies($this->functionStmts);
-        $this->function->analyser = self;
+//        $this->function->analyser = self;
+    }
+    
+    public static function getFunctionAnalyser(\Phortress\Environment $env, $functionName){
+        assert(!empty($env));
+        $func_def = $env->resolveFunction($functionName);
+        $analyser = $func_def->analyser;
+        if(empty($analyser)){
+            $analyser = new FunctionAnalyser($env, $functionName);
+            $func_def->analyser = $analyser;
+        }
+        return $analyser;
+    }
+    
+    /**
+     * Takes in an array of Node\Args[]
+     * Returns the taint value of the value returned by the function
+     */
+    public function analyseFunctionCall($args){
+        
     }
 
     private function analyseReturnStatementsDependencies($stmts){

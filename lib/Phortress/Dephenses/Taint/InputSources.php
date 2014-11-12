@@ -1,7 +1,6 @@
 <?php
 namespace Phortress\Dephenses;
 use PhpParser\Node;
-use PhpParser\Node\Expr;
 /**
  * Contains the list of input sources
  * Has a method which checks if the variable is an input variable, 

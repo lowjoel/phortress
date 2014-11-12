@@ -254,7 +254,13 @@ class StmtAnalyser {
         if(InputSources::isInputRead($exp)){
             return Annotation::TAINTED;
         }else{
-            
+            $func_name = $exp->name;
+            if($func_name instanceof Expr){
+                return Annotation::UNKNOWN;
+            }
+            $func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
+            $taint_val = $func_analyser->analyseFunctionCall($exp->args);
+            return $taint_val;
         }
     }
     
