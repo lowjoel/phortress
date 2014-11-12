@@ -87,7 +87,7 @@ class Program {
 	 */
 	private static function parseFile($file) {
 		$file = realpath($file);
-		$parser = new Parser($file);
+		$parser = new Parser();
 		try {
 			$statements = $parser->parse(file_get_contents($file));
 

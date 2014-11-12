@@ -1,6 +1,9 @@
 <?php
 namespace Phortress;
 
+use \Colors\Color;
+use \Phortress\Dephenses\Error;
+
 /**
  * Manages running Phortress from the command line.
  *
@@ -71,9 +74,21 @@ class Cli {
 	/**
 	 * Prints the errors found in the Dephenses.
 	 *
-	 * @param array $results
+	 * @param Dephenses\Message[] $results
 	 */
 	private static function printResults(array $results) {
+		$color = new Color();
+		foreach ($results as $result) {
+			if ($result instanceof Error) {
+				echo $color('[Error]   ')->red;
+			} else {
+				echo '[Message] ';
+			}
 
+			echo $result->getMessage();
+			echo ' at ';
+			echo $color('line ' . $result->getNode()->getLine())->yellow;
+			echo PHP_EOL;
+		}
 	}
 }

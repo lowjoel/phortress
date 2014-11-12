@@ -1,10 +1,62 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "fb34801975940b6a36cee7b7d0bd376b",
+    "hash": "3e8be0d8b5be35a398a9fca695e66aad",
     "packages": [
+        {
+            "name": "kevinlebrun/colors.php",
+            "version": "0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kevinlebrun/colors.php.git",
+                "reference": "7bf126ab246278a4597ffd3a32395eb458faf76b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kevinlebrun/colors.php/zipball/7bf126ab246278a4597ffd3a32395eb458faf76b",
+                "reference": "7bf126ab246278a4597ffd3a32395eb458faf76b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "satooshi/php-coveralls": "dev-master",
+                "squizlabs/php_codesniffer": "1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Colors": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Le Brun",
+                    "email": "lebrun.k@gmail.com",
+                    "homepage": "http://kevinlebrun.fr",
+                    "role": "developer"
+                }
+            ],
+            "description": "Colors for PHP CLI scripts",
+            "homepage": "https://github.com/kevinlebrun/colors.php",
+            "keywords": [
+                "cli",
+                "color",
+                "colors",
+                "console",
+                "shell"
+            ],
+            "time": "2014-09-18 09:15:40"
+        },
         {
             "name": "myclabs/php-enum",
             "version": "1.2.1",
@@ -38,16 +90,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "b9a60372f26356feb85b4b9ca50a395a5f0d7f34"
+                "reference": "a8ffc6fcfcbae268656c8acf1298e378ac1ee5f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/b9a60372f26356feb85b4b9ca50a395a5f0d7f34",
-                "reference": "b9a60372f26356feb85b4b9ca50a395a5f0d7f34",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/a8ffc6fcfcbae268656c8acf1298e378ac1ee5f1",
+                "reference": "a8ffc6fcfcbae268656c8acf1298e378ac1ee5f1",
                 "shasum": ""
             },
             "require": {
@@ -79,7 +131,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2014-10-14 19:40:07"
+            "time": "2014-11-04 22:12:46"
         }
     ],
     "packages-dev": [
@@ -631,16 +683,16 @@
         },
         {
             "name": "sebastian/environment",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "6288ebbf6fa3ed2b2ff2d69c356fbaaf4f0971a7"
+                "reference": "0d9bf79554d2a999da194a60416c15cf461eb67d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/6288ebbf6fa3ed2b2ff2d69c356fbaaf4f0971a7",
-                "reference": "6288ebbf6fa3ed2b2ff2d69c356fbaaf4f0971a7",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/0d9bf79554d2a999da194a60416c15cf461eb67d",
+                "reference": "0d9bf79554d2a999da194a60416c15cf461eb67d",
                 "shasum": ""
             },
             "require": {
@@ -652,7 +704,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1.x-dev"
+                    "dev-master": "1.2.x-dev"
                 }
             },
             "autoload": {
@@ -677,7 +729,7 @@
                 "environment",
                 "hhvm"
             ],
-            "time": "2014-10-07 09:23:16"
+            "time": "2014-10-22 06:38:05"
         },
         {
             "name": "sebastian/exporter",
@@ -781,17 +833,17 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.5.5",
+            "version": "v2.5.6",
             "target-dir": "Symfony/Component/Yaml",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "b1dbc53593b98c2d694ebf383660ac9134d30b96"
+                "reference": "2d9f527449cabfa8543dd7fa3a466d6ae83d6726"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/b1dbc53593b98c2d694ebf383660ac9134d30b96",
-                "reference": "b1dbc53593b98c2d694ebf383660ac9134d30b96",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/2d9f527449cabfa8543dd7fa3a466d6ae83d6726",
+                "reference": "2d9f527449cabfa8543dd7fa3a466d6ae83d6726",
                 "shasum": ""
             },
             "require": {
@@ -824,12 +876,13 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2014-09-22 09:14:18"
+            "time": "2014-10-01 05:50:18"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": [],
+    "prefer-stable": false,
     "platform": [],
     "platform-dev": []
 }
