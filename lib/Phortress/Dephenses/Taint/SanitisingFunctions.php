@@ -8,7 +8,32 @@
  * @author naomileow
  */
 class SanitisingFunctions {
-    //put your code here
+    //This are the functions that can be used to sanitise input against any type of vulnerability
+    public static $general_sanitising = array(
+		'intval',
+		'floatval',
+		'doubleval',
+		'filter_input',
+		'urlencode',
+		'rawurlencode',
+		'hexdec',
+		'md5',
+		'sha1',
+		'crypt',
+		'crc32',
+		'hash',
+		'base64_encode',
+                'str_rot13',
+	);
+    
+    public static $sanitising_reverse = array(
+		'rawurldecode' => 'rawurlencode',
+		'urldecode' => 'urlencode',
+		'base64_decode' => 'base64_encode',
+		'html_entity_decode' => 'htmlentities',
+		'str_rot13' => 'str_rot13',
+	);
+    
     public static $sql_sanitising = array(
 		'addslashes',
 		'dbx_escape_string',
