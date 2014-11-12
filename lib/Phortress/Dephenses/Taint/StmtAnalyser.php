@@ -32,7 +32,7 @@ class StmtAnalyser {
             return;
         }
         
-        if($var instanceof Expr\Variable){
+        if($var instanceof Variable){
             $taint = $this->resolveExprTaint($exp);
             $this->annotateVariable($var, $taint, $exp);
         }else if($var instanceof List_){
@@ -47,11 +47,48 @@ class StmtAnalyser {
         assert($assign->var instanceof List_);
         $list_of_vars = $assign->var->vars;
         $exp = $assign->expr;
-
-        if($exp instanceof Array_){
-            
+        if($exp instanceof Variable){
+            $exp = getVariableTerminalReference($exp);
         }
         
+        if($exp instanceof Array_){
+            $taint_vals = $this->resolveTaintOfExprsInArray($exp);
+        }
+        
+        for($i = 0; $i < count(list_of_vars); $i++){
+            $var = $list_of_vars[$i];
+            $assignment = $exp[$i];
+            if(empty($taint_vals)){
+                //For now we do not handle the case where the RHS of the list 
+                //assignment cannot be resolved to an array
+                $taint = Annotation::UNKNOWN;
+            }else{
+                $taint = $taint_vals[$i];
+            }
+            $this->annotateVariable($var, $taint, $assignment);
+        }
+        
+    }
+    
+    private function getVariableTerminalReference(Variable $var){
+        $name = $var->name;
+        if($name instanceof Expr){
+            //If the name of the variable is not a string, we cannot resolve 
+            //the variable's assignment statically.
+            return $var;
+        }
+        $env = $var->environment;
+        if(empty($env)){
+            return $var;
+        }else{
+             $assign = $env->resolveVariable($name);
+             $exp = $assign->expr;
+             if($exp instanceof Variable){
+                 return $this->getVariableTerminalReference($exp);
+             }else{
+                 return $exp;
+             }
+        }
     }
     
     private function resolveExprTaint(Expr $exp){
@@ -70,7 +107,8 @@ class StmtAnalyser {
             $var = $exp->expr;
             return $this->resolveExprTaint($exp);
         }else if($exp instanceof Array_){
-            
+            $taint_values = $this->resolveTaintOfExprsInArray($exp);
+            return max($taint_values);
         }else if($exp instanceof ArrayDimFetch){
             return $this->resolveArrayFieldTaint($exp);
         }else if($exp instanceof PropertyFetch){
