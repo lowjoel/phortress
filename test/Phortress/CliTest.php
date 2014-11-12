@@ -26,7 +26,7 @@ class CliTest extends \PHPUnit_Framework_TestCase {
 
 	public function testErrorPrinting() {
 		$this->expectOutputString(
-			"\033[31m[Error  ] \033[0mTest at \033[33mline 1\033[0m" . PHP_EOL
+			"\033[31m[Error]   \033[0mTest at \033[33mline 1\033[0m" . PHP_EOL
 		);
 
 		$parser = new Parser;
