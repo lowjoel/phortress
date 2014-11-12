@@ -3,6 +3,7 @@ namespace Phortress\Dephenses\Taint;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Stmt;
 
 class FunctionAnalyser{
     const TAINT_KEY = "taint";
@@ -113,7 +114,31 @@ class FunctionAnalyser{
     
     private static function traceFunctionCall(Expr\FuncCall $exp){
         $func_name = $exp->name;
+        $args = $exp->args;
+        $traced_args = array();
         
+        foreach($args as $arg){
+            $arg_val = $arg->value;
+            $traced = $this->traceExpressionVariables($arg_val);
+            
+            $traced_args[] = $this->addSanitisingFunctionInfo($traced, $func_name);
+        }
+        return $this->mergeVariables($traced_args);
+    }
+    
+    private static function addSanitisingFunctionInfo($var_infolist, $func_name){
+        foreach($var_infolist as $var=>$infolist){
+            $original = $infolist[self::SANITISATION_KEY];
+            if(\SanitisingFunctions::isSanitisingFunction($func_name)){
+                $new_list = array_merge($original, array($func_name));
+                $infolist[self::SANITISATION_KEY] = $new_list;
+            }else if(\SanitisingFunctions::isSanitisingReverseFunction($func_name)){
+                $reverse_func = \SanitisingFunctions::getAffectedSanitiser($func_name);
+                $new_list = array_diff($original, array($reverse_func));
+                $infolist[self::SANITISATION_KEY] = $new_list;
+            }
+        }
+        return $var_infolist;
     }
     
     private static function traceMethodCall(Expr\MethodCall $exp){
@@ -253,7 +278,7 @@ class FunctionAnalyser{
     
     private function getReturnStatements($stmts){
         $filter_returns = function($item){
-            return ($item instanceof Node\Stmt\Return_);
+            return ($item instanceof Stmt\Return_);
         };
         return array_filter($stmts, $filter_returns);
     }

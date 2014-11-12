@@ -23,7 +23,7 @@ class SanitisingFunctions {
 		'crc32',
 		'hash',
 		'base64_encode',
-                'str_rot13',
+//                'str_rot13', //This makes life complicated because it is its own inverse
 	);
     
     public static $sanitising_reverse = array(
@@ -31,7 +31,7 @@ class SanitisingFunctions {
 		'urldecode' => 'urlencode',
 		'base64_decode' => 'base64_encode',
 		'html_entity_decode' => 'htmlentities',
-		'str_rot13' => 'str_rot13',
+//		'str_rot13' => 'str_rot13',
 	);
     
     public static $sql_sanitising = array(
