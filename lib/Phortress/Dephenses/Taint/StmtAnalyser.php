@@ -17,8 +17,10 @@ class StmtAnalyser {
      * @param \PhpParser\Node $node
      */
     public static function reduce(Node $node){
-        if($node instanceof Expr\Assign){
-            
+        if($node instanceof Assign){
+            $this->applyAssignmentRule($node);
+        }else if($node instanceof AssignOp){
+            $this->applyAssignmentOpRule($node);
         }
     }
     

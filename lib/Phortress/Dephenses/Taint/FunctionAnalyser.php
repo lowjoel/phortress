@@ -44,13 +44,18 @@ class FunctionAnalyser{
         $this->functionStmts = $this->function->stmts;
         $this->params = $this->function->params;
         $this->analyseReturnStatementsDependencies($this->params, $this->functionStmts);
+        $this->function->analyser = self;
     }
 
     private function analyseReturnStatementsDependencies($params, $stmts){
         $retStmts = $this->getReturnStatements($stmts);
+        $stmts = array();
         foreach($retStmts as $ret){
-            $this->analyseStatementDependency($ret);
+            $depending_vars = $this->analyseStatementDependency($ret);
+            $index = $ret->getLine(); //Use the statement's line number to index the statement for now.
+            $stmts[$index] = $depending_vars;
         }
+        $this->returnStmts = $stmts;
     }
     
     private function analyseStatementDependency(Return_ $stmt){
@@ -58,6 +63,7 @@ class FunctionAnalyser{
         if($exp instanceof Expr){
             $trace = $this->traceExpressionVariables($exp);
         }
+        return $trace;
     }
     
     private function traceExpressionVariables(Expr $exp){
@@ -87,7 +93,7 @@ class FunctionAnalyser{
         }else if($exp instanceof StaticPropertyFetch){
             //TODO:
         }else if($exp instanceof FuncCall){
-            return $this->resolveFunctionCall($exp);
+            return $this->traceFunctionCall($exp);
         }else if($exp instanceof MethodCall){
             return $this->traceMethodCall($exp);
         }else if($exp instanceof Ternary){
