@@ -29,7 +29,7 @@ class Program {
 	/**
 	 * The parse tree for the entire program.
 	 *
-	 * @var AbstractNode[]
+	 * @var \PhpParser\Node[]
 	 */
 	private $parseTree;
 
@@ -120,7 +120,7 @@ class Program {
 	 *
 	 * @param \PhpParser\Node[] $statements The statements comprising the
 	 * program.
-	 * @return AbstractNode
+	 * @return \PhpParser\Node[]
 	 */
 	private function addEnvironment(array $statements) {
 		$traverser = new \PhpParser\NodeTraverser;
@@ -132,7 +132,7 @@ class Program {
 	/**
 	 * Verifies the program using the given Dephenses.
 	 *
-	 * @param string[] $dephenses The Dephenses to execute, or null to execute all.
+	 * @param Dephenses\Dephense[] $dephenses The Dephenses to execute, or null to execute all.
 	 */
 	public function verify(array $dephenses = null) {
 
