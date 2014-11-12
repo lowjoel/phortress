@@ -1,6 +1,7 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
 class FileAssignerVisitor extends NodeVisitorAbstract {
