@@ -133,8 +133,19 @@ class Program {
 	 * Verifies the program using the given Dephenses.
 	 *
 	 * @param Dephenses\Dephense[] $dephenses The Dephenses to execute, or null to execute all.
+	 * @return Dephenses\Message[] The messages associated with running the dephenses on the
+	 *                             given file.
 	 */
 	public function verify(array $dephenses = null) {
+		if (is_null($dephenses)) {
+			$dephenses = Dephense::getAll();
+		}
 
+		$errors = array();
+		foreach ($dephenses as $dephense) {
+			$errors += $dephense->run($this->parseTree);
+		}
+
+		return $errors;
 	}
-} 
+}
