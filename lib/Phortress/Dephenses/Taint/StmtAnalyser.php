@@ -38,7 +38,8 @@ class StmtAnalyser {
         }else if($var instanceof List_){
             $this->resolveListAssignment($assign);
         }else{
-//            $this->resolveExprTaint($var);
+            $taint = $this->resolveExprTaint($var);
+            $this->annotateVariable($var, $taint, $exp);
         }
         
     }
