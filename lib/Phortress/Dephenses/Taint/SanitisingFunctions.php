@@ -59,4 +59,33 @@ class SanitisingFunctions {
 		'htmlentities',
 		'htmlspecialchars'
     );	
+    
+    public static function isGeneralSanitisingFunction($func_name){
+        return in_array($func_name, self::general_sanitising);
+    }
+    
+    public static function isShellSanitisingFunction($func_name){
+        return in_array($func_name, self::shell_sanitising);
+    }
+    
+    public static function isXSSSanitisingFunction($func_name){
+        return in_array($func_name, self::xss_sanitising());
+    }
+    
+    public static function isSQLSanitisingFunction($func_name){
+        return in_array($func_name, self::sql_sanitising);
+    }
+    
+    public static function isSanitisingFunction($func_name){
+        return self::isGeneralSanitisingFunction($func_name) || self::isSQLSanitisingFunction($func_name) 
+                || self::isShellSanitisingFunction($func_name) || self::isShellSanitisingFunction($func_name);
+    }
+    
+    public static function isSanitisingReverseFunction($func_name){
+        return array_key_exists($func_name, self::$sanitising_reverse);
+    }
+    
+    public static function getAffectedSanitiser($func_name){
+        return self::$sanitising_reverse[$func_name];
+    }
 }

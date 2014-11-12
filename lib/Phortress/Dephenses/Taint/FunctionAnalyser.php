@@ -12,7 +12,7 @@ class FunctionAnalyser{
     const VARIABLE_DEF = "def";
     /**
      * Return statements and the variables they are dependent on.
-     * array(Stmt => array(variable name => array(Sanitising Functions))
+     * array(Stmt => array(variable name => array(Variable Info, as stored in the $variables array))
      */
     protected $returnStmts = array();
     
@@ -21,6 +21,9 @@ class FunctionAnalyser{
      */
     protected $params = array();
     
+    /**
+     * The statements in the function
+     */
     protected $functionStmts;
     
     /**
@@ -43,23 +46,24 @@ class FunctionAnalyser{
         $this->function = $env->resolveFunction($functionName);
         $this->functionStmts = $this->function->stmts;
         $this->params = $this->function->params;
-        $this->analyseReturnStatementsDependencies($this->params, $this->functionStmts);
+        $this->analyseReturnStatementsDependencies($this->functionStmts);
         $this->function->analyser = self;
     }
 
-    private function analyseReturnStatementsDependencies($params, $stmts){
+    private function analyseReturnStatementsDependencies($stmts){
         $retStmts = $this->getReturnStatements($stmts);
-        $stmts = array();
+        $stmt_dependencies = array();
         foreach($retStmts as $ret){
             $depending_vars = $this->analyseStatementDependency($ret);
             $index = $ret->getLine(); //Use the statement's line number to index the statement for now.
-            $stmts[$index] = $depending_vars;
+            $stmt_dependencies[$index] = $depending_vars;
         }
-        $this->returnStmts = $stmts;
+        $this->returnStmts = $stmt_dependencies;
     }
     
     private function analyseStatementDependency(Return_ $stmt){
         $exp = $stmt->expr;
+        $trace = array();
         if($exp instanceof Expr){
             $trace = $this->traceExpressionVariables($exp);
         }
@@ -103,10 +107,12 @@ class FunctionAnalyser{
             return $this->resolveTernaryTrace($exp->expr);
         }else{
             //Other expressions we will not handle.
+            return array();
         }
     }
     
     private static function traceFunctionCall(Expr\FuncCall $exp){
+        $func_name = $exp->name;
         
     }
     
@@ -143,6 +149,9 @@ class FunctionAnalyser{
     private function mergeVariables($vars){
         $merged = array();
         foreach($vars as $var){
+            if(empty($var)){
+                continue;
+            }
             $var_name = key($var);
             if(!array_key_exists($var_name, $merged)){
                 $merged[$var_name] = $var;
