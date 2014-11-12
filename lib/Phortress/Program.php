@@ -91,16 +91,16 @@ class Program {
 		try {
 			$statements = $parser->parseFile($file);
 
+			// Parse requires
+			$includer = new \PhpParser\NodeTraverser;
+			$includeResolver = new IncludeResolver($parser);
+			$includer->addVisitor($includeResolver);
+			$parseTree = $includer->traverse(array_slice($statements, 0));
+
 			// Convert to fully qualified names
 			$traverser = new \PhpParser\NodeTraverser;
 			$traverser->addVisitor(new \PhpParser\NodeVisitor\NameResolver);
 			$statements = $traverser->traverse($statements);
-
-			// Parse requires
-			$includer = new \PhpParser\NodeTraverser;
-			$includeResolver = new IncludeResolver;
-			$includer->addVisitor($includeResolver);
-			$parseTree = $includer->traverse(array_slice($statements, 0));
 
 			// Merge all the raw statements
 			$files = array(
