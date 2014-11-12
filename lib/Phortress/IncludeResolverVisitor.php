@@ -5,7 +5,7 @@ use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 
-class IncludeResolver extends NodeVisitorAbstract {
+class IncludeResolverVisitor extends NodeVisitorAbstract {
 	/**
 	 * The parser to use for parsing includes.
 	 * @var Parser

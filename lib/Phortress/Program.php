@@ -93,7 +93,7 @@ class Program {
 
 			// Parse requires
 			$includer = new \PhpParser\NodeTraverser;
-			$includeResolver = new IncludeResolver($parser);
+			$includeResolver = new IncludeResolverVisitor($parser);
 			$includer->addVisitor($includeResolver);
 			$parseTree = $includer->traverse(array_slice($statements, 0));
 
@@ -124,7 +124,7 @@ class Program {
 	 */
 	private function addEnvironment(array $statements) {
 		$traverser = new \PhpParser\NodeTraverser;
-		$environmentResolver = new EnvironmentResolver($this->environment);
+		$environmentResolver = new EnvironmentResolverVisitor($this->environment);
 		$traverser->addVisitor($environmentResolver);
 		return $traverser->traverse($statements);
 	}
