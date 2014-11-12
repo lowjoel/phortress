@@ -48,13 +48,16 @@ class FunctionAnalyser{
 
     private function analyseReturnStatementsDependencies($params, $stmts){
         $retStmts = $this->getReturnStatements($stmts);
-        
+        foreach($retStmts as $ret){
+            $this->analyseStatementDependency($ret);
+        }
     }
     
     private function analyseStatementDependency(Return_ $stmt){
         $exp = $stmt->expr;
-        $env = $exp->environment;
-        
+        if($exp instanceof Expr){
+            $trace = $this->traceExpressionVariables($exp);
+        }
     }
     
     private function traceExpressionVariables(Expr $exp){
@@ -77,23 +80,40 @@ class FunctionAnalyser{
         }else if($exp instanceof ArrayDimFetch){
             //For now treat all array dimension fields as one
             $var = $exp->var;
-            
+            return $this->traceVariable($var);
         }else if($exp instanceof PropertyFetch){
-            
+            $var = $exp->var;
+            return $this->traceVariable($var);
         }else if($exp instanceof StaticPropertyFetch){
-            
+            //TODO:
         }else if($exp instanceof FuncCall){
-            
+            return $this->resolveFunctionCall($exp);
         }else if($exp instanceof MethodCall){
-
+            return $this->traceMethodCall($exp);
         }else if($exp instanceof Ternary){
             //If-else block
-           
+           return $this->traceTernaryTrace($exp);
         }else if($exp instanceof Eval_){
-            
+            return $this->resolveTernaryTrace($exp->expr);
         }else{
             //Other expressions we will not handle.
         }
+    }
+    
+    private static function traceFunctionCall(Expr\FuncCall $exp){
+        
+    }
+    
+    private static function traceMethodCall(Expr\MethodCall $exp){
+        
+    }
+    
+     private static function resolveTernaryTrace(Ternary $exp){
+        $if = $exp->if;
+        $else = $exp->else;
+        $if_trace = $this->traceExpressionVariables($if);
+        $else_trace = $this->traceExpressionVariables($else);
+        return $this->mergeTaintValues($if_trace, $else_trace);
     }
     
     private function traceVariablesInArray(Array_ $arr){
