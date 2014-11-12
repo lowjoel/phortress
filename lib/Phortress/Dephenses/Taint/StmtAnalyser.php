@@ -17,14 +17,14 @@ class StmtAnalyser {
      * @param \PhpParser\Node $node
      */
     public static function reduce(Node $node){
-        if($node instanceof Assign){
+        if($node instanceof Expr\Assign){
             $this->applyAssignmentRule($node);
-        }else if($node instanceof AssignOp){
+        }else if($node instanceof Expr\AssignOp){
             $this->applyAssignmentOpRule($node);
         }
     }
     
-    public static function getVariableTerminalReference(Variable $var){
+    public static function getVariableTerminalReference(Expr\Variable $var){
         $name = $var->name;
         if($name instanceof Expr){
             //If the name of the variable is not a string, we cannot resolve 
@@ -45,7 +45,7 @@ class StmtAnalyser {
         }
     }
     
-    private static function applyAssignmentOpRule(AssignOp $assignOp){
+    private static function applyAssignmentOpRule(Expr\AssignOp $assignOp){
         $var = $assignOp->var;
         $exp = $assignOp->expr;
         
@@ -55,7 +55,7 @@ class StmtAnalyser {
         $var->taint = $newTaint;
     }
     
-    private static function applyAssignmentRule(Assign $assign){
+    private static function applyAssignmentRule(Expr\Assign $assign){
         $var = $assign->var;
         $exp = $assign->expr;
         
@@ -63,10 +63,10 @@ class StmtAnalyser {
             return;
         }
         
-        if($var instanceof Variable){
+        if($var instanceof Expr\Variable){
             $taint = self::resolveExprTaint($exp);
             self::annotateVariable($var, $taint, $exp);
-        }else if($var instanceof List_){
+        }else if($var instanceof Expr\List_){
             self::resolveListAssignment($assign);
         }else{
             $taint = self::resolveExprTaint($var);
@@ -75,15 +75,15 @@ class StmtAnalyser {
         
     }
     
-    private static function resolveListAssignment(Assign $assign){
-        assert($assign->var instanceof List_);
+    private static function resolveListAssignment(Expr\Assign $assign){
+        assert($assign->var instanceof Expr\List_);
         $list_of_vars = $assign->var->vars;
         $exp = $assign->expr;
         if($exp instanceof Variable){
             $exp = getVariableTerminalReference($exp);
         }
         
-        if($exp instanceof Array_){
+        if($exp instanceof Expr\Array_){
             $taint_vals = self::resolveTaintOfExprsInArray($exp);
         }
         
@@ -103,38 +103,38 @@ class StmtAnalyser {
     }
     
     private static function resolveExprTaint(Expr $exp){
-        if($exp instanceof Scalar){
+        if($exp instanceof Node\Scalar){
             return Annotation::SAFE;
-        }else if ($exp instanceof Variable) {
+        }else if ($exp instanceof Expr\Variable) {
             return self::resolveVariableTaint($exp);
-        }else if($exp instanceof ClassConstFetch || ConstFetch){
+        }else if($exp instanceof Expr\ClassConstFetch || Expr\ConstFetch){
             return Annotation::SAFE;
-        }else if($exp instanceof PreInc || $exp instanceof PreDec || $exp instanceof PostInc || $exp instanceof PostDec){
+        }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
             return resolveExprTaint($var);
-        }else if($exp instanceof BinaryOp){
+        }else if($exp instanceof Expr\BinaryOp){
             return self::resolveBinaryOpTaint($exp);
-        }else if($exp instanceof UnaryMinus || $exp instanceof UnaryPlus){
+        }else if($exp instanceof Expr\UnaryMinus || $exp instanceof Expr\UnaryPlus){
             $var = $exp->expr;
             return self::resolveExprTaint($var);
-        }else if($exp instanceof Array_){
+        }else if($exp instanceof Expr\Array_){
             $taint_values = self::resolveTaintOfExprsInArray($exp);
             return max($taint_values);
-        }else if($exp instanceof ArrayDimFetch){
+        }else if($exp instanceof Expr\ArrayDimFetch){
             return self::resolveArrayFieldTaint($exp);
-        }else if($exp instanceof PropertyFetch){
+        }else if($exp instanceof Expr\PropertyFetch){
             $var = $exp->var;
             return self::resolveVariableTaint($var);
-        }else if($exp instanceof StaticPropertyFetch){
+        }else if($exp instanceof Expr\StaticPropertyFetch){
             return self::resolveClassPropertyTaint($exp);
-        }else if($exp instanceof FuncCall){
+        }else if($exp instanceof Expr\FuncCall){
             return self::resolveFuncResultTaint($exp);
-        }else if($exp instanceof MethodCall){
+        }else if($exp instanceof Expr\MethodCall){
             return self::resolveMethodResultTaint($exp);
-        }else if($exp instanceof Ternary){
+        }else if($exp instanceof Expr\Ternary){
             //If-else block
             return self::resolveTernaryTaint($exp);
-        }else if($exp instanceof Eval_){
+        }else if($exp instanceof Expr\Eval_){
             return self::resolveExprTaint($exp->expr);
         }else{
             //Other expressions we will not handle.
@@ -146,7 +146,7 @@ class StmtAnalyser {
      * Takes in an array of Nodes and resolves their taint values if they are are variables.
      * Returns an array containing the taint value of each item in the array.
      */
-    private static function resolveTaintOfExprsInArray(Array_ $arr){
+    private static function resolveTaintOfExprsInArray(Expr\Array_ $arr){
         $arr_items = $arr->items;
         $taint_vals = array();
         foreach($arr_items as $item){
@@ -160,7 +160,7 @@ class StmtAnalyser {
         return $taint_vals;
     }
     
-    private static function resolveBinaryOpTaint(BinaryOp $exp){
+    private static function resolveBinaryOpTaint(Expr\BinaryOp $exp){
         $left = $exp->left;
         $right = $exp->right;
         $left_taint = self::resolveExprTaint($left);
@@ -168,7 +168,7 @@ class StmtAnalyser {
         return self::mergeTaintValues($left_taint, $right_taint);
     }
     
-    private static function resolveArrayFieldTaint(ArrayDimFetch $exp){
+    private static function resolveArrayFieldTaint(Expr\ArrayDimFetch $exp){
         //TODO: This is merely a stub which treats all the fields in an array as a single entity
         //i.e. They all have the same taint value.
         $array_var = $exp->var;
@@ -186,12 +186,12 @@ class StmtAnalyser {
             return Annotation::UNASSIGNED;
         }
     }
-    private static function resolveClassPropertyTaint(StaticPropertyFetch $exp){
+    private static function resolveClassPropertyTaint(Expr\StaticPropertyFetch $exp){
         $classEnv = $exp->environment->resolveClass($exp->class);
         return self::resolveVariableTaintInEnvironment($classEnv, $exp);
     }
     
-    private static function resolveVariableTaint(Variable $exp){
+    private static function resolveVariableTaint(Expr\Variable $exp){
         //This should apply the taint value of $exp to $var. 
         //If $exp is not marked, go up the environment chain to mark the taint value of $exp,
         //marking the taint value of the variables along the way.
@@ -219,7 +219,7 @@ class StmtAnalyser {
         }
     }
     
-    private static function resolveVariableTaintInEnvironment(Environment $env, Variable $var){
+    private static function resolveVariableTaintInEnvironment(\Phortress\Environment $env, Expr\Variable $var){
         $name = $var->name;
         if($name instanceof Expr){
             self::annotateVariable($var, Annotation::UNKNOWN);
@@ -241,7 +241,7 @@ class StmtAnalyser {
         return max($taints);
     }
     
-    private static function resolveTernaryTaint(Ternary $exp){
+    private static function resolveTernaryTaint(Expr\Ternary $exp){
         $if = $exp->if;
         $else = $exp->else;
         $if_taint = self::resolveExprTaint($if);
@@ -249,7 +249,7 @@ class StmtAnalyser {
         return self::mergeTaintValues($if_taint, $else_taint);
     }
     
-    private static function resolveFuncResultTaint(FuncCall $exp){
+    private static function resolveFuncResultTaint(Expr\FuncCall $exp){
         //$exp->name is of type Name|Expr
         if(InputSources::isInputRead($exp)){
             return Annotation::TAINTED;
@@ -258,7 +258,7 @@ class StmtAnalyser {
         }
     }
     
-    private static function resolveMethodResultTaint(MethodCall $exp){
+    private static function resolveMethodResultTaint(Expr\MethodCall $exp){
         
     }
     
