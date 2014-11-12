@@ -89,7 +89,7 @@ class Program {
 		$file = realpath($file);
 		$parser = new Parser();
 		try {
-			$statements = $parser->parse(file_get_contents($file));
+			$statements = $parser->parseFile($file);
 
 			// Convert to fully qualified names
 			$traverser = new \PhpParser\NodeTraverser;
