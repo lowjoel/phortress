@@ -46,7 +46,7 @@ class IncludeResolver extends NodeVisitorAbstract {
 	 * @return Boolean|Node[] The nodes from the include.
 	 */
 	private function includeFile($type, Expr $expression) {
-		$file = $this->evaluateIncludeExpr($expression);
+		$file = self::evaluateIncludeExpr($expression);
 		$file = $this->resolveIncludePath($file);
 		switch ($type) {
 			case Expr\Include_::TYPE_INCLUDE_ONCE:
@@ -65,8 +65,19 @@ class IncludeResolver extends NodeVisitorAbstract {
 	 * @param Expr $expression The expression to evaluate.
 	 * @return string The expression result.
 	 */
-	private function evaluateIncludeExpr(Expr $expression) {
-		assert(false, 'Includes not currently supported');
+	private static function evaluateIncludeExpr(Expr $expression) {
+		if ($expression instanceof Expr\BinaryOp\Concat) {
+			return self::evaluateIncludeExpr($expression->left) .
+				self::evaluateIncludeExpr($expression->right);
+		} else if ($expression instanceof Node\Scalar\MagicConst\Dir) {
+			return dirname($expression->file);
+		} else if ($expression instanceof Node\Scalar\MagicConst\File) {
+			return basename($expression->file);
+		} else if ($expression instanceof Node\Scalar) {
+			return (string)$expression->value;
+		} else {
+			assert(false, 'Unknown expression type for static evaluation');
+		}
 	}
 
 	/**
@@ -76,10 +87,11 @@ class IncludeResolver extends NodeVisitorAbstract {
 	 * @return string The fully qualified path to the file.
 	 */
 	private function resolveIncludePath($path) {
-		if (!self::ignoresIncludePath($file)) {
+		if (self::ignoresIncludePath($path)) {
 			return realpath($path);
+		} else {
+			assert(false, 'Include path not currently supported');
 		}
-		assert(false, 'Include path not currently supported');
 	}
 
 	/**
