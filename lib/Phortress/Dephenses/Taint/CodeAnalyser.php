@@ -17,8 +17,10 @@ class CodeAnalyser {
     }
     
     public function analyse(){
-        StmtAnalyser::reduce($this->parseTree);
-
+        
+        foreach($this->parseTree as $statement){
+            StmtAnalyser::reduce($statement);
+        }
         return array();
     }
 }

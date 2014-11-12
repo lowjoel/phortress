@@ -2,6 +2,7 @@
 namespace Phortress\Dephenses\Taint;
 
 use \Phortress\Dephenses;
+use PhpParser\Node;
 use PhpParser\Node\Expr;
 /**
  *  Most basic unit of the taint analyser. Takes in a statement and outputs 
@@ -11,12 +12,14 @@ use PhpParser\Node\Expr;
  */
 class StmtAnalyser {
     /**
-     * Runs the analyser on the parse tree.
+     * Runs the analyser on a node in theparse tree.
      *
-     * @param \PhpParser\Node[] $parseTree
+     * @param \PhpParser\Node $node
      */
-    public static function reduce(array $parseTree){
-        
+    public static function reduce(Node $node){
+        if($node instanceof Expr\Assign){
+            
+        }
     }
     
     public static function getVariableTerminalReference(Variable $var){
