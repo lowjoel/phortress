@@ -62,7 +62,7 @@ class FunctionAnalyser{
         $this->returnStmts = $stmt_dependencies;
     }
     
-    private function analyseStatementDependency(Return_ $stmt){
+    private function analyseStatementDependency(Stmt\Return_ $stmt){
         $exp = $stmt->expr;
         $trace = array();
         if($exp instanceof Expr){
@@ -72,39 +72,39 @@ class FunctionAnalyser{
     }
     
     private function traceExpressionVariables(Expr $exp){
-        if($exp instanceof Scalar){
+        if($exp instanceof Node\Scalar){
             return array();
-        }else if ($exp instanceof Variable) {
+        }else if ($exp instanceof Expr\Variable) {
             return $this->traceVariable($exp);
-        }else if($exp instanceof ClassConstFetch || ConstFetch){
+        }else if($exp instanceof Expr\ClassConstFetch || Expr\ConstFetch){
             return array();
-        }else if($exp instanceof PreInc || $exp instanceof PreDec || $exp instanceof PostInc || $exp instanceof PostDec){
+        }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
             return $this->traceVariable($var);
-        }else if($exp instanceof BinaryOp){
+        }else if($exp instanceof Expr\BinaryOp){
             return $this->traceBinaryOp($exp);
-        }else if($exp instanceof UnaryMinus || $exp instanceof UnaryPlus){
+        }else if($exp instanceof Expr\UnaryMinus || $exp instanceof Expr\UnaryPlus){
             $var = $exp->expr;
             return $this->traceVariable($var);
-        }else if($exp instanceof Array_){
+        }else if($exp instanceof Expr\Array_){
             return $this->traceVariablesInArray($exp);
-        }else if($exp instanceof ArrayDimFetch){
+        }else if($exp instanceof Expr\ArrayDimFetch){
             //For now treat all array dimension fields as one
             $var = $exp->var;
             return $this->traceVariable($var);
-        }else if($exp instanceof PropertyFetch){
+        }else if($exp instanceof Expr\PropertyFetch){
             $var = $exp->var;
             return $this->traceVariable($var);
-        }else if($exp instanceof StaticPropertyFetch){
+        }else if($exp instanceof Expr\StaticPropertyFetch){
             //TODO:
-        }else if($exp instanceof FuncCall){
+        }else if($exp instanceof Expr\FuncCall){
             return $this->traceFunctionCall($exp);
-        }else if($exp instanceof MethodCall){
+        }else if($exp instanceof Expr\MethodCall){
             return $this->traceMethodCall($exp);
-        }else if($exp instanceof Ternary){
+        }else if($exp instanceof Expr\Ternary){
             //If-else block
            return $this->traceTernaryTrace($exp);
-        }else if($exp instanceof Eval_){
+        }else if($exp instanceof Expr\Eval_){
             return $this->resolveTernaryTrace($exp->expr);
         }else{
             //Other expressions we will not handle.
@@ -145,7 +145,7 @@ class FunctionAnalyser{
         
     }
     
-     private static function resolveTernaryTrace(Ternary $exp){
+     private static function resolveTernaryTrace(Expr\Ternary $exp){
         $if = $exp->if;
         $else = $exp->else;
         $if_trace = $this->traceExpressionVariables($if);
@@ -153,7 +153,7 @@ class FunctionAnalyser{
         return $this->mergeTaintValues($if_trace, $else_trace);
     }
     
-    private function traceVariablesInArray(Array_ $arr){
+    private function traceVariablesInArray(Expr\Array_ $arr){
         $arr_items = $arr->items;
         $var_traces = array();
         foreach($arr_items as $item){
@@ -163,7 +163,7 @@ class FunctionAnalyser{
         return $this->mergeVariables($var_traces);
     }
     
-    private function traceBinaryOp(BinaryOp $exp){
+    private function traceBinaryOp(Expr\BinaryOp $exp){
         $left = $exp->left;
         $right = $exp->right;
         $left_var = $this->traceVariable($left);
@@ -205,7 +205,7 @@ class FunctionAnalyser{
         return array_intersect($sanitising1, $sanitising2);
     }
     
-    private function traceVariable(Variable $var){
+    private function traceVariable(Expr\Variable $var){
         $name = $var->name;
         if($name instanceof Expr){
             $name = self::UNRESOLVED_VARIABLE_KEY;
@@ -232,7 +232,7 @@ class FunctionAnalyser{
         }
     }
     
-    private function isFunctionParameter(Variable $var){
+    private function isFunctionParameter(Expr\Variable $var){
         $name = $var->name;
         $filter = function($item) use ($name){
             return ($item->name == $name);
@@ -246,7 +246,7 @@ class FunctionAnalyser{
                     self::SANITISATION_KEY => $sanitising);
     }
     
-    private function getVariableDetails(Variable $var){
+    private function getVariableDetails(Expr\Variable $var){
         $name = $var->name;
         if(array_key_exists($name, $this->variables)){
             return $this->variables[$name];
