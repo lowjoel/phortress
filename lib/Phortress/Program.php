@@ -93,7 +93,7 @@ class Program {
 
 			// Parse requires
 			$includer = new \PhpParser\NodeTraverser;
-			$includeResolver = new IncludeResolver;
+			$includeResolver = new IncludeResolver($parser);
 			$includer->addVisitor($includeResolver);
 			$parseTree = $includer->traverse(array_slice($statements, 0));
 

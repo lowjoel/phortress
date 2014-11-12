@@ -7,12 +7,19 @@ use PhpParser\Node\Expr;
 
 class IncludeResolver extends NodeVisitorAbstract {
 	/**
+	 * The parser to use for parsing includes.
+	 * @var Parser
+	 */
+	private $parser;
+
+	/**
 	 * The files and the statements including them.
 	 * @var array(String => \PhpParser\Node[])
 	 */
 	private $files;
 
-	public function __construct(&$files = array()) {
+	public function __construct(Parser $parser, &$files = array()) {
+		$this->parser = $parser;
 		$this->files = &$files;
 	}
 
@@ -73,6 +80,18 @@ class IncludeResolver extends NodeVisitorAbstract {
 			return realpath($path);
 		}
 		assert(false, 'Include path not currently supported');
+	}
+
+	/**
+	 * Parses the given file, and visits all nodes in the file and includes them too.
+	 *
+	 * @param string $path The path to the file to parse.
+	 * @return \PhpParser\Node[] The parse tree for the file, with all the includes expanded.
+	 */
+	private function parse($path) {
+		$includer = new \PhpParser\NodeTraverser;
+		$includer->addVisitor($this);
+		return $includer->traverse($this->parser->parseFile($path));
 	}
 
 	/**
