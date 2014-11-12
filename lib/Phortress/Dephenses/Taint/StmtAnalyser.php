@@ -10,8 +10,12 @@ use PhpParser\Node\Expr;
  * @author naomileow
  */
 class StmtAnalyser {
-  
-    public static function reduce(){
+    /**
+     * Runs the analyser on the parse tree.
+     *
+     * @param \PhpParser\Node[] $parseTree
+     */
+    public static function reduce(array $parseTree){
         
     }
     

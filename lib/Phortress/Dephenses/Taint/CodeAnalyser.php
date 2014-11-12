@@ -10,18 +10,15 @@ namespace Phortress\Dephenses\Taint;
 class CodeAnalyser {
     private $parseTree;
     
-    private $warnings;
+    private $warnings = array();
     
     function __construct($tree) {
         $this->parseTree = $tree;
     }
     
-    private function analyse(){
-        if(!isset($this->warnings)){
-            $this->warnings = array();
-            foreach($this->parseTree as $statement){
-                
-            }
-        }
+    public function analyse(){
+        StmtAnalyser::reduce($this->parseTree);
+
+        return array();
     }
 }

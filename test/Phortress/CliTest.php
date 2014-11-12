@@ -34,4 +34,9 @@ class CliTest extends \PHPUnit_Framework_TestCase {
 				new Error("Test", $parser->parse('<?php $x = 3;')[0])
 			));
 	}
+
+	public function testCheck() {
+		$this->cli->parseOptions(array('f' => __DIR__ . '/Fixture/basic_program_test.php'));
+		$this->cli->check();
+	}
 }

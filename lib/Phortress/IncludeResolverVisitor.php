@@ -1,6 +1,7 @@
 <?php
 namespace Phortress;
 
+use Phortress\Exception\IOException;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
@@ -94,7 +95,11 @@ class IncludeResolverVisitor extends NodeVisitorAbstract {
 	 */
 	private function resolveIncludePath($path) {
 		if (self::ignoresIncludePath($path)) {
-			return realpath($path);
+			$realPath = realpath($path);
+			if ($realPath === false) {
+				throw new IOException($path);
+			}
+			return $realPath;
 		} else {
 			return assert(false, 'Include path not currently supported');
 		}
