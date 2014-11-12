@@ -1,5 +1,6 @@
 <?php
 namespace Phortress;
+use Phortress\Exception\IOException;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
@@ -90,10 +91,13 @@ class Program {
 	 * input source.
 	 */
 	private static function parseFile($file) {
-		$file = realpath($file);
+		$realfile = realpath($file);
+		if ($realfile === false) {
+			throw new IOException($file);
+		}
 		$parser = new Parser();
 		try {
-			$statements = $parser->parseFile($file);
+			$statements = $parser->parseFile($realfile);
 
 			// Parse requires
 			$includer = new NodeTraverser;
@@ -108,7 +112,7 @@ class Program {
 
 			// Merge all the raw statements
 			$files = array(
-				$file => $statements
+				$realfile => $statements
 			);
 			$files = array_merge($files, $includeResolver->getFiles());
 
