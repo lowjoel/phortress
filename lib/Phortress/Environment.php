@@ -90,6 +90,8 @@ abstract class Environment {
 
 	/**
 	 * Constructs a new, empty environment.
+	 *
+	 * @param string $name The name of the environment.
 	 */
 	protected function __construct($name) {
 		$this->name = $name;
@@ -247,7 +249,7 @@ abstract class Environment {
 	/**
 	 * Checks if the given symbol is absolutely qualified.
 	 *
-	 * @param $symbol The name of the symbol.
+	 * @param string $symbol The name of the symbol.
 	 * @return bool
 	 */
 	protected static function isAbsolutelyQualified($symbol) {
@@ -257,7 +259,7 @@ abstract class Environment {
 	/**
 	 * Checks if the given symbol is relatively qualfied.
 	 *
-	 * @param $symbol The name of the symbol.
+	 * @param string $symbol The name of the symbol.
 	 * @return bool
 	 */
 	protected static function isRelativelyQualified($symbol) {

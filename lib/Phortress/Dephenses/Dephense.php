@@ -37,6 +37,7 @@ abstract class Dephense {
     /**
      * Checks if the given class name is a Dephense.
      * @param $className
+     * @return bool True if the class is a Dephense.
      */
     private static function isDephense($className) {
         try {
