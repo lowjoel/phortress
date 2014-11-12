@@ -84,7 +84,7 @@ abstract class Environment {
 	 *
 	 * Remember that all variables are prefixed with $.
 	 *
-	 * @var array(String => AbstractNode)
+	 * @var array(String => \PhpParser\Node)
 	 */
 	protected $variables = array();
 
@@ -147,7 +147,7 @@ abstract class Environment {
 	 *
 	 * @param string $className The name of a class to resolve. This can either
 	 * be fully qualified, or relatively qualified.
-	 * @return AbstractNode
+	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the class has not been declared.
 	 */
 	public function resolveClass($className) {
@@ -159,7 +159,7 @@ abstract class Environment {
 	 *
 	 * @param string $functionName The name of a function to resolve. This can
 	 * either be fully qualified, or relatively qualified.
-	 * @return AbstractNode
+	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the function has not been
 	 * declared.
 	 */
@@ -171,7 +171,7 @@ abstract class Environment {
 	 * Resolves the declaration of a variable.
 	 *
 	 * @param string $variableName The name of a variable to resolve.
-	 * @return AbstractNode
+	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the variable has not been
 	 * declared.
 	 */
@@ -207,7 +207,7 @@ abstract class Environment {
 	 *
 	 * @param string $constantName The name of a constant to resolve. This can
 	 * either be fully qualified, or relatively qualified.
-	 * @return AbstractNode
+	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the constant has not been
 	 * declared.
 	 */

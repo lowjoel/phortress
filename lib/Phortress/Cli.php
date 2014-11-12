@@ -1,6 +1,9 @@
 <?php
 namespace Phortress;
 
+use \Colors\Color;
+use \Phortress\Dephenses\Error;
+
 /**
  * Manages running Phortress from the command line.
  *
@@ -26,7 +29,7 @@ class Cli {
 		$options = getopt(self::GETOPT_STRING);
 		self::parseOptions($options);
 
-		return self::execute();
+		return self::check();
 	}
 
 	/**
@@ -47,9 +50,9 @@ class Cli {
 	 *
 	 * @return int The exit code of the program.
 	 */
-	private static function execute() {
+	private static function check() {
 		foreach (self::$files as $file) {
-			self::executeProgram($file);
+			self::checkProgram($file);
 		}
 
 		return 0;
@@ -59,12 +62,35 @@ class Cli {
 	 * Starts parsing the given PHP source file as the entry point to a program.
 	 *
 	 * @param string $file The path to the file to treat as the entry point.
-	 * @return array A tuple containing the program representing the file.
 	 */
-	private static function executeProgram($file) {
+	private static function checkProgram($file) {
 		$program = new Program($file);
 		$program->parse();
-		$program->verify(null);
-		return array($program);
+		$result = $program->verify(null);
+
+		self::printResults($result);
+	}
+
+	/**
+	 * Prints the errors found in the Dephenses.
+	 *
+	 * @param Dephenses\Message[] $results
+	 */
+	private static function printResults(array $results) {
+		$color = new Color();
+		foreach ($results as $result) {
+			if ($result instanceof Error) {
+				echo $color('[Error]   ')->red;
+			} else {
+				echo '[Message] ';
+			}
+
+			echo $result->getMessage();
+			echo ' at ';
+			echo $color(sprintf('%sline %d',
+					empty($result->getNode()->file) ? '' : $result->getNode()->file . ' ',
+					$result->getNode()->getLine()))->yellow;
+			echo PHP_EOL;
+		}
 	}
 }

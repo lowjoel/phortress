@@ -29,7 +29,7 @@ class Program {
 	/**
 	 * The parse tree for the entire program.
 	 *
-	 * @var AbstractNode[]
+	 * @var \PhpParser\Node[]
 	 */
 	private $parseTree;
 
@@ -87,9 +87,9 @@ class Program {
 	 */
 	private static function parseFile($file) {
 		$file = realpath($file);
-		$parser = new Parser($file);
+		$parser = new Parser();
 		try {
-			$statements = $parser->parse(file_get_contents($file));
+			$statements = $parser->parseFile($file);
 
 			// Convert to fully qualified names
 			$traverser = new \PhpParser\NodeTraverser;
@@ -120,7 +120,7 @@ class Program {
 	 *
 	 * @param \PhpParser\Node[] $statements The statements comprising the
 	 * program.
-	 * @return AbstractNode
+	 * @return \PhpParser\Node[]
 	 */
 	private function addEnvironment(array $statements) {
 		$traverser = new \PhpParser\NodeTraverser;
@@ -132,9 +132,20 @@ class Program {
 	/**
 	 * Verifies the program using the given Dephenses.
 	 *
-	 * @param string[] $dephenses The Dephenses to execute, or null to execute all.
+	 * @param Dephenses\Dephense[] $dephenses The Dephenses to execute, or null to execute all.
+	 * @return Dephenses\Message[] The messages associated with running the dephenses on the
+	 *                             given file.
 	 */
 	public function verify(array $dephenses = null) {
+		if (is_null($dephenses)) {
+			$dephenses = Dephense::getAll();
+		}
 
+		$errors = array();
+		foreach ($dephenses as $dephense) {
+			$errors += $dephense->run($this->parseTree);
+		}
+
+		return $errors;
 	}
-} 
+}
