@@ -14,9 +14,6 @@ class FunctionEnvironment extends Environment {
 	}
 
 	public function createChild() {
-		$environment = new FunctionEnvironment($this->name);
-		$environment->parent = $this;
-
-		return $environment;
+		return new FunctionEnvironment($this->name, $this);
 	}
 } 

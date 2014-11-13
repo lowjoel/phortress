@@ -24,6 +24,11 @@ class NamespaceEnvironment extends Environment {
 	 */
 	protected $classes = array();
 
+	public function __construct($name, Environment $parent) {
+		parent::__construct($name);
+		$this->parent = $parent;
+	}
+
 	public function resolveNamespace(Name $namespaceName) {
 		if ($namespaceName === null) {
 			return $this;
@@ -74,11 +79,8 @@ class NamespaceEnvironment extends Environment {
 	 * @return NamespaceEnvironment The new namespace environment, with the parent properly set.
 	 */
 	public function createNamespace(Namespace_ $namespaceName) {
-		$result = new NamespaceEnvironment(sprintf('%s\%s',
-			$this->name, $namespaceName));
-		$result->parent = $this;
-
-		return $result;
+		return new NamespaceEnvironment(sprintf('%s\%s',
+			$this->name, $namespaceName), $this);
 	}
 
 	/**
@@ -89,8 +91,7 @@ class NamespaceEnvironment extends Environment {
 	 */
 	public function createClass(Class_ $class) {
 		$this->classes[$class->name] = $class;
-		$result = new ClassEnvironment(sprintf('%s\%s', $this->name, $class->name));
-		$result->parent = $this;
+		$result = new ClassEnvironment(sprintf('%s\%s', $this->name, $class->name), $this);
 		return $result;
 	}
 }
