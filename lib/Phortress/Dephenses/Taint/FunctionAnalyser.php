@@ -1,6 +1,7 @@
 <?php
 namespace Phortress\Dephenses\Taint;
 
+use Phortress\Exception\UnboundIdentifierException;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
@@ -224,11 +225,10 @@ class FunctionAnalyser{
     
     private function mergeVariables($vars){
         $merged = array();
-        foreach($vars as $var){
+        foreach($vars as $var_name => $var){
             if(empty($var)){
                 continue;
             }
-            $var_name = key($var);
             if(!array_key_exists($var_name, $merged)){
                 $merged[$var_name] = $var;
             }else{
@@ -319,9 +319,16 @@ class FunctionAnalyser{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];
             }else{
-                $assign = $var->environment->resolveVariable($name);
+	            try{
+		            $assign = $var->environment->resolveVariable($name);
+	            }catch(UnboundIdentifierException $e){
+					//TODO:
+	            }
+
                 $var_arr = $this->constructVariableDetails($var);
-                $var_arr[self::VARIABLE_DEF] = $assign;
+	            if(!empty($assign)) {
+		            $var_arr[self::VARIABLE_DEF] = $assign;
+	            }
                 $this->variables[$name] = $var_arr;
                 return $var_arr;
             }
