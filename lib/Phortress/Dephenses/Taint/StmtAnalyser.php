@@ -18,9 +18,9 @@ class StmtAnalyser {
      */
     public static function reduce(Node $node){
         if($node instanceof Expr\Assign){
-            $this->applyAssignmentRule($node);
+            self::applyAssignmentRule($node);
         }else if($node instanceof Expr\AssignOp){
-            $this->applyAssignmentOpRule($node);
+            self::applyAssignmentOpRule($node);
         }
     }
     
