@@ -15,7 +15,7 @@ class GlobalEnvironment extends NamespaceEnvironment {
 	private $superglobals;
 
 	public function __construct() {
-		parent::__construct('Global');
+		parent::__construct('Global', null);
 
 		$this->superglobals = array(
 			'GLOBALS' => &$this->variables,

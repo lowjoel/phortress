@@ -24,11 +24,6 @@ class NamespaceEnvironment extends Environment {
 	 */
 	protected $classes = array();
 
-	public function __construct($name, Environment $parent) {
-		parent::__construct($name);
-		$this->parent = $parent;
-	}
-
 	public function resolveNamespace(Name $namespaceName) {
 		if ($namespaceName === null) {
 			return $this;

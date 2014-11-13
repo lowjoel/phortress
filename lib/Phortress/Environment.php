@@ -93,9 +93,11 @@ abstract class Environment {
 	 * Constructs a new, empty environment.
 	 *
 	 * @param string $name The name of the environment.
+	 * @param Environment $parent The parent environment.
 	 */
-	protected function __construct($name) {
+	protected function __construct($name, Environment $parent = null) {
 		$this->name = $name;
+		$this->parent = $parent;
 	}
 
 	/**

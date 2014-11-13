@@ -3,8 +3,7 @@ namespace Phortress;
 
 class FunctionEnvironment extends Environment {
 	public function __construct($name, Environment $parent) {
-		parent::__construct($name);
-		$this->parent = $parent;
+		parent::__construct($name, $parent);
 		self::copyValueReferences($parent->getGlobal()->getSuperglobals(),
 			$this->variables);
 	}

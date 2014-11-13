@@ -16,9 +16,10 @@ class ClassInstanceEnvironment extends Environment {
 	 * @param ClassEnvironment $classEnvironment The class environment for instances of this class.
 	 */
 	public function __construct($name, $classEnvironment) {
-		parent::__construct($name);
+		parent::__construct($name, $classEnvironment);
 		$this->classEnvironment = $classEnvironment;
 	}
+
 	public function shouldResolveVariablesInParentEnvironment() {
 		// Only ourself.
 		return false;
