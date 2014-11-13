@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tests" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" singleton="true">
+    <TestRunner scope="XML" />
+    <RunnerSettings RunnerId="PhpRunner" />
+    <RunnerSettings RunnerId="PhpUnitDebugRunner" />
+    <ConfigurationWrapper RunnerId="PhpRunner" />
+    <ConfigurationWrapper RunnerId="PhpUnitDebugRunner" />
+    <method />
+  </configuration>
+</component>
