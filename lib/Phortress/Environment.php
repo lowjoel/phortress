@@ -189,8 +189,8 @@ abstract class Environment {
 
 		// We can only check our own local environment. We cannot pass a
 		// function environment and check our namespace for variables.
-		} else if ($this->shouldResolveVariablesInParentEnvironment() &&
-			!empty($this->getParent())) {
+		} else if (!empty($this->getParent()) &&
+			$this->shouldResolveVariablesInParentEnvironment()) {
 			return $this->getParent()->resolveVariable($variableName);
 		} else {
 			throw new UnboundIdentifierException($variableName, $this);
