@@ -22,10 +22,12 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->file1 = realpath(__DIR__ . '/../Fixture/taint_test_2.php');
 		$this->file2 = realpath(__DIR__ . '/../Fixture/taint_test_3.php');
 		$this->file3 = realpath(__DIR__ . '/../Fixture/taint_test_4.php');
+		$this->file4 = realpath(__DIR__ . '/../Fixture/taint_test_5.php');
 		$this->program = loadGlassBoxProgram($this->file);
 		$this->program1 = loadGlassBoxProgram($this->file1);
 		$this->program2 = loadGlassBoxProgram($this->file2);
 		$this->program3 = loadGlassBoxProgram($this->file3);
+		$this->program4 = loadGlassBoxProgram($this->file4);
 	}
 
 	public function testTaint() {
@@ -59,9 +61,20 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 	public function testTaintedParamsWithTernaryOps(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program3->parseTree);
-		$taint1 = $this->program3->parseTree[2]->var->taint;
+//		$taint1 = $this->program3->parseTree[2]->var->taint;
+//		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
+//		$taint2 = $this->program3->parseTree[3]->var->taint;
+//		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
+//		$taint3 = $this->program3->parseTree[4]->var->taint;
+//		$this->assertEquals(Taint\Annotation::TAINTED, $taint3);
+	}
+
+	public function testTaintedParamsWithTernarySingleReturn(){
+		$taintDephense = new Taint();
+		$taintDephense->run($this->program4->parseTree);
+		$taint1 = $this->program4->parseTree[2]->var->taint;
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
-		$taint2 = $this->program3->parseTree[3]->var->taint;
+		$taint2 = $this->program4->parseTree[3]->var->taint;
 		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
 }

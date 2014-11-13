@@ -10,3 +10,4 @@ function func($a, $b) {
 
 $a = func($_GET['tainted'], 5);
 $b = func(5, 5);
+$a = func(5, $_GET['tainted']);
