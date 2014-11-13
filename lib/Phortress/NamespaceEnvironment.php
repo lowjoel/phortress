@@ -2,6 +2,7 @@
 namespace Phortress;
 
 use Phortress\Exception\UnboundIdentifierException;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
 
 class NamespaceEnvironment extends Environment {
@@ -31,7 +32,7 @@ class NamespaceEnvironment extends Environment {
 	 */
 	public function resolveNamespace($namespaceName) {
 		if ($namespaceName === null) {
-			return self;
+			return $this;
 		} else if (self::isAbsolutelyQualified($namespaceName)) {
 			return $this->getGlobal()->resolveNamespace($namespaceName);
 		} else if (self::isUnqualified($namespaceName)) {
@@ -80,18 +81,28 @@ class NamespaceEnvironment extends Environment {
 	 * Extracts the first namespace component from the given symbol, and returns
 	 * the namespace and the tail of the symbol.
 	 *
-	 * @param string $symbol
+	 * @param Name|string $symbol
 	 * @return String[]
 	 */
 	private static function extractNamespaceComponent($symbol) {
 		assert(!self::isAbsolutelyQualified($symbol));
-		$firstSlash = strpos($symbol, '\\');
-		if ($firstSlash === false) {
-			return array(null, $symbol);
+
+		if (is_string($symbol)) {
+			$firstSlash = strpos($symbol, '\\');
+			if ($firstSlash === false) {
+				return array(null, $symbol);
+			} else {
+				return array(
+					substr($symbol, 0, $firstSlash),
+					substr($symbol, $firstSlash + 1)
+				);
+			}
 		} else {
 			return array(
-				substr($symbol, 0, $firstSlash),
-				substr($symbol, $firstSlash + 1)
+				count($symbol->parts) === 1 ?
+					null :
+					new Name(array_slice($symbol->parts, 1), $symbol->getAttributes()),
+				$symbol->parts[0]
 			);
 		}
 	}
