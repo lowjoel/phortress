@@ -2,9 +2,9 @@
 namespace Phortress;
 
 use PhpParser\Node\Name;
-use PhpParser\Node\Scalar\MagicConst\Namespace_;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Namespace_;
 
 /**
  * Namespace Continuation Environments: these are continuation of namespaces

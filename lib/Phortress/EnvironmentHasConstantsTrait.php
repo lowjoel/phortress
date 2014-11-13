@@ -2,6 +2,7 @@
 namespace Phortress;
 
 use PhpParser\Node\Const_;
+use PhpParser\Node\Name;
 
 trait EnvironmentHasConstantsTrait {
 	/**
