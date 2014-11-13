@@ -319,13 +319,20 @@ abstract class Environment {
 	 */
 	protected static function extractNamespaceComponent(Name $symbol) {
 		assert(!self::isAbsolutelyQualified($symbol));
+		$symbolParts = count($symbol->parts);
+		assert($symbolParts > 0);
 
-		return array(
-			count($symbol->parts) === 1 ?
-				null :
+		if ($symbolParts === 1) {
+			return array(
+				null,
+				new Name($symbol->parts[0], $symbol->getAttributes())
+			);
+		} else {
+			return array(
 				new Name($symbol->parts[0], $symbol->getAttributes()),
-			new Name\Relative(array_slice($symbol->parts, 1), $symbol->getAttributes())
-		);
+				new Name\Relative(array_slice($symbol->parts, 1), $symbol->getAttributes())
+			);
+		}
 	}
 
 	/**
