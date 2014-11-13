@@ -19,11 +19,37 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 	public function setUp() {
 		// Load a program
 		$this->file = realpath(__DIR__ . '/../Fixture/taint_test.php');
+		$this->file1 = realpath(__DIR__ . '/../Fixture/taint_test_2.php');
+		$this->file2 = realpath(__DIR__ . '/../Fixture/taint_test_3.php');
 		$this->program = loadGlassBoxProgram($this->file);
+		$this->program1 = loadGlassBoxProgram($this->file1);
+		$this->program2 = loadGlassBoxProgram($this->file2);
 	}
 
 	public function testTaint() {
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program->parseTree);
+	}
+
+	public function testTaintedParams(){
+		$taintDephense = new Taint();
+		$taintDephense->run($this->program1->parseTree);
+
+		$taint1 = $this->program1->parseTree[2]->var->taint;
+		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
+		$taint2 = $this->program1->parseTree[3]->var->taint;
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
+
+	}
+
+	public function testTaintedParamsWithBinaryOps(){
+		$taintDephense = new Taint();
+		$taintDephense->run($this->program2->parseTree);
+
+		$taint1 = $this->program2->parseTree[2]->var->taint;
+		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
+		$taint2 = $this->program2->parseTree[3]->var->taint;
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
+
 	}
 }
