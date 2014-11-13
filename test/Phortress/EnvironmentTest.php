@@ -1,6 +1,8 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Name;
+
 class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * The program we will be testing.
@@ -14,7 +16,7 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testCanFindFunction() {
-		$this->assertTrue($this->program->environment->resolveFunction('a')
+		$this->assertTrue($this->program->environment->resolveFunction(new Name('a'))
 			->environment->getParent() instanceof GlobalEnvironment);
 	}
 

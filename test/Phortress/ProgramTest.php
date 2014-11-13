@@ -1,6 +1,8 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Name;
+
 class ProgramTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * The file we loaded the program from.
@@ -36,7 +38,8 @@ class ProgramTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGeneratesEnvironment() {
 		// Check that we can find hello()
-		$function = $this->program->environment->resolveFunction('hello');
+		$function = $this->program->environment->resolveFunction(
+			new Name('hello'));
 		$this->assertEquals('hello', $function->name);
 		$this->assertEquals(0, count($function->params));
 	}
