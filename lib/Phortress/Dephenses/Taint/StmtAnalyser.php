@@ -181,7 +181,7 @@ class StmtAnalyser {
         }
         $env = $array_var->environment;
         if(!empty($env)){
-            return resolveVariableTaintInEnvironment($env, $array_var);
+            return self::resolveVariableTaintInEnvironment($env, $array_var);
         }else{
             self::annotateVariable($array_var, Annotation::UNASSIGNED);
             return Annotation::UNASSIGNED;
