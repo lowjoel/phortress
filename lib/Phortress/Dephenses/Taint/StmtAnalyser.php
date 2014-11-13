@@ -123,7 +123,6 @@ class StmtAnalyser {
             return max($taint_values);
         }else if($exp instanceof Expr\ArrayDimFetch){
             $taint = self::resolveArrayFieldTaint($exp);
-//            assert(!empty($taint));
             return $taint;
         }else if($exp instanceof Expr\PropertyFetch){
             $var = $exp->var;
@@ -183,13 +182,6 @@ class StmtAnalyser {
             self::annotateVariable($exp, Annotation::TAINTED);
             return Annotation::TAINTED;
         }
-//        $env = $array_var->environment;
-//        if(!empty($env)){
-//            return self::resolveVariableTaintInEnvironment($env, $array_var);
-//        }else{
-//            self::annotateVariable($array_var, Annotation::UNASSIGNED);
-//            return Annotation::UNASSIGNED;
-//        }
         $taint = self::resolveExprTaint($array_var);
         return $taint;
     }
