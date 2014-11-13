@@ -61,6 +61,7 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 				case 'PhpParser\Node\Name':
 				case 'PhpParser\Node\Stmt\PropertyProperty':
 				case 'PhpParser\Node\Stmt\Echo_':
+				case 'PhpParser\Node\Stmt\Return_':
 					break;
 				default:
 					printf('Unknown node type: %s'."\n", $className);
