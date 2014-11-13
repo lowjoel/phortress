@@ -189,9 +189,9 @@ abstract class Environment {
 		if (array_key_exists($variableName, $this->variables)) {
 			$result = $this->variables[$variableName];
 			if ($result === self::UNSET_) {
-                            throw new UnboundIdentifierException($variableName, $this);
+				throw new UnboundIdentifierException($variableName, $this);
 			} else {
-                            return $result;
+				return $result;
 			}
 
 		// We can only check our own local environment. We cannot pass a
