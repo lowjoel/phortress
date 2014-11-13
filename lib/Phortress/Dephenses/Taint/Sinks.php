@@ -1,6 +1,6 @@
 <?php
 /**
- * Description of Sinks
+ * List of Sink Functions adapted from RIPS
  *
  * @author naomileow
  */

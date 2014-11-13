@@ -118,13 +118,64 @@ class FunctionAnalyser{
     
     private function analyseStatementDependency(Stmt\Return_ $stmt){
         $exp = $stmt->expr;
-        $trace = array();
-        if($exp instanceof Expr){
-            $trace = $this->traceExpressionVariables($exp);
-        }
-        return $trace;
+
+        return $this->traceItem($exp);
     }
-    
+
+	private function traceStatementVariables(Stmt $stmt){
+		if($stmt instanceof Stmt\If_){
+			var_dump("processing if");
+			return $this->traceIfStatement($stmt);
+		}else if($stmt instanceof Stmt\Else_){
+			$items = $stmt->stmts;
+			return $this->traceArrayOfItems($items);
+		}else if($stmt instanceof Stmt\ElseIf_){
+			$items = $stmt->stmts;
+			return $this->traceArrayOfItems($items);
+		}else if($stmt instanceof Stmt\Do_){
+			$items = $stmt->stmts;
+			return $this->traceArrayOfItems($items);
+		}else if($stmt instanceof Stmt\For_){
+			$items = $stmt->stmts;
+			return $this->traceArrayOfItems($items);
+		}else if($stmt instanceof Stmt\Foreach_){
+			$items = $stmt->stmts;
+			return $this->traceArrayOfItems($items);
+		}else if($stmt instanceof Stmt\While_){
+			$items = $stmt->stmts;
+			return $this->traceArrayOfItems($items);
+		}else{
+			return array();
+		}
+	}
+
+	private function traceIfStatement(Stmt\If_$stmt){
+		$if_items = $stmt->stmts;
+		$if_res = $this->traceArrayOfItems($if_items);
+		$else = $stmt->else;
+		$else_res = $this->traceStatementVariables($else);
+		return VariableInfo::mergeVariables(array($if_res, $else_res));
+	}
+
+	private function traceArrayOfItems($arr){
+		$result = array();
+		foreach($arr as $item){
+			$trace = $this->traceItem($result);
+			$result[] = $trace;
+		}
+		return TaintInfo::mergeVariables($result);
+	}
+
+	private function traceItem(Node $exp){
+		$trace = array();
+		if($exp instanceof Expr){
+			$trace = $this->traceExpressionVariables($exp);
+		}else if($exp instanceof Stmt){
+			$trace = $this->traceStatementVariables($exp);
+		}
+		return $trace;
+	}
+
     private function traceExpressionVariables(Expr $exp){
         if($exp instanceof Node\Scalar){
 	        return array();
@@ -197,7 +248,11 @@ class FunctionAnalyser{
     }
     
     private  function traceMethodCall(Expr\MethodCall $exp){
-        
+        $var = $exp->var;
+	    $name = $exp->name;
+	    $args = $exp->args;
+
+	    $class_obj = StmtAnalyser::getVariableTerminalReference($var);
     }
     
      private function traceTernary(Expr\Ternary $exp){
@@ -225,7 +280,7 @@ class FunctionAnalyser{
 	private function traceAndMergeTwoExpr(Expr $left, Expr $right){
 		$left_var = $this->traceExpressionVariables($left);
 		$right_var = $this->traceExpressionVariables($right);
-		return VariableInfo::mergeVariables(array_merge($left_var, $right_var));
+		return VariableInfo::mergeVariables(array($left_var, $right_var));
 	}
 
     private function traceVariable(Expr\Variable $var){
@@ -279,7 +334,7 @@ class FunctionAnalyser{
                 return $filter_res;
             }else{
                 $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
-                $unresolved_vars[] = $varInfo;
+                $this->unresolved_variables[] = $varInfo;
                 return $varInfo;
             }
         }else{

@@ -76,17 +76,21 @@ class VariableInfo {
 		return array_intersect($sanitising1, $sanitising2);
 	}
 
+
 	public static function mergeVariables($vars){
 		$merged = array();
-		foreach($vars as $var_name => $varInfo){
-			if(empty($varInfo)){
-				continue;
-			}
-			if(!array_key_exists($var_name, $merged)){
-				$merged[$var_name] = $varInfo;
-			}else{
-				$existing = $merged[$var_name];
-				$merged[$var_name] = self::mergeVariableRecords($existing, $varInfo);
+		//This takes in an array of the $item is of the form: array(array(var name => VariableInfo))
+		foreach($vars as $item){
+			foreach($item as $var_name => $varInfo){
+				if(empty($varInfo)){
+					continue;
+				}
+				if(!array_key_exists($var_name, $merged)){
+					$merged[$var_name] = $varInfo;
+				}else{
+					$existing = $merged[$var_name];
+					$merged[$var_name] = self::mergeVariableRecords($existing, $varInfo);
+				}
 			}
 		}
 		return $merged;
