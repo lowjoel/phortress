@@ -7,11 +7,8 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
 
 class FunctionAnalyser{
-    const TAINT_KEY = "taint";
-    const SANITISATION_KEY = "sanfuncs";
-    const VARIABLE_KEY = "variable";
+
     const UNRESOLVED_VARIABLE_KEY = "unresolved";
-    const VARIABLE_DEF = "def";
     /**
      * Return statements and the variables they are dependent on.
      * array(Stmt => array(variable name => array(Variable Info, as stored in the $variables array))
@@ -75,18 +72,19 @@ class FunctionAnalyser{
         }
         return $result;
     }
-    
+
     private function analyseArgumentsEffectOnReturn($args, $return){
         $taint_mappings = $this->getParametersToTaintMappings($args);
         $sanitising_funcs = array();
         $taint_val = Annotation::UNASSIGNED;
         foreach($return as $var_name => $var_info){
-	        if(!empty($var_info)){
-		        $sanitising_funcs = array_merge($sanitising_funcs, $var_info[self::SANITISATION_KEY]);
-	        }
 
-            if(!empty($var_info[self::TAINT_KEY])){
-                $taint_val = max($taint_val, $var_info[self::TAINT_KEY]);
+	        $sanitising_funcs = array_merge($sanitising_funcs,
+			        $var_info->getSanitisingFunctions());
+
+
+            if($var_info->getTaint()){
+                $taint_val = max($taint_val, $var_info->getTaint());
             }
             if(array_key_exists($var_name, $taint_mappings)){
                 $taint_val = max($taint_val, $taint_mappings[$var_name]);
@@ -128,11 +126,11 @@ class FunctionAnalyser{
     
     private function traceExpressionVariables(Expr $exp){
         if($exp instanceof Node\Scalar){
-            return array();
+            return new VariableInfo();
         }else if ($exp instanceof Expr\Variable) {
             return $this->traceVariable($exp);
         }else if(($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
-            return array();
+            return new VariableInfo();
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
             return $this->traceVariable($var);
@@ -163,7 +161,7 @@ class FunctionAnalyser{
             return $this->resolveTernaryTrace($exp->expr);
         }else{
             //Other expressions we will not handle.
-            return array();
+            return new VariableInfo();
         }
     }
     
@@ -178,7 +176,7 @@ class FunctionAnalyser{
             
             $traced_args[] = $this->addSanitisingFunctionInfo($traced, $func_name);
         }
-        return $this->mergeVariables($traced_args);
+        return VariableInfo::mergeVariables($traced_args);
     }
     
     private function addSanitisingFunctionInfo($var_infolist, $func_name){
@@ -201,11 +199,12 @@ class FunctionAnalyser{
     }
     
      private function resolveTernaryTrace(Expr\Ternary $exp){
+	     //TODO:
         $if = $exp->if;
         $else = $exp->else;
         $if_trace = $this->traceExpressionVariables($if);
         $else_trace = $this->traceExpressionVariables($else);
-        return $this->mergeTaintValues($if_trace, $else_trace);
+        return TaintInfo::mergeTaintValues($if_trace, $else_trace);
     }
     
     private function traceVariablesInArray(Expr\Array_ $arr){
@@ -215,7 +214,7 @@ class FunctionAnalyser{
             $exp = $item->value;
             $var_traces[] = $this->traceExpressionVariables($exp);
         }
-        return $this->mergeVariables($var_traces);
+        return TaintInfo::mergeVariables($var_traces);
     }
     
     private function traceBinaryOp(Expr\BinaryOp $exp){
@@ -223,43 +222,9 @@ class FunctionAnalyser{
         $right = $exp->right;
         $left_var = $this->traceVariable($left);
         $right_var = $this->traceVariable($right);
-        return $this->mergeVariables(array($left_var, $right_var));
+        return VariableInfo::mergeVariables(array($left_var, $right_var));
     }
-    
-    private function mergeVariables($vars){
-        $merged = array();
-        foreach($vars as $var_name => $var){
-            if(empty($var)){
-                continue;
-            }
-            if(!array_key_exists($var_name, $merged)){
-                $merged[$var_name] = $var;
-            }else{
-                $existing = $merged[$var_name];
-                $merged[$var_name] = $this->mergeVariableRecords($existing, $var);
-            }
-        }
-	    return $merged;
-    }
-    
-    private function mergeVariableRecords($var1, $var2){
-        $taint = $this->mergeTaintValues($var1, $var2);
-        $san = $this->mergeSanitisingFunctions($var1, $var2);
-        $var_arr = $this->constructVariableDetails($var1[self::VARIABLE_KEY], $taint, $san);
-        $var_arr[self::VARIABLE_DEF] = $var2[self::VARIABLE_DEF];
-        return $var_arr;
-    }
-    
-    private function mergeTaintValues($var1, $var2){
-        return max($var1[self::TAINT_KEY], $var2[self::TAINT_KEY]);
-    }
-    
-    private function mergeSanitisingFunctions($var1, $var2){
-        $sanitising1 = $var1[self::SANITISATION_KEY];
-        $sanitising2 = $var2[self::SANITISATION_KEY];
-        return array_intersect($sanitising1, $sanitising2);
-    }
-    
+
     private function traceVariable(Expr\Variable $var){
         $name = $var->name;
         if($name instanceof Expr){
@@ -269,12 +234,12 @@ class FunctionAnalyser{
         $details_ret = array($name => $var_details);
         
         if(InputSources::isInputVariable($var)){
-            $var_details[self::TAINT_KEY] = Annotation::TAINTED;
+            $var_details->setTaint(Annotation::TAINTED);
             return $details_ret;
         }
         
         if(!$this->isFunctionParameter($var)){
-            $assign = $var_details[self::VARIABLE_DEF];
+            $assign = $var_details->getDefinition();
             if(!empty($assign)){
                 $ref_expr = $assign->expr;
                 return $this->traceExpressionVariables($ref_expr);
@@ -296,12 +261,6 @@ class FunctionAnalyser{
         return !empty($matches);
     }
     
-    private function constructVariableDetails(Expr\Variable $var, $taint = Annotation::UNASSIGNED, $sanitising = array()){
-        return array(self::VARIABLE_KEY => $var,
-                    self::TAINT_KEY => $taint,
-                    self::SANITISATION_KEY => $sanitising);
-    }
-    
     private function getVariableDetails(Expr\Variable $var){
         $name = $var->name;
         if(array_key_exists($name, $this->variables)){
@@ -309,32 +268,26 @@ class FunctionAnalyser{
         }else if($name instanceof Expr){
             $unresolved_vars = $this->variables[self::UNRESOLVED_VARIABLE_KEY];
             $filter_matching = function($item) use ($var){
-                return $item[self::VARIABLE_KEY] == $var;
+                return $item->getVariable() == $var;
             };
             $filter_res = array_filter($unresolved_vars, $filter_matching);
             if(!empty($filter_res)){
                 return $filter_res;
             }else{
-                $var_arr = $this->constructVariableDetails($var, Annotation::UNKNOWN);
-                $unresolved_vars[] = $var_arr;
-                return $var_arr;
+	            //TODO:
+                $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
+                $unresolved_vars[] = $varInfo;
+                return $varInfo;
             }            
         }else{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];
             }else{
-	            try{
-		            $assign = $var->environment->resolveVariable($name);
-	            }catch(UnboundIdentifierException $e){
-					//TODO:
-	            }
-
-                $var_arr = $this->constructVariableDetails($var);
-	            if(!empty($assign)) {
-		            $var_arr[self::VARIABLE_DEF] = $assign;
-	            }
-                $this->variables[$name] = $var_arr;
-                return $var_arr;
+	            $assign = $var->environment->resolveVariable($name);
+                $varInfo = new VariableInfo($var);
+	            $varInfo->setDefinition($assign);
+                $this->variables[$name] = $varInfo;
+                return $varInfo;
             }
         }
     }
