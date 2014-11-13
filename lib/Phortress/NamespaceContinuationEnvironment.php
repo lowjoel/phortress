@@ -14,31 +14,31 @@ use PhpParser\Node\Stmt\Namespace_;
  */
 class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 	public function createFunction(Stmt $function) {
-		return $this->getNamespaceEnvironment()->createFunction($function);
+		return $this->getNamespace()->createFunction($function);
 	}
 
 	public function createClass(Class_ $class) {
-		return $this->getNamespaceEnvironment()->createClass($class);
+		return $this->getNamespace()->createClass($class);
 	}
 
 	public function createNamespace(Namespace_ $namespace) {
-		return $this->getNamespaceEnvironment()->createNamespace($namespace);
+		return $this->getNamespace()->createNamespace($namespace);
 	}
 
 	public function resolveFunction(Name $functionName) {
-		return $this->getNamespaceEnvironment()->resolveFunction($functionName);
+		return $this->getNamespace()->resolveFunction($functionName);
 	}
 
 	public function resolveClass(Name $className) {
-		return $this->getNamespaceEnvironment()->resolveClass($className);
+		return $this->getNamespace()->resolveClass($className);
 	}
 
 	public function resolveNamespace(Name $namespaceName) {
-		return $this->getNamespaceEnvironment()->resolveNamespace($namespaceName);
+		return $this->getNamespace()->resolveNamespace($namespaceName);
 	}
 
 	public function resolveConstant(Name $constantName) {
-		return $this->getNamespaceEnvironment()->resolveConstant($constantName);
+		return $this->getNamespace()->resolveConstant($constantName);
 	}
 
 	/**
@@ -47,7 +47,7 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 	 *
 	 * @return NamespaceEnvironment
 	 */
-	private function getNamespaceEnvironment() {
+	protected function getNamespace() {
 		$parent = $this->getParent();
 		while ($parent && get_class($parent) === '\Phortress\NamespaceContinuationEnvironment') {
 			$parent = $parent->getParent();
