@@ -42,12 +42,10 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 	}
 
 	/**
-	 * Gets the namespace environment for this environment. This is a shorthand
-	 * for defining functions and constants.
-	 *
+	 * @inheritdoc
 	 * @return NamespaceEnvironment
 	 */
-	protected function getNamespace() {
+	public function getNamespace() {
 		$parent = $this->getParent();
 		while ($parent && get_class($parent) === '\Phortress\NamespaceContinuationEnvironment') {
 			$parent = $parent->getParent();
