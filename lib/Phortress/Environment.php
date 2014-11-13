@@ -76,7 +76,7 @@ abstract class Environment {
 	/**
 	 * The name of this environment, mainly for debugging.
 	 *
-	 * @var String
+	 * @var string
 	 */
 	protected $name;
 
@@ -85,7 +85,7 @@ abstract class Environment {
 	 *
 	 * Remember that all variables are prefixed with $.
 	 *
-	 * @var array(String => \PhpParser\Node)
+	 * @var array(string => \PhpParser\Node)
 	 */
 	protected $variables = array();
 

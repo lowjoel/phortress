@@ -7,7 +7,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * The file we loaded the program from.
 	 *
-	 * @var String
+	 * @var string
 	 */
 	private $file;
 

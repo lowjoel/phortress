@@ -20,8 +20,9 @@ class Parser extends \PhpParser\Parser {
 	/**
 	 * Parses the given file. Adds another attribute 'file'.
 	 *
-	 * @param String $file The path to the file.
+	 * @param string $file The path to the file.
 	 * @return \PhpParser\Node[] The parse tree for the given file.
+	 * @throws IOException When the file cannot be opened.
 	 */
 	public function parseFile($file) {
 		if (!is_string($file) || !file_exists($file)) {

@@ -8,7 +8,7 @@ namespace Phortress\Dephenses;
  */
 class Message {
 	/**
-	 * @var String The message to show.
+	 * @var string The message to show.
 	 */
 	protected $message;
 
@@ -18,7 +18,7 @@ class Message {
 	protected $node;
 
 	/**
-	 * @param String $message The message to show.
+	 * @param string $message The message to show.
 	 * @param \PhpParser\Node $node The node which triggered the error.
 	 */
 	protected function __construct($message, $node) {
@@ -29,7 +29,7 @@ class Message {
 	/**
 	 * Gets the message to display.
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getMessage() {
 		return $this->message;

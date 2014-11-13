@@ -16,7 +16,7 @@ class IncludeResolverVisitor extends NodeVisitorAbstract {
 
 	/**
 	 * The files and the statements including them.
-	 * @var array(String => \PhpParser\Node[])
+	 * @var array(string => \PhpParser\Node[])
 	 */
 	private $files;
 
