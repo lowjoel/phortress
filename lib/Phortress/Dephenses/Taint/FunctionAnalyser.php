@@ -69,7 +69,7 @@ class FunctionAnalyser{
      */
     public function analyseFunctionCall($args){
         $result = array(Annotation::UNASSIGNED, array());
-        foreach($this->returnStmts as $return){
+        foreach($this->returnStmts as $line_num => $return){
             $ret_effect = $this->analyseArgumentsEffectOnReturn($args, $return);
             $result = array(max($result[0], $ret_effect[0]), array_merge($result[1], $ret_effect[1]));
         }
@@ -81,7 +81,10 @@ class FunctionAnalyser{
         $sanitising_funcs = array();
         $taint_val = Annotation::UNASSIGNED;
         foreach($return as $var_name => $var_info){
-            $sanitising_funcs = array_merge($sanitising_funcs, $var_info[self::SANITISATION_KEY]);
+	        if(!empty($var_info)){
+		        $sanitising_funcs = array_merge($sanitising_funcs, $var_info[self::SANITISATION_KEY]);
+	        }
+
             if(!empty($var_info[self::TAINT_KEY])){
                 $taint_val = max($taint_val, $var_info[self::TAINT_KEY]);
             }
@@ -236,6 +239,7 @@ class FunctionAnalyser{
                 $merged[$var_name] = $this->mergeVariableRecords($existing, $var);
             }
         }
+	    return $merged;
     }
     
     private function mergeVariableRecords($var1, $var2){
