@@ -70,12 +70,12 @@ class NamespaceEnvironment extends Environment {
 	/**
 	 * Creates a new Child namespace.
 	 *
-	 * @param Namespace_ $namespaceName The name of the namespace. This must be unqualified.
+	 * @param Namespace_ $namespace The name of the namespace. This must be unqualified.
 	 * @return NamespaceEnvironment The new namespace environment, with the parent properly set.
 	 */
-	public function createNamespace(Namespace_ $namespaceName) {
+	public function createNamespace(Namespace_ $namespace) {
 		return new NamespaceEnvironment(sprintf('%s\%s',
-			$this->name, $namespaceName), $this);
+			$this->name, $namespace->name), $this);
 	}
 
 	/**

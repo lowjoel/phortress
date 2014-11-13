@@ -22,3 +22,8 @@ class A {
 }
 
 }
+
+namespace TestNamespace {
+	function A() {
+	}
+}

@@ -52,12 +52,21 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('b', $instanceEnvironment->variables);
 	}
 
-	public function testCanFindClassMethodDefinition(){
+	public function testCanFindClassMethodDefinition() {
 		$classEnvironment = new \TestObject(
 			(new \TestObject($this->program->environment))->classes['A']->environment);
 		$this->assertArrayHasKey('testB', $classEnvironment->functions);
 		$instanceEnvironment = new \TestObject(
 			$classEnvironment->instanceEnvironment);
 		$this->assertArrayHasKey('testA', $instanceEnvironment->functions);
+	}
+
+	public function testCanFindNamespaceDefinition() {
+		$namespaceTestNamespace =
+			$this->program->environment->resolveNamespace(new Name('TestNamespace'));
+		$this->assertEquals($namespaceTestNamespace,
+			$this->program->parseTree[1]->environment);
+
+		$namespaceTestNamespace->resolveFunction(new Name('A'));
 	}
 }
