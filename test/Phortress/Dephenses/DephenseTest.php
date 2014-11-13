@@ -3,7 +3,7 @@ namespace Phortress\Dephenses;
 
 class DephenseTest extends \PHPUnit_Framework_TestCase {
 	public function setUp(){
-		$this->file = realpath(__DIR__ . '/taint_test_1.php');
+		$this->file = realpath(__DIR__ . '/../Fixture/taint_test_1.php');
                 $this->program = loadGlassBoxProgram($this->file);
 	}
 
