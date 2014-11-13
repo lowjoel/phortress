@@ -31,7 +31,7 @@ class FunctionAnalyser{
 
 
 	protected $unresolved_variables = array();
-	
+
     /**
      * Environment where the function was defined
      */
@@ -157,9 +157,9 @@ class FunctionAnalyser{
             return $this->traceMethodCall($exp);
         }else if($exp instanceof Expr\Ternary){
             //If-else block
-           return $this->traceTernaryTrace($exp);
+           return $this->traceTernary($exp);
         }else if($exp instanceof Expr\Eval_){
-            return $this->resolveTernaryTrace($exp->expr);
+
         }else{
             //Other expressions we will not handle.
 	        return array();
@@ -199,13 +199,10 @@ class FunctionAnalyser{
         
     }
     
-     private function resolveTernaryTrace(Expr\Ternary $exp){
-	     //TODO:
+     private function traceTernary(Expr\Ternary $exp){
         $if = $exp->if;
         $else = $exp->else;
-        $if_trace = $this->traceExpressionVariables($if);
-        $else_trace = $this->traceExpressionVariables($else);
-        return TaintInfo::mergeTaintValues($if_trace, $else_trace);
+        return $this->traceAndMergeTwoExpr($if, $else);
     }
     
     private function traceVariablesInArray(Expr\Array_ $arr){
@@ -221,10 +218,14 @@ class FunctionAnalyser{
     private function traceBinaryOp(Expr\BinaryOp $exp){
         $left = $exp->left;
         $right = $exp->right;
-        $left_var = $this->traceExpressionVariables($left);
-        $right_var = $this->traceExpressionVariables($right);
-        return VariableInfo::mergeVariables(array_merge($left_var, $right_var));
+        return $this->traceAndMergeTwoExpr($left, $right);
     }
+
+	private function traceAndMergeTwoExpr(Expr $left, Expr $right){
+		$left_var = $this->traceExpressionVariables($left);
+		$right_var = $this->traceExpressionVariables($right);
+		return VariableInfo::mergeVariables(array_merge($left_var, $right_var));
+	}
 
     private function traceVariable(Expr\Variable $var){
         $name = $var->name;
@@ -232,28 +233,30 @@ class FunctionAnalyser{
 	        //TODO: fix case where variable cannot be resolved statically
         }else{
 	        $var_details = $this->getVariableDetails($var);
-	        $details_ret = array($name => $var_details);
+
 
 	        if(InputSources::isInputVariable($var)){
 		        $var_details->setTaint(Annotation::TAINTED);
+		        $details_ret = array($name => $var_details);
 		        return $details_ret;
 	        }
 
-	        if(!$this->isFunctionParameter($var)){
-		        $assign = $var_details->getDefinition();
-		        if(!empty($assign)){
-			        $ref_expr = $assign->expr;
-			        return $this->traceExpressionVariables($ref_expr);
-		        }else{
-			        return $details_ret;
-		        }
-
-	        }else{
-		        return $details_ret;
-	        }
+	        return $this->traceVariableAssignmentToParameters($var, $var_details);
         }
 
     }
+
+	private function traceVariableAssignmentToParameters(Expr\Variable $var, VariableInfo $var_details){
+		if(!$this->isFunctionParameter($var)){
+			$assign = $var_details->getDefinition();
+			if(!empty($assign)) {
+				$ref_expr = $assign->expr;
+				return $this->traceExpressionVariables($ref_expr);
+			}
+		}
+		$details_ret = array($var->name => $var_details);
+		return $details_ret;
+	}
     
     private function isFunctionParameter(Expr\Variable $var){
         $name = $var->name;
@@ -269,20 +272,17 @@ class FunctionAnalyser{
         if(array_key_exists($name, $this->variables)){
             return $this->variables[$name];
         }else if($name instanceof Expr){
-	        //TODO: fix case where variable cannot be statically resolved
-//            $unresolved_vars = $this->variables[self::UNRESOLVED_VARIABLE_KEY];
-//            $filter_matching = function($item) use ($var){
-//                return $item->getVariable() == $var;
-//            };
-//            $filter_res = array_filter($unresolved_vars, $filter_matching);
-//            if(!empty($filter_res)){
-//                return $filter_res;
-//            }else{
-//	            //TODO:
-//                $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
-//                $unresolved_vars[] = $varInfo;
-//                return $varInfo;
-//            }
+            $filter_matching = function($item) use ($var){
+                return $item->getVariable() == $var;
+            };
+            $filter_res = array_filter($this->unresolved_variables, $filter_matching);
+            if(!empty($filter_res)){
+                return $filter_res;
+            }else{
+                $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
+                $unresolved_vars[] = $varInfo;
+                return $varInfo;
+            }
         }else{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];
@@ -290,7 +290,7 @@ class FunctionAnalyser{
 	            try{
 		            $assign = $var->environment->resolveVariable($name);
 	            }catch(UnboundIdentifierException $e){
-					print_r($name);
+					var_dump($name);
 		            var_dump("error happened");
 	            }
 //	            $assign = $var->environment->resolveVariable($name);
