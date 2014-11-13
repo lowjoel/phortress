@@ -2,7 +2,8 @@
 namespace Phortress;
 
 class ClassEnvironment extends Environment {
-	use EnvironmentHasFunctionsTrait;
+	use EnvironmentHasFunctionsTrait,
+		EnvironmentHasConstantsTrait;
 
 	/**
 	 * Creates child environments for classes. This should never be called,

@@ -7,7 +7,8 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Namespace_;
 
 class NamespaceEnvironment extends Environment {
-	use EnvironmentHasFunctionsTrait;
+	use EnvironmentHasFunctionsTrait,
+		EnvironmentHasConstantsTrait;
 
 	/**
 	 * The namespaces declared in this namespace.
@@ -64,17 +65,6 @@ class NamespaceEnvironment extends Environment {
 				self::extractNamespaceComponent($className);
 			return $this->resolveNamespace($nextNamespace)->
 				resolveClass($className);
-		}
-	}
-
-	public function resolveConstant(Name $constantName) {
-		if (self::isAbsolutelyQualified($constantName)) {
-			return $this->getGlobal()->resolveConstant($constantName);
-		} else {
-			list($nextNamespace, $constantName) =
-				self::extractNamespaceComponent($constantName);
-			return $this->resolveNamespace($nextNamespace)->
-				resolveConstant($constantName);
 		}
 	}
 
