@@ -12,6 +12,9 @@ trait EnvironmentHasConstantsTrait {
 	 */
 	protected $constants = array();
 
+	public abstract function getGlobal();
+	public abstract function resolveNamespace(Name $namespace);
+
 	public function resolveConstant(Name $constantName) {
 		if (self::isAbsolutelyQualified($constantName)) {
 			return $this->getGlobal()->resolveConstant($constantName);

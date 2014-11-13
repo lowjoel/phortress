@@ -15,6 +15,9 @@ trait EnvironmentHasFunctionsTrait {
 	 */
 	protected $functions = array();
 
+	public abstract function getGlobal();
+	public abstract function resolveNamespace(Name $namespace);
+
 	public function resolveFunction(Name $functionName) {
 		if (self::isAbsolutelyQualified($functionName)) {
 			return $this->getGlobal()->resolveFunction($functionName);
