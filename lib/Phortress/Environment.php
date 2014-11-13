@@ -284,4 +284,34 @@ abstract class Environment {
 				!($symbol instanceof Name\Relative)
 			);
 	}
+
+	/**
+	 * Extracts the first namespace component from the given symbol, and returns
+	 * the namespace and the tail of the symbol.
+	 *
+	 * @param Name|string $symbol
+	 * @return String[]
+	 */
+	protected static function extractNamespaceComponent($symbol) {
+		assert(!self::isAbsolutelyQualified($symbol));
+
+		if (is_string($symbol)) {
+			$firstSlash = strpos($symbol, '\\');
+			if ($firstSlash === false) {
+				return array(null, $symbol);
+			} else {
+				return array(
+					substr($symbol, 0, $firstSlash),
+					substr($symbol, $firstSlash + 1)
+				);
+			}
+		} else {
+			return array(
+				count($symbol->parts) === 1 ?
+					null :
+					new Name(array_slice($symbol->parts, 1), $symbol->getAttributes()),
+				$symbol->parts[0]
+			);
+		}
+	}
 }
