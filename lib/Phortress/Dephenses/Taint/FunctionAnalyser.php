@@ -264,7 +264,7 @@ class FunctionAnalyser{
         $var_details = $this->getVariableDetails($var);
         $details_ret = array($name => $var_details);
         
-        if(\Phortress\Dephenses\InputSources::isInputVariable($var)){
+        if(InputSources::isInputVariable($var)){
             $var_details[self::TAINT_KEY] = Annotation::TAINTED;
             return $details_ret;
         }

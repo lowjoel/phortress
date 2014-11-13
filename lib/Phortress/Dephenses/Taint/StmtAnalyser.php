@@ -18,9 +18,9 @@ class StmtAnalyser {
      */
     public static function reduce(Node $node){
         if($node instanceof Expr\Assign){
-            $this->applyAssignmentRule($node);
+            self::applyAssignmentRule($node);
         }else if($node instanceof Expr\AssignOp){
-            $this->applyAssignmentOpRule($node);
+            self::applyAssignmentOpRule($node);
         }
     }
     
@@ -174,7 +174,7 @@ class StmtAnalyser {
         $array_var = $exp->var;
         $array_var_name = $array_var->name;
 //        $array_field = $exp->var->dim;
-        if(Dephenses\InputSources::isInputVariableName($array_var_name)){
+        if(InputSources::isInputVariableName($array_var_name)){
             self::annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }
@@ -204,7 +204,7 @@ class StmtAnalyser {
             return $annot;
         }
         
-        if(Dephenses\InputSources::isInputVariable($exp)){
+        if(InputSources::isInputVariable($exp)){
             self::annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }
