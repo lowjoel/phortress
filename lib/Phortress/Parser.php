@@ -1,5 +1,6 @@
 <?php
 namespace Phortress;
+use Phortress\Exception\IOException;
 use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 
@@ -23,6 +24,9 @@ class Parser extends \PhpParser\Parser {
 	 * @return \PhpParser\Node[] The parse tree for the given file.
 	 */
 	public function parseFile($file) {
+		if (!is_string($file) || !file_exists($file)) {
+			throw new IOException($file);
+		}
 		$result = $this->parse(file_get_contents($file));
 
 		$traverser = new NodeTraverser;

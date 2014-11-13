@@ -92,7 +92,7 @@ class Program {
 	 */
 	private static function parseFile($file) {
 		$realfile = realpath($file);
-		if ($realfile === false) {
+		if ($file === false || $realfile === false) {
 			throw new IOException($file);
 		}
 		$parser = new Parser();
