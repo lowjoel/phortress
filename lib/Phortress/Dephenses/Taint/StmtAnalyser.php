@@ -62,7 +62,7 @@ class StmtAnalyser {
         if($var->taintSource == $exp){
             return;
         }
-        
+
         if($var instanceof Expr\Variable){
             $taint = self::resolveExprTaint($exp);
             self::annotateVariable($var, $taint, $exp);
@@ -72,7 +72,7 @@ class StmtAnalyser {
             $taint = self::resolveExprTaint($var);
             self::annotateVariable($var, $taint, $exp);
         }
-        
+
     }
     
     private static function resolveListAssignment(Expr\Assign $assign){
@@ -80,7 +80,7 @@ class StmtAnalyser {
         $list_of_vars = $assign->var->vars;
         $exp = $assign->expr;
         if($exp instanceof Variable){
-            $exp = getVariableTerminalReference($exp);
+            $exp = self::getVariableTerminalReference($exp);
         }
         
         if($exp instanceof Expr\Array_){
@@ -106,7 +106,9 @@ class StmtAnalyser {
         if($exp instanceof Node\Scalar){
             return Annotation::SAFE;
         }else if ($exp instanceof Expr\Variable) {
-            return self::resolveVariableTaint($exp);
+            $var_taint = self::resolveVariableTaint($exp);
+            assert(!empty($var_taint));
+            return $var_taint;
         }else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
             return Annotation::SAFE;
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
@@ -165,6 +167,10 @@ class StmtAnalyser {
         $right = $exp->right;
         $left_taint = self::resolveExprTaint($left);
         $right_taint = self::resolveExprTaint($right);
+//        var_dump("start");
+//        var_dump($left_taint);
+//        var_dump($right_taint);
+//        var_dump("end");
         return self::mergeTaintValues($left_taint, $right_taint);
     }
     
@@ -176,7 +182,7 @@ class StmtAnalyser {
 //        $array_field = $exp->var->dim;
         if(InputSources::isInputVariableName($array_var_name)){
             self::annotateVariable($exp, Annotation::TAINTED);
-            return $exp->taint;
+            return Annotation::TAINTED;
         }
         $env = $array_var->environment;
         if(!empty($env)){
@@ -239,7 +245,7 @@ class StmtAnalyser {
     
     private static function mergeTaintValues(){
         $taints = func_get_args();
-        return max($taints);
+        return max(array_values($taints));
     }
     
     private static function resolveTernaryTaint(Expr\Ternary $exp){
@@ -266,7 +272,8 @@ class StmtAnalyser {
     }
     
     private static function resolveMethodResultTaint(Expr\MethodCall $exp){
-        
+        //TODO:
+        return Annotation::UNKNOWN;
     }
     
     private static function annotateVariable($var, $annot, $source=NULL){
