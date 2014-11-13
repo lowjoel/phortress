@@ -27,7 +27,7 @@ class Program {
 	 *
 	 * This is null until @see parse is called.
 	 *
-	 * @var array(String => SourceFile)
+	 * @var array(string => SourceFile)
 	 */
 	private $files;
 

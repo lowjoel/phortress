@@ -6,7 +6,7 @@ use PhpParser\NodeVisitorAbstract;
 
 class FileAssignerVisitor extends NodeVisitorAbstract {
 	/**
-	 * @var String The path to the file to assign.
+	 * @var string The path to the file to assign.
 	 */
 	private $path;
 

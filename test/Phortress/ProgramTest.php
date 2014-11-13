@@ -7,14 +7,14 @@ class ProgramTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * The file we loaded the program from.
 	 *
-	 * @var String
+	 * @var string
 	 */
 	private $file;
 
 	/**
 	 * The file which the program is supposed to include.
 	 *
-	 * @var String
+	 * @var string
 	 */
 	private $included_file;
 
