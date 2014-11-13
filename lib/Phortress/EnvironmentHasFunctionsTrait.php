@@ -49,8 +49,7 @@ trait EnvironmentHasFunctionsTrait {
 		$this->functions[$function->name] = $function;
 
 		$result = new FunctionEnvironment(sprintf('%s\%s',
-				$this->name, $function->name));
-		$result->parent = $this;
+				$this->name, $function->name), $this);
 
 		foreach ($function->params as $param) {
 			$result->variables[$param->name] = $param;

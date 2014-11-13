@@ -15,7 +15,7 @@ class GlobalEnvironment extends NamespaceEnvironment {
 	private $superglobals;
 
 	public function __construct() {
-		parent::__construct('Global');
+		parent::__construct('Global', null);
 
 		$this->superglobals = array(
 			'GLOBALS' => &$this->variables,
@@ -30,5 +30,18 @@ class GlobalEnvironment extends NamespaceEnvironment {
 		);
 
 		self::copyValueReferences($this->variables, $this->superglobals);
+	}
+
+	public function getGlobal() {
+		return $this;
+	}
+
+	/**
+	 * Gets the superglobals in this global environment.
+	 *
+	 * @return array
+	 */
+	public function &getSuperglobals() {
+		return $this->superglobals;
 	}
 }

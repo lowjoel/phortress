@@ -93,9 +93,11 @@ abstract class Environment {
 	 * Constructs a new, empty environment.
 	 *
 	 * @param string $name The name of the environment.
+	 * @param Environment $parent The parent environment.
 	 */
-	protected function __construct($name) {
+	protected function __construct($name, Environment $parent = null) {
 		$this->name = $name;
+		$this->parent = $parent;
 	}
 
 	/**
@@ -134,7 +136,7 @@ abstract class Environment {
 	 */
 	public function getGlobal() {
 		$parent = $this->getParent();
-		while ($parent !== null) {
+		for ( ; $parent !== null; $parent = $parent->getParent()) {
 			if ($parent instanceof GlobalEnvironment) {
 				break;
 			}
@@ -315,5 +317,14 @@ abstract class Environment {
 				new Name(array_slice($symbol->parts, 1), $symbol->getAttributes()),
 			$symbol->parts[0]
 		);
+	}
+
+	/**
+	 * Copy the values by reference from one array to another.
+	 */
+	protected static function copyValueReferences(&$to, &$from) {
+		foreach ($from as $key => &$value) {
+			$to[$key] = &$value;
+		}
 	}
 }

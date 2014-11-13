@@ -1,4 +1,6 @@
 <?php
+namespace {
+
 $glob = 1;
 function a() {
 	$glob = 4;
@@ -16,5 +18,12 @@ class A {
 	}
 
 	public static function testB() {
+	}
+}
+
+}
+
+namespace TestNamespace {
+	function A() {
 	}
 }

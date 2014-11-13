@@ -21,8 +21,8 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 		return $this->getNamespaceEnvironment()->createClass($class);
 	}
 
-	public function createNamespace(Namespace_ $namespaceName) {
-		return $this->getNamespaceEnvironment()->createNamespace($namespaceName);
+	public function createNamespace(Namespace_ $namespace) {
+		return $this->getNamespaceEnvironment()->createNamespace($namespace);
 	}
 
 	public function resolveFunction(Name $functionName) {

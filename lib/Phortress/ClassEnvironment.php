@@ -22,8 +22,8 @@ class ClassEnvironment extends Environment {
 	 */
 	private $instanceEnvironment;
 
-	public function __construct($name) {
-		parent::__construct($name);
+	public function __construct($name, Environment $parent) {
+		parent::__construct($name, $parent);
 		$this->instanceEnvironment = new ClassInstanceEnvironment($name, $this);
 	}
 

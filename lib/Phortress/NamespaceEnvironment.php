@@ -70,15 +70,12 @@ class NamespaceEnvironment extends Environment {
 	/**
 	 * Creates a new Child namespace.
 	 *
-	 * @param Namespace_ $namespaceName The name of the namespace. This must be unqualified.
+	 * @param Namespace_ $namespace The name of the namespace. This must be unqualified.
 	 * @return NamespaceEnvironment The new namespace environment, with the parent properly set.
 	 */
-	public function createNamespace(Namespace_ $namespaceName) {
-		$result = new NamespaceEnvironment(sprintf('%s\%s',
-			$this->name, $namespaceName));
-		$result->parent = $this;
-
-		return $result;
+	public function createNamespace(Namespace_ $namespace) {
+		return new NamespaceEnvironment(sprintf('%s\%s',
+			$this->name, $namespace->name), $this);
 	}
 
 	/**
@@ -89,17 +86,7 @@ class NamespaceEnvironment extends Environment {
 	 */
 	public function createClass(Class_ $class) {
 		$this->classes[$class->name] = $class;
-		$result = new ClassEnvironment(sprintf('%s\%s', $this->name, $class->name));
-		$result->parent = $this;
+		$result = new ClassEnvironment(sprintf('%s\%s', $this->name, $class->name), $this);
 		return $result;
-	}
-
-	/**
-	 * Copy the values by reference from one array to another.
-	 */
-	protected static function copyValueReferences(&$to, &$from) {
-		foreach ($from as $key => &$value) {
-			$to[$key] = &$value;
-		}
 	}
 }
