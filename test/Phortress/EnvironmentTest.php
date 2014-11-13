@@ -44,6 +44,7 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 	public function testCanFindClassProperty(){
 		$classEnvironment = new \TestObject(
 			(new \TestObject($this->program->environment))->classes['A']->environment);
+		$this->assertArrayHasKey('c', $classEnvironment->variables);
 		$instanceEnvironment = new \TestObject(
 			$classEnvironment->instanceEnvironment);
 		$this->assertArrayHasKey('b', $instanceEnvironment->variables);
@@ -52,6 +53,7 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 	public function testCanFindClassMethodDefinition(){
 		$classEnvironment = new \TestObject(
 			(new \TestObject($this->program->environment))->classes['A']->environment);
+		$this->assertArrayHasKey('testB', $classEnvironment->functions);
 		$instanceEnvironment = new \TestObject(
 			$classEnvironment->instanceEnvironment);
 		$this->assertArrayHasKey('testA', $instanceEnvironment->functions);
