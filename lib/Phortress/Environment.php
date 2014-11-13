@@ -136,7 +136,7 @@ abstract class Environment {
 	 */
 	public function getGlobal() {
 		$parent = $this->getParent();
-		while ($parent !== null) {
+		for ( ; $parent !== null; $parent = $parent->getParent()) {
 			if ($parent instanceof GlobalEnvironment) {
 				break;
 			}
