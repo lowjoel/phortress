@@ -1,7 +1,16 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Const_;
+
 trait EnvironmentHasConstantsTrait {
+	/**
+	 * The constants declared in this namespace.
+	 *
+	 * @var array(string => Const_)
+	 */
+	protected $constants = array();
+
 	public function resolveConstant(Name $constantName) {
 		if (self::isAbsolutelyQualified($constantName)) {
 			return $this->getGlobal()->resolveConstant($constantName);
@@ -9,7 +18,19 @@ trait EnvironmentHasConstantsTrait {
 			list($nextNamespace, $constantName) =
 				self::extractNamespaceComponent($constantName);
 			return $this->resolveNamespace($nextNamespace)->
-			resolveConstant($constantName);
+				resolveConstant($constantName);
 		}
+	}
+
+	/**
+	 * Creates a new Function environment.
+	 *
+	 * @param Const_ $value The value to create a constant for.
+	 * @return Environment
+	 */
+	public function createConstant(Const_ $value) {
+		$this->constants[$value->name] = $value;
+
+		return $this;
 	}
 }
