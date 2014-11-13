@@ -48,12 +48,23 @@ class GlobalEnvironment extends NamespaceEnvironment {
 	}
 
 	public function resolveNamespace(Name $namespaceName = null) {
-		if (self::isAbsolutelyQualified($namespaceName)) {
+		if ($namespaceName !== null &&
+			self::isAbsolutelyQualified($namespaceName)) {
 			$namespaceName = new Relative(
 				$namespaceName->parts,
 				$namespaceName->getAttributes());
 		}
 
 		return parent::resolveNamespace($namespaceName);
+	}
+
+	public function resolveClass(Name $className) {
+		if (self::isAbsolutelyQualified($className)) {
+			$className = new Relative(
+				$className->parts,
+				$className->getAttributes());
+		}
+
+		return parent::resolveClass($className);
 	}
 }

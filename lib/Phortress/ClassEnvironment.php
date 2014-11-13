@@ -62,8 +62,7 @@ class ClassEnvironment extends Environment {
 		if ($function->isStatic()) {
 			return $this->traitCreateFunction($function);
 		} else {
-			$this->instanceEnvironment->createFunction($function);
-			return $this;
+			return $this->instanceEnvironment->createFunction($function);
 		}
 	}
 }

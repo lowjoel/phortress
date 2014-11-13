@@ -83,4 +83,16 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 			$namespaceTestTestNamespaceTestNamespace->resolveClass(new Name('C')));
 		$namespaceTestTestNamespaceTestNamespace->resolveClass(new Name('B'));
 	}
+
+	public function testClassInstanceMethodsHaveThis() {
+		$aClass = new \TestObject(
+			$this->program->environment->resolveClass(
+				new Name\FullyQualified('A')));
+		$aClassEnvironment = new \TestObject($aClass->environment);
+		$aClassThisEnvironment = $aClassEnvironment->instanceEnvironment;
+		$testAEnvironment = $aClassThisEnvironment->
+			resolveFunction(new Name('testA'))->environment;
+		$this->assertTrue($testAEnvironment instanceof FunctionEnvironment);
+		$this->assertArrayHasKey('this', (new \TestObject($testAEnvironment))->variables);
+	}
 }

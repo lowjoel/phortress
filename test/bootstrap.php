@@ -129,10 +129,14 @@ class TestObject {
 	 * @return mixed The value of the property.
 	 */
 	public function __get($name) {
-		$property = $this->reflector->getProperty($name);
-		$property->setAccessible(true);
+		try {
+			$property = $this->reflector->getProperty($name);
+			$property->setAccessible(true);
 
-		return $property->getValue($this->object);
+			return $property->getValue($this->object);
+		} catch (ReflectionException $e) {
+			return $this->object->__get($name);
+		}
 	}
 
 	/**
@@ -142,10 +146,14 @@ class TestObject {
 	 * @param mixed $value The value of the property
 	 */
 	public function __set($name, $value) {
-		$property = $this->reflector->getProperty($name);
-		$property->setAccessible(true);
+		try {
+			$property = $this->reflector->getProperty($name);
+			$property->setAccessible(true);
 
-		$property->setValue($this->object, $value);
+			$property->setValue($this->object, $value);
+		} catch (ReflectionException $e) {
+			return $this->object->__set($name, $value);
+		}
 	}
 }
 

@@ -1,8 +1,16 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Name;
+use PhpParser\Node\Stmt;
+
 class ClassInstanceEnvironment extends Environment {
-	use EnvironmentHasFunctionsTrait;
+	use EnvironmentHasFunctionsTrait {
+		createFunction as traitCreateFunction;
+	}
 
 	/**
 	 * The class environment for this instance.
@@ -27,5 +35,22 @@ class ClassInstanceEnvironment extends Environment {
 
 	public function createChild() {
 		return $this;
+	}
+
+	/**
+	 * @inheritdoc
+	 * @param Stmt\ClassMethod $function
+	 */
+	public function createFunction(Stmt $function) {
+		assert($function instanceof Stmt\ClassMethod, 'Only accepts class methods');
+		$result = $this->traitCreateFunction($function);
+
+		// Assign $this
+		$result->variables['this'] = (new Assign(
+				new Variable('this'),
+				new New_(new Name($this->classEnvironment->getName()))
+			));
+
+		return $result;
 	}
 }
