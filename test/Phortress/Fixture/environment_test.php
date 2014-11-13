@@ -10,6 +10,11 @@ $b = a();
 class A {
 	private $b;
 
+	private static $c;
+
 	public function testA() {
+	}
+
+	public static function testB() {
 	}
 }
