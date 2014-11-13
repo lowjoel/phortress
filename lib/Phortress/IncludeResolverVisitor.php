@@ -92,6 +92,7 @@ class IncludeResolverVisitor extends NodeVisitorAbstract {
 	 *
 	 * @param string $path The path to resolve,
 	 * @return string The fully qualified path to the file.
+	 * @throws IOException When the path cannot be opened.
 	 */
 	private function resolveIncludePath($path) {
 		if (self::ignoresIncludePath($path)) {

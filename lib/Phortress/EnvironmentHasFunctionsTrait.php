@@ -15,13 +15,12 @@ trait EnvironmentHasFunctionsTrait {
 	 */
 	protected $functions = array();
 
-	public function resolveFunction($functionName) {
+	public function resolveFunction(Name $functionName) {
 		if (self::isAbsolutelyQualified($functionName)) {
 			return $this->getGlobal()->resolveFunction($functionName);
 		} else if (self::isUnqualified($functionName)) {
-			if ($functionName instanceof Name) {
-				$functionName = implode('\\', $functionName->parts);
-			}
+			assert(count($functionName->parts) === 1, 'Must be unqualified name.');
+			$functionName = $functionName->parts[0];
 			if (array_key_exists($functionName, $this->functions)) {
 				return $this->functions[$functionName];
 			} else {

@@ -148,25 +148,25 @@ abstract class Environment {
 	/**
 	 * Resolves the declaration of a class.
 	 *
-	 * @param string $className The name of a class to resolve. This can either
-	 * be fully qualified, or relatively qualified.
+	 * @param Name $className The name of a class to resolve. This can either
+	 *                        be fully qualified, or relatively qualified.
 	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the class has not been declared.
 	 */
-	public function resolveClass($className) {
+	public function resolveClass(Name $className) {
 		return $this->getNamespace()->resolveClass($className);
 	}
 
 	/**
 	 * Resolves the declaration of a function.
 	 *
-	 * @param string $functionName The name of a function to resolve. This can
-	 * either be fully qualified, or relatively qualified.
+	 * @param Name $functionName The name of a function to resolve. This can either be fully
+	 *                           qualified, or relatively qualified.
 	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the function has not been
 	 * declared.
 	 */
-	public function resolveFunction($functionName) {
+	public function resolveFunction(Name $functionName) {
 		return $this->getNamespace()->resolveFunction($functionName);
 	}
 
@@ -175,10 +175,9 @@ abstract class Environment {
 	 *
 	 * @param string $variableName The name of a variable to resolve.
 	 * @return \PhpParser\Node
-	 * @throws UnboundIdentifierException When the variable has not been
-	 * declared.
+	 * @throws UnboundIdentifierException When the variable has not been declared.
 	 */
-	public function resolveVariable($variableName) {
+	public function resolveVariable(Name $variableName) {
 		if (array_key_exists($variableName, $this->variables)) {
 			$result = $this->variables[$variableName];
 			if ($result === self::UNSET_) {
@@ -198,8 +197,9 @@ abstract class Environment {
 	}
 
 	/**
-	 * Check if the current environment should check the parent environment for
-	 * variable resolutions.
+	 * Check if the current environment should check the parent environment for variable
+	 * resolutions.
+	 *
 	 * @return bool
 	 */
 	protected function shouldResolveVariablesInParentEnvironment() {
@@ -209,13 +209,13 @@ abstract class Environment {
 	/**
 	 * Resolves the declaration of a constant.
 	 *
-	 * @param string $constantName The name of a constant to resolve. This can
+	 * @param Name $constantName The name of a constant to resolve. This can
 	 * either be fully qualified, or relatively qualified.
 	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the constant has not been
 	 * declared.
 	 */
-	public function resolveConstant($constantName) {
+	public function resolveConstant(Name $constantName) {
 		return $this->getNamespace()->resolveConstant($constantName);
 	}
 
@@ -251,37 +251,49 @@ abstract class Environment {
 	/**
 	 * Checks if the given symbol is absolutely qualified.
 	 *
-	 * @param string|Name $symbol The name of the symbol.
+	 * @param Name $symbol The name of the symbol.
 	 * @return bool
 	 */
-	protected static function isAbsolutelyQualified($symbol) {
-		if (is_string($symbol)) {
-			return substr($symbol, 0, 1) === '\\';
-		} else {
-			return $symbol instanceof Name\FullyQualified;
-		}
+	protected static function isAbsolutelyQualified(Name $symbol) {
+		return $symbol instanceof Name\FullyQualified;
 	}
 
 	/**
 	 * Checks if the given symbol is relatively qualfied.
 	 *
-	 * @param string $symbol The name of the symbol.
+	 * @param Name $symbol The name of the symbol.
 	 * @return bool
 	 */
-	protected static function isRelativelyQualified($symbol) {
+	protected static function isRelativelyQualified(Name $symbol) {
 		return !self::isAbsolutelyQualified($symbol);
 	}
 
 	/**
 	 * Checks whether the given symbol is unqualified.
 	 *
-	 * @param string $symbol The symbol to check.
+	 * @param Name $symbol The symbol to check.
 	 * @return bool True if the symbol is unqualified.
 	 */
-	protected static function isUnqualified($symbol) {
-		return self::isRelativelyQualified($symbol) && (
-				(is_string($symbol) && strpos($symbol, '\\') === false) ||
-				!($symbol instanceof Name\Relative)
-			);
+	protected static function isUnqualified(Name $symbol) {
+		return self::isRelativelyQualified($symbol) &&
+			!($symbol instanceof Name\Relative);
+	}
+
+	/**
+	 * Extracts the first namespace component from the given symbol, and returns
+	 * the namespace and the tail of the symbol.
+	 *
+	 * @param Name $symbol
+	 * @return array(string, Name)
+	 */
+	protected static function extractNamespaceComponent(Name $symbol) {
+		assert(!self::isAbsolutelyQualified($symbol));
+
+		return array(
+			count($symbol->parts) === 1 ?
+				null :
+				new Name(array_slice($symbol->parts, 1), $symbol->getAttributes()),
+			$symbol->parts[0]
+		);
 	}
 }
