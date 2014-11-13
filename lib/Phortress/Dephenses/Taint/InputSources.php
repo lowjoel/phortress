@@ -100,6 +100,7 @@ class InputSources {
         return in_array($var->name, self::$USER_INPUT_GLOBALS);
     }
     
+
     public static function isInputVariableName($name){
         return in_array($name, self::$USER_INPUT_GLOBALS);
     }
