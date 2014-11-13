@@ -36,7 +36,16 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 	}
 
 	public function enterNode(Node $node) {
-		if ($node instanceof Stmt\Function_) {
+		if ($node instanceof Stmt\Namespace_) {
+			if ($node->name === null) {
+				// Global namespace
+				$node->environment = $this->currentEnvironment();
+			} else {
+				$node->environment = $this->currentEnvironment()->
+					createNamespace($node);
+			}
+			$this->pushEnvironment($node->environment);
+		} else if ($node instanceof Stmt\Function_) {
 			$node->environment = $this->currentEnvironment()->
 				createFunction($node);
 			$this->pushEnvironment($node->environment);
@@ -70,7 +79,9 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 	}
 
 	public function leaveNode(Node $node) {
-		if ($node instanceof Stmt\Function_) {
+		if ($node instanceof Stmt\Namespace_) {
+			$this->popEnvironment();
+		} else if ($node instanceof Stmt\Function_) {
 			$this->popEnvironment();
 		} else if ($node instanceof Stmt\Class_) {
 			$this->popEnvironment();
