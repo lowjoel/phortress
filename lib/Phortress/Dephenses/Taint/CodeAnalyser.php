@@ -17,7 +17,7 @@ class CodeAnalyser {
     }
     
     public function analyse(){
-        
+        assert(!empty($this->parseTree));
         foreach($this->parseTree as $statement){
             StmtAnalyser::reduce($statement);
         }
