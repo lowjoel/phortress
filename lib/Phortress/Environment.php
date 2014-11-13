@@ -146,6 +146,18 @@ abstract class Environment {
 	}
 
 	/**
+	 * Resolves the given namespace to an environment.
+	 *
+	 * @param Name $namespaceName The name of the namespace to resolve. This can either be fully
+	 *                            qualified, or relatively qualified.
+	 * @return NamespaceEnvironment
+	 * @throws UnboundIdentifierException When the identifier cannot be found.
+	 */
+	public function resolveNamespace(Name $namespaceName) {
+		return $this->getNamespace()->resolveNamespace($namespaceName);
+	}
+
+	/**
 	 * Resolves the declaration of a class.
 	 *
 	 * @param Name $className The name of a class to resolve. This can either

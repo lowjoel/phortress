@@ -24,14 +24,6 @@ class NamespaceEnvironment extends Environment {
 	 */
 	protected $classes = array();
 
-	/**
-	 * Resolves the given namespace to an environment.
-	 *
-	 * @param Name $namespaceName The name of the namespace to resolve. This can either be fully
-	 *                            qualified, or relatively qualified.
-	 * @return NamespaceEnvironment
-	 * @throws UnboundIdentifierException When the identifier cannot be found.
-	 */
 	public function resolveNamespace(Name $namespaceName) {
 		if ($namespaceName === null) {
 			return $this;
