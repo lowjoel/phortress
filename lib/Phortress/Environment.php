@@ -173,11 +173,19 @@ abstract class Environment {
 	/**
 	 * Resolves the declaration of a variable.
 	 *
-	 * @param string $variableName The name of a variable to resolve.
+	 * @param Name|string $variableName The name of a variable to resolve.
 	 * @return \PhpParser\Node
 	 * @throws UnboundIdentifierException When the variable has not been declared.
 	 */
-	public function resolveVariable(Name $variableName) {
+	public function resolveVariable($variableName) {
+		if (is_object($variableName)) {
+			assert($variableName instanceof Name, 'Variable names must be string or Name.');
+			assert(count($variableName->parts) === 1, 'Must be unqualified name');
+			$variableName = $variableName->parts;
+		} else {
+			assert(true);
+		}
+
 		if (array_key_exists($variableName, $this->variables)) {
 			$result = $this->variables[$variableName];
 			if ($result === self::UNSET_) {
