@@ -1,6 +1,8 @@
 <?php
 namespace Phortress;
 
+use PhpParser\Node\Name;
+use PhpParser\Node\Scalar\MagicConst\Namespace_;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
 
@@ -11,31 +13,31 @@ use PhpParser\Node\Stmt\Class_;
  * namespace.
  */
 class NamespaceContinuationEnvironment extends NamespaceEnvironment {
-	public function createNamespace($namespaceName) {
-		$this->getNamespaceEnvironment()->createNamespace($namespaceName);
+	public function createFunction(Stmt $function) {
+		return $this->getNamespaceEnvironment()->createFunction($function);
 	}
 
 	public function createClass(Class_ $class) {
 		return $this->getNamespaceEnvironment()->createClass($class);
 	}
 
-	public function createFunction(Stmt $function) {
-		return $this->getNamespaceEnvironment()->createFunction($function);
+	public function createNamespace(Namespace_ $namespaceName) {
+		return $this->getNamespaceEnvironment()->createNamespace($namespaceName);
 	}
 
-	public function resolveFunction($functionName) {
+	public function resolveFunction(Name $functionName) {
 		return $this->getNamespaceEnvironment()->resolveFunction($functionName);
 	}
 
-	public function resolveClass($className) {
+	public function resolveClass(Name $className) {
 		return $this->getNamespaceEnvironment()->resolveClass($className);
 	}
 
-	public function resolveNamespace($namespaceName) {
+	public function resolveNamespace(Name $namespaceName) {
 		return $this->getNamespaceEnvironment()->resolveNamespace($namespaceName);
 	}
 
-	public function resolveConstant($constantName) {
+	public function resolveConstant(Name $constantName) {
 		return $this->getNamespaceEnvironment()->resolveConstant($constantName);
 	}
 

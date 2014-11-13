@@ -4,6 +4,7 @@ namespace Phortress;
 use Phortress\Exception\UnboundIdentifierException;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Namespace_;
 
 class NamespaceEnvironment extends Environment {
 	use EnvironmentHasFunctionsTrait;
@@ -25,12 +26,12 @@ class NamespaceEnvironment extends Environment {
 	/**
 	 * Resolves the given namespace to an environment.
 	 *
-	 * @param string $namespaceName The name of the namespace to resolve. This
-	 * can either be fully qualified, or relatively qualified.
+	 * @param Name $namespaceName The name of the namespace to resolve. This can either be fully
+	 *                            qualified, or relatively qualified.
 	 * @return NamespaceEnvironment
 	 * @throws UnboundIdentifierException When the identifier cannot be found.
 	 */
-	public function resolveNamespace($namespaceName) {
+	public function resolveNamespace(Name $namespaceName) {
 		if ($namespaceName === null) {
 			return $this;
 		} else if (self::isAbsolutelyQualified($namespaceName)) {
@@ -49,7 +50,7 @@ class NamespaceEnvironment extends Environment {
 		}
 	}
 
-	public function resolveClass($className) {
+	public function resolveClass(Name $className) {
 		if (self::isAbsolutelyQualified($className)) {
 			return $this->getGlobal()->resolveClass($className);
 		} else if (self::isUnqualified($className)) {
@@ -66,7 +67,7 @@ class NamespaceEnvironment extends Environment {
 		}
 	}
 
-	public function resolveConstant($constantName) {
+	public function resolveConstant(Name $constantName) {
 		if (self::isAbsolutelyQualified($constantName)) {
 			return $this->getGlobal()->resolveConstant($constantName);
 		} else {
@@ -87,10 +88,10 @@ class NamespaceEnvironment extends Environment {
 	/**
 	 * Creates a new Child namespace.
 	 *
-	 * @param string $namespaceName The name of the namespace. This must be unqualified.
+	 * @param Namespace_ $namespaceName The name of the namespace. This must be unqualified.
 	 * @return NamespaceEnvironment The new namespace environment, with the parent properly set.
 	 */
-	public function createNamespace($namespaceName) {
+	public function createNamespace(Namespace_ $namespaceName) {
 		$result = new NamespaceEnvironment(sprintf('%s\%s',
 			$this->name, $namespaceName));
 		$result->parent = $this;
