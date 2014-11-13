@@ -70,7 +70,7 @@ class FunctionAnalyser{
         $result = array(Annotation::UNASSIGNED, array());
         foreach($this->returnStmts as $return){
             $ret_effect = $this->analyseArgumentsEffectOnReturn($args, $return);
-            $result = array(max($result[0], $ret_effect[0]), merge_array($result[1], $ret_effect[1]));
+            $result = array(max($result[0], $ret_effect[0]), array_merge($result[1], $ret_effect[1]));
         }
         return $result;
     }
