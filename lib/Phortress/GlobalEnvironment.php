@@ -1,5 +1,7 @@
 <?php
 namespace Phortress;
+use PhpParser\Node\Name;
+use PhpParser\Node\Name\Relative;
 
 /**
  * The global environment for a program.
@@ -32,10 +34,6 @@ class GlobalEnvironment extends NamespaceEnvironment {
 		self::copyValueReferences($this->variables, $this->superglobals);
 	}
 
-	public function getGlobal() {
-		return $this;
-	}
-
 	/**
 	 * Gets the superglobals in this global environment.
 	 *
@@ -43,5 +41,19 @@ class GlobalEnvironment extends NamespaceEnvironment {
 	 */
 	public function &getSuperglobals() {
 		return $this->superglobals;
+	}
+
+	public function getGlobal() {
+		return $this;
+	}
+
+	public function resolveNamespace(Name $namespaceName = null) {
+		if (self::isAbsolutelyQualified($namespaceName)) {
+			$namespaceName = new Relative(
+				$namespaceName->parts,
+				$namespaceName->getAttributes());
+		}
+
+		return parent::resolveNamespace($namespaceName);
 	}
 }

@@ -8,7 +8,6 @@ use PhpParser\Node\Stmt;
 
 class FunctionAnalyser{
 
-    const UNRESOLVED_VARIABLE_KEY = "unresolved";
     /**
      * Return statements and the variables they are dependent on.
      * array(Stmt => array(variable name => array(Variable Info, as stored in the $variables array))
@@ -30,7 +29,9 @@ class FunctionAnalyser{
      *  SANITISATION_KEY => array(sanitising functions)))
      */
     protected $variables = array();
-    
+
+
+	protected $unresolved_variables = array();
     /**
      * Environment where the function was defined
      */
@@ -228,28 +229,30 @@ class FunctionAnalyser{
     private function traceVariable(Expr\Variable $var){
         $name = $var->name;
         if($name instanceof Expr){
-            $name = self::UNRESOLVED_VARIABLE_KEY;
-        }
-        $var_details = $this->getVariableDetails($var);
-        $details_ret = array($name => $var_details);
-        
-        if(InputSources::isInputVariable($var)){
-            $var_details->setTaint(Annotation::TAINTED);
-            return $details_ret;
-        }
-        
-        if(!$this->isFunctionParameter($var)){
-            $assign = $var_details->getDefinition();
-            if(!empty($assign)){
-                $ref_expr = $assign->expr;
-                return $this->traceExpressionVariables($ref_expr);
-            }else{
-                return $details_ret;
-            }
-            
+	        //TODO: fix case where variable cannot be resolved statically
         }else{
-            return $details_ret;
+	        $var_details = $this->getVariableDetails($var);
+	        $details_ret = array($name => $var_details);
+
+	        if(InputSources::isInputVariable($var)){
+		        $var_details->setTaint(Annotation::TAINTED);
+		        return $details_ret;
+	        }
+
+	        if(!$this->isFunctionParameter($var)){
+		        $assign = $var_details->getDefinition();
+		        if(!empty($assign)){
+			        $ref_expr = $assign->expr;
+			        return $this->traceExpressionVariables($ref_expr);
+		        }else{
+			        return $details_ret;
+		        }
+
+	        }else{
+		        return $details_ret;
+	        }
         }
+
     }
     
     private function isFunctionParameter(Expr\Variable $var){
@@ -266,19 +269,20 @@ class FunctionAnalyser{
         if(array_key_exists($name, $this->variables)){
             return $this->variables[$name];
         }else if($name instanceof Expr){
-            $unresolved_vars = $this->variables[self::UNRESOLVED_VARIABLE_KEY];
-            $filter_matching = function($item) use ($var){
-                return $item->getVariable() == $var;
-            };
-            $filter_res = array_filter($unresolved_vars, $filter_matching);
-            if(!empty($filter_res)){
-                return $filter_res;
-            }else{
-	            //TODO:
-                $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
-                $unresolved_vars[] = $varInfo;
-                return $varInfo;
-            }            
+	        //TODO: fix case where variable cannot be statically resolved
+//            $unresolved_vars = $this->variables[self::UNRESOLVED_VARIABLE_KEY];
+//            $filter_matching = function($item) use ($var){
+//                return $item->getVariable() == $var;
+//            };
+//            $filter_res = array_filter($unresolved_vars, $filter_matching);
+//            if(!empty($filter_res)){
+//                return $filter_res;
+//            }else{
+//	            //TODO:
+//                $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
+//                $unresolved_vars[] = $varInfo;
+//                return $varInfo;
+//            }
         }else{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];

@@ -61,12 +61,26 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('testA', $instanceEnvironment->functions);
 	}
 
+	/**
+	 * @expectedException \Phortress\Exception\UnboundIdentifierException
+	 */
 	public function testCanFindNamespaceDefinition() {
 		$namespaceTestNamespace =
 			$this->program->environment->resolveNamespace(new Name('TestNamespace'));
 		$this->assertEquals($namespaceTestNamespace,
 			$this->program->parseTree[1]->environment);
+		$this->assertEquals('Global\TestNamespace',
+			$namespaceTestNamespace->getName());
+		$this->assertNotEmpty(
+			$namespaceTestNamespace->resolveFunction(new Name('A')));
 
-		$namespaceTestNamespace->resolveFunction(new Name('A'));
+		$namespaceTestTestNamespaceTestNamespace =
+			$this->program->environment->resolveNamespace(new Name\FullyQualified(
+				array('TestTestNamespace', 'TestNamespace')));
+		$this->assertEquals('Global\TestTestNamespace\TestNamespace',
+			$namespaceTestTestNamespaceTestNamespace->getName());
+		$this->assertNotEmpty(
+			$namespaceTestTestNamespaceTestNamespace->resolveClass(new Name('C')));
+		$namespaceTestTestNamespaceTestNamespace->resolveClass(new Name('B'));
 	}
 }

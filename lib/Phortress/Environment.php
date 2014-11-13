@@ -111,6 +111,15 @@ abstract class Environment {
 	}
 
 	/**
+	 * Gets the name of this environment.
+	 *
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
+	}
+
+	/**
 	 * Gets the namespace that this environment is in. For example, if this is
 	 * a function, it will get the namespace that this function is declared in.
 	 *
@@ -155,7 +164,7 @@ abstract class Environment {
 	 * @return NamespaceEnvironment
 	 * @throws UnboundIdentifierException When the identifier cannot be found.
 	 */
-	public function resolveNamespace(Name $namespaceName) {
+	public function resolveNamespace(Name $namespaceName = null) {
 		return $this->getNamespace()->resolveNamespace($namespaceName);
 	}
 
@@ -310,13 +319,20 @@ abstract class Environment {
 	 */
 	protected static function extractNamespaceComponent(Name $symbol) {
 		assert(!self::isAbsolutelyQualified($symbol));
+		$symbolParts = count($symbol->parts);
+		assert($symbolParts > 0);
 
-		return array(
-			count($symbol->parts) === 1 ?
-				null :
-				new Name(array_slice($symbol->parts, 1), $symbol->getAttributes()),
-			$symbol->parts[0]
-		);
+		if ($symbolParts === 1) {
+			return array(
+				null,
+				new Name($symbol->parts[0], $symbol->getAttributes())
+			);
+		} else {
+			return array(
+				new Name($symbol->parts[0], $symbol->getAttributes()),
+				new Name\Relative(array_slice($symbol->parts, 1), $symbol->getAttributes())
+			);
+		}
 	}
 
 	/**

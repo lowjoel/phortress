@@ -24,12 +24,14 @@ class NamespaceEnvironment extends Environment {
 	 */
 	protected $classes = array();
 
-	public function resolveNamespace(Name $namespaceName) {
+	public function resolveNamespace(Name $namespaceName = null) {
 		if ($namespaceName === null) {
 			return $this;
 		} else if (self::isAbsolutelyQualified($namespaceName)) {
 			return $this->getGlobal()->resolveNamespace($namespaceName);
 		} else if (self::isUnqualified($namespaceName)) {
+			assert(count($namespaceName->parts) === 1, 'Must be unqualified name.');
+			$namespaceName = $namespaceName->parts[0];
 			if (array_key_exists($namespaceName, $this->namespaces)) {
 				return $this->namespaces[$namespaceName];
 			} else {
@@ -47,6 +49,8 @@ class NamespaceEnvironment extends Environment {
 		if (self::isAbsolutelyQualified($className)) {
 			return $this->getGlobal()->resolveClass($className);
 		} else if (self::isUnqualified($className)) {
+			assert(count($className->parts) === 1, 'Must be unqualified name.');
+			$className = $className->parts[0];
 			if (array_key_exists($className, $this->classes)) {
 				return $this->classes[$className];
 			} else {
@@ -74,8 +78,20 @@ class NamespaceEnvironment extends Environment {
 	 * @return NamespaceEnvironment The new namespace environment, with the parent properly set.
 	 */
 	public function createNamespace(Namespace_ $namespace) {
-		return new NamespaceEnvironment(sprintf('%s\%s',
-			$this->name, $namespace->name), $this);
+		$namespaceEnvironment = $this;
+		foreach ($namespace->name->parts as $part) {
+			// Create the intermediate environment if it doesn't exist.
+			if (!array_key_exists($part, $namespaceEnvironment->namespaces)) {
+				$namespaceEnvironment->namespaces[$part] =
+					new NamespaceEnvironment(
+						sprintf('%s\%s', $namespaceEnvironment->name, $part),
+						$this);
+			}
+
+			$namespaceEnvironment = $namespaceEnvironment->namespaces[$part];
+		}
+
+		return $namespaceEnvironment;
 	}
 
 	/**
