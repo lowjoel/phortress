@@ -111,6 +111,15 @@ abstract class Environment {
 	}
 
 	/**
+	 * Gets the name of this environment.
+	 *
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
+	}
+
+	/**
 	 * Gets the namespace that this environment is in. For example, if this is
 	 * a function, it will get the namespace that this function is declared in.
 	 *
