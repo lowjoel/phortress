@@ -23,6 +23,22 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 		return $this->getNamespaceEnvironment()->createFunction($function);
 	}
 
+	public function resolveFunction($functionName) {
+		return $this->getNamespaceEnvironment()->resolveFunction($functionName);
+	}
+
+	public function resolveClass($className) {
+		return $this->getNamespaceEnvironment()->resolveClass($className);
+	}
+
+	public function resolveNamespace($namespaceName) {
+		return $this->getNamespaceEnvironment()->resolveNamespace($namespaceName);
+	}
+
+	public function resolveConstant($constantName) {
+		return $this->getNamespaceEnvironment()->resolveConstant($constantName);
+	}
+
 	/**
 	 * Gets the namespace environment for this environment. This is a shorthand
 	 * for defining functions and constants.
