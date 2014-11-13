@@ -316,4 +316,13 @@ abstract class Environment {
 			$symbol->parts[0]
 		);
 	}
+
+	/**
+	 * Copy the values by reference from one array to another.
+	 */
+	protected static function copyValueReferences(&$to, &$from) {
+		foreach ($from as $key => &$value) {
+			$to[$key] = &$value;
+		}
+	}
 }

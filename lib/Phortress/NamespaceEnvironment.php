@@ -93,13 +93,4 @@ class NamespaceEnvironment extends Environment {
 		$result->parent = $this;
 		return $result;
 	}
-
-	/**
-	 * Copy the values by reference from one array to another.
-	 */
-	protected static function copyValueReferences(&$to, &$from) {
-		foreach ($from as $key => &$value) {
-			$to[$key] = &$value;
-		}
-	}
 }
