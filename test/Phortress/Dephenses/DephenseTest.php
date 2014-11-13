@@ -23,5 +23,5 @@ class DephenseTest extends \PHPUnit_Framework_TestCase {
             $this->assertEquals(Taint\Annotation::TAINTED, $taint2);
             $taint3 = $this->program->parseTree[4]->var->taint;
             $this->assertEquals(Taint\Annotation::TAINTED, $taint3);
-	}got
+	}
 }
