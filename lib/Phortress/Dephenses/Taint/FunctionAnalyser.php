@@ -1,6 +1,7 @@
 <?php
 namespace Phortress\Dephenses\Taint;
 
+use Phortress\Exception\UnboundIdentifierException;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
@@ -319,11 +320,21 @@ class FunctionAnalyser{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];
             }else{
-                $assign = $var->environment->resolveVariable($name);
-                $var_arr = $this->constructVariableDetails($var);
-                $var_arr[self::VARIABLE_DEF] = $assign;
-                $this->variables[$name] = $var_arr;
-                return $var_arr;
+	            try{
+		            $assign = $var->environment->resolveVariable($name);
+	            }catch(UnboundIdentifierException $e){
+					//This could mean that the variable is bound to a global,
+//		            or it is not defined in the environment or the variable's name is dynamically
+//		            referenced
+	            }
+	            $var_arr = $this->constructVariableDetails($var);
+	            $this->variables[$name] = $var_arr;
+	            if(!empty($assign)){
+		            $var_arr[self::VARIABLE_DEF] = $assign;
+	            }
+
+	            return $var_arr;
+
             }
         }
     }
