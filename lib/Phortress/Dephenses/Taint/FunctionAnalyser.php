@@ -10,7 +10,7 @@ class FunctionAnalyser{
 
     /**
      * Return statements and the variables they are dependent on.
-     * array(Stmt => array(variable name => array(Variable Info, as stored in the $variables array))
+     * array(Stmt => array(variable name => VariableInfo)
      */
     protected $returnStmts = array();
     
@@ -25,13 +25,13 @@ class FunctionAnalyser{
     protected $functionStmts;
     
     /**
-     * array(variable name => array(VARIABLE_KEY => variable, TAINT_KEY => taint,
-     *  SANITISATION_KEY => array(sanitising functions)))
+     * array(variable name => VariableInfo)
      */
     protected $variables = array();
 
 
 	protected $unresolved_variables = array();
+	
     /**
      * Environment where the function was defined
      */
@@ -127,11 +127,11 @@ class FunctionAnalyser{
     
     private function traceExpressionVariables(Expr $exp){
         if($exp instanceof Node\Scalar){
-            return new VariableInfo();
+	        return array();
         }else if ($exp instanceof Expr\Variable) {
             return $this->traceVariable($exp);
         }else if(($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
-            return new VariableInfo();
+	        return array();
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
             return $this->traceVariable($var);
@@ -162,7 +162,7 @@ class FunctionAnalyser{
             return $this->resolveTernaryTrace($exp->expr);
         }else{
             //Other expressions we will not handle.
-            return new VariableInfo();
+	        return array();
         }
     }
     
@@ -221,9 +221,9 @@ class FunctionAnalyser{
     private function traceBinaryOp(Expr\BinaryOp $exp){
         $left = $exp->left;
         $right = $exp->right;
-        $left_var = $this->traceVariable($left);
-        $right_var = $this->traceVariable($right);
-        return VariableInfo::mergeVariables(array($left_var, $right_var));
+        $left_var = $this->traceExpressionVariables($left);
+        $right_var = $this->traceExpressionVariables($right);
+        return VariableInfo::mergeVariables(array_merge($left_var, $right_var));
     }
 
     private function traceVariable(Expr\Variable $var){
@@ -287,9 +287,18 @@ class FunctionAnalyser{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];
             }else{
-	            $assign = $var->environment->resolveVariable($name);
+	            try{
+		            $assign = $var->environment->resolveVariable($name);
+	            }catch(UnboundIdentifierException $e){
+					print_r($name);
+		            var_dump("error happened");
+	            }
+//	            $assign = $var->environment->resolveVariable($name);
                 $varInfo = new VariableInfo($var);
-	            $varInfo->setDefinition($assign);
+	            if(!empty($assign)){
+		            $varInfo->setDefinition($assign);
+	            }
+
                 $this->variables[$name] = $varInfo;
                 return $varInfo;
             }

@@ -50,6 +50,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
 		$taint2 = $this->program2->parseTree[3]->var->taint;
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
-
+		$taint3 = $this->program2->parseTree[5]->var->taint;
+		$this->assertEquals(Taint\Annotation::SAFE, $taint3);
 	}
 }

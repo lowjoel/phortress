@@ -9,10 +9,10 @@ function func($a, $b) {
 $a = func($tainted, 1);
 $b = func(1, $tainted);
 
-// function func($a, $b) {
-// 	$t = $a + $a;
-// 	$s = $b + 1;
-// 	return $s;
-// }
+function func($a, $b) {
+	$t = $a + $a;
+	$s = $b + 1;
+	return $s;
+}
 
-// $c = func(1, 1);
+$c = func(1, 1);
