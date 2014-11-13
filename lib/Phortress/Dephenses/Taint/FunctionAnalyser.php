@@ -163,7 +163,7 @@ class FunctionAnalyser{
         }
     }
     
-    private static function traceFunctionCall(Expr\FuncCall $exp){
+    private  function traceFunctionCall(Expr\FuncCall $exp){
         $func_name = $exp->name;
         $args = $exp->args;
         $traced_args = array();
@@ -177,7 +177,7 @@ class FunctionAnalyser{
         return $this->mergeVariables($traced_args);
     }
     
-    private static function addSanitisingFunctionInfo($var_infolist, $func_name){
+    private function addSanitisingFunctionInfo($var_infolist, $func_name){
         foreach($var_infolist as $var=>$infolist){
             $original = $infolist[self::SANITISATION_KEY];
             if(\SanitisingFunctions::isSanitisingFunction($func_name)){
@@ -192,11 +192,11 @@ class FunctionAnalyser{
         return $var_infolist;
     }
     
-    private static function traceMethodCall(Expr\MethodCall $exp){
+    private  function traceMethodCall(Expr\MethodCall $exp){
         
     }
     
-     private static function resolveTernaryTrace(Expr\Ternary $exp){
+     private function resolveTernaryTrace(Expr\Ternary $exp){
         $if = $exp->if;
         $else = $exp->else;
         $if_trace = $this->traceExpressionVariables($if);

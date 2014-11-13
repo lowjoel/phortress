@@ -59,7 +59,7 @@ class StmtAnalyser {
         $var = $assign->var;
         $exp = $assign->expr;
         
-        if($var->taintSource == $exp){
+        if(!empty($var->taintSource) && $var->taintSource == $exp){
             return;
         }
 
@@ -107,7 +107,6 @@ class StmtAnalyser {
             return Annotation::SAFE;
         }else if ($exp instanceof Expr\Variable) {
             $var_taint = self::resolveVariableTaint($exp);
-            assert(!empty($var_taint));
             return $var_taint;
         }else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
             return Annotation::SAFE;
@@ -123,7 +122,9 @@ class StmtAnalyser {
             $taint_values = self::resolveTaintOfExprsInArray($exp);
             return max($taint_values);
         }else if($exp instanceof Expr\ArrayDimFetch){
-            return self::resolveArrayFieldTaint($exp);
+            $taint = self::resolveArrayFieldTaint($exp);
+//            assert(!empty($taint));
+            return $taint;
         }else if($exp instanceof Expr\PropertyFetch){
             $var = $exp->var;
             return self::resolveVariableTaint($var);
@@ -167,10 +168,8 @@ class StmtAnalyser {
         $right = $exp->right;
         $left_taint = self::resolveExprTaint($left);
         $right_taint = self::resolveExprTaint($right);
-//        var_dump("start");
-//        var_dump($left_taint);
-//        var_dump($right_taint);
-//        var_dump("end");
+        assert($left_taint != NULL);
+        assert($right_taint !=NULL);
         return self::mergeTaintValues($left_taint, $right_taint);
     }
     
@@ -227,6 +226,7 @@ class StmtAnalyser {
     }
     
     private static function resolveVariableTaintInEnvironment(\Phortress\Environment $env, Expr\Variable $var){
+        assert($env != NULL);
         $name = $var->name;
         if($name instanceof Expr){
             self::annotateVariable($var, Annotation::UNKNOWN);
@@ -235,6 +235,7 @@ class StmtAnalyser {
             try{
                 $assign = $env->resolveVariable($name);
                 self::applyAssignmentRule($assign);
+
                 return $var->taint;
             }catch(UnboundIdentifierException $e){
                 self::annotateVariable($var, Annotation::UNASSIGNED);
