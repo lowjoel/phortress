@@ -107,7 +107,7 @@ class StmtAnalyser {
             return Annotation::SAFE;
         }else if ($exp instanceof Expr\Variable) {
             return self::resolveVariableTaint($exp);
-        }else if($exp instanceof Expr\ClassConstFetch || Expr\ConstFetch){
+        }else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
             return Annotation::SAFE;
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;

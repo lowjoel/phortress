@@ -127,7 +127,7 @@ class FunctionAnalyser{
             return array();
         }else if ($exp instanceof Expr\Variable) {
             return $this->traceVariable($exp);
-        }else if($exp instanceof Expr\ClassConstFetch || Expr\ConstFetch){
+        }else if(($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
             return array();
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
