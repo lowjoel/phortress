@@ -159,7 +159,8 @@ class FunctionAnalyser{
             //If-else block
            return $this->traceTernary($exp);
         }else if($exp instanceof Expr\Eval_){
-
+			//TODO:
+	        return traceExpressionVariable($exp->expr);
         }else{
             //Other expressions we will not handle.
 	        return array();
@@ -229,12 +230,10 @@ class FunctionAnalyser{
 
     private function traceVariable(Expr\Variable $var){
         $name = $var->name;
+	    $var_details = $this->getVariableDetails($var);
         if($name instanceof Expr){
-	        //TODO: fix case where variable cannot be resolved statically
+	        return $var_details;
         }else{
-	        $var_details = $this->getVariableDetails($var);
-
-
 	        if(InputSources::isInputVariable($var)){
 		        $var_details->setTaint(Annotation::TAINTED);
 		        $details_ret = array($name => $var_details);
