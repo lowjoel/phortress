@@ -2,6 +2,7 @@
 namespace Phortress;
 
 use Phortress\Exception\UnboundIdentifierException;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;
@@ -18,6 +19,9 @@ trait EnvironmentHasFunctionsTrait {
 		if (self::isAbsolutelyQualified($functionName)) {
 			return $this->getGlobal()->resolveFunction($functionName);
 		} else if (self::isUnqualified($functionName)) {
+			if ($functionName instanceof Name) {
+				$functionName = implode('\\', $functionName->parts);
+			}
 			if (array_key_exists($functionName, $this->functions)) {
 				return $this->functions[$functionName];
 			} else {
@@ -27,7 +31,7 @@ trait EnvironmentHasFunctionsTrait {
 			list($nextNamespace, $functionName) =
 				self::extractNamespaceComponent($functionName);
 			return $this->resolveNamespace($nextNamespace)->
-			resolveFunction($functionName);
+				resolveFunction($functionName);
 		}
 	}
 
