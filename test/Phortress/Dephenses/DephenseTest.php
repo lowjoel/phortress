@@ -13,7 +13,7 @@ class DephenseTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testBasicAnnotation(){
-
+            var_dump($this->program->parseTree);
             $this->analyser = new Taint\CodeAnalyser($this->program->parseTree);
             $this->analyser->analyse();
 	}

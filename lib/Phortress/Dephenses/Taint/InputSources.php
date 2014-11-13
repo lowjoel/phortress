@@ -1,5 +1,5 @@
 <?php
-namespace Phortress\Dephenses;
+namespace Phortress\Dephenses\Taint;
 use PhpParser\Node;
 /**
  * Contains the list of input sources
@@ -9,7 +9,7 @@ use PhpParser\Node;
  * @author naomileow
  */
 class InputSources {
-    const USER_INPUT_GLOBALS = array(
+    public static $USER_INPUT_GLOBALS = array(
         '_GET',
         '_POST',
         '_COOKIE',
@@ -20,14 +20,14 @@ class InputSources {
         'argv' //argc should be safe? since it's just the number of arguments
     );
     
-    const INPUT_READ_FUNCTIONS = array(
+    public static $INPUT_READ_FUNCTIONS = array(
         'readline',
         'get_headers',
         'parse_url',
         
     );
     
-    const FILE_READ_FUNCTIONS = array(
+    public static $FILE_READ_FUNCTIONS = array(
         'fread', 
         'fopen', 
         'popen',
@@ -49,7 +49,7 @@ class InputSources {
         'scandir',
     );
     
-    const DATABASE_READ_FUNCTIONS = array(
+    public static $DATABASE_READ_FUNCTIONS = array(
         'mysql_fetch_array',
         'mysql_fetch_row',
         'mysql_fetch_assoc',
@@ -94,25 +94,25 @@ class InputSources {
 
 
     public static function isInputVariable(Node\Expr\Variable $var){
-        return in_array($var->name, USER_INPUT_GLOBALS);
+        return in_array($var->name, self::$USER_INPUT_GLOBALS);
     }
     
     public static function isInputVariableName(String $name){
-        return in_array($name, USER_INPUT_GLOBALS);
+        return in_array($name, self::$USER_INPUT_GLOBALS);
     }
     
     public static function isDatabaseRead(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, DATABASE_READ_FUNCTIONS);
+        return in_array($name, self::$DATABASE_READ_FUNCTIONS);
     }
     
     public static function isFileRead(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, FILE_READ_FUNCTIONS);
+        return in_array($name, self::$FILE_READ_FUNCTIONS);
     }
     
     public static function isInputRead(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, INPUT_READ_FUNCTIONS);
+        return in_array($name, self::$INPUT_READ_FUNCTIONS);
     }
 }
