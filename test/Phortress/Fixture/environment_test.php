@@ -15,9 +15,11 @@ class A {
 	private static $c;
 
 	public function testA() {
+		TestNamespace\A();
 	}
 
 	public static function testB() {
+		new \TestNamespace\B();
 	}
 }
 
@@ -26,4 +28,11 @@ class A {
 namespace TestNamespace {
 	function A() {
 	}
+
+	class B {
+	}
+}
+
+namespace TestTestNamespace\TestNamespace {
+	class C {}
 }
