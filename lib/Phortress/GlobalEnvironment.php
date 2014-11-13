@@ -35,4 +35,13 @@ class GlobalEnvironment extends NamespaceEnvironment {
 	public function getGlobal() {
 		return $this;
 	}
+
+	/**
+	 * Gets the superglobals in this global environment.
+	 *
+	 * @return array
+	 */
+	public function &getSuperglobals() {
+		return $this->superglobals;
+	}
 }

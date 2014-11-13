@@ -85,10 +85,10 @@ class Program {
 	 * Parses the given file.
 	 *
 	 * @param string $file The path to the file.
-	 * @return array The statements in all included files file, and the complete
-	 * parse tree of the program after following requires and includes.
-	 * @throws Exception\ParseErrorException When there is a syntax error in the
-	 * input source.
+	 * @return array The statements in all included files file, and the complete parse tree of the
+	 *               program after following requires and includes.
+	 * @throws Exception\ParseErrorException When there is a syntax error in the input source.
+	 * @throws IOException When the file cannot be opened.
 	 */
 	private static function parseFile($file) {
 		$realfile = realpath($file);
