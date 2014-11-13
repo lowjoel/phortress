@@ -70,7 +70,7 @@ class FunctionAnalyser{
         $result = array(Annotation::UNASSIGNED, array());
         foreach($this->returnStmts as $return){
             $ret_effect = $this->analyseArgumentsEffectOnReturn($args, $return);
-            $result = array(max($result[0], $ret_effect[0]), merge_array($result[1], $ret_effect[1]));
+            $result = array(max($result[0], $ret_effect[0]), array_merge($result[1], $ret_effect[1]));
         }
         return $result;
     }
@@ -127,7 +127,7 @@ class FunctionAnalyser{
             return array();
         }else if ($exp instanceof Expr\Variable) {
             return $this->traceVariable($exp);
-        }else if($exp instanceof Expr\ClassConstFetch || Expr\ConstFetch){
+        }else if(($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
             return array();
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
@@ -264,7 +264,7 @@ class FunctionAnalyser{
         $var_details = $this->getVariableDetails($var);
         $details_ret = array($name => $var_details);
         
-        if(\Phortress\Dephenses\InputSources::isInputVariable($var)){
+        if(InputSources::isInputVariable($var)){
             $var_details[self::TAINT_KEY] = Annotation::TAINTED;
             return $details_ret;
         }

@@ -107,7 +107,7 @@ class StmtAnalyser {
             return Annotation::SAFE;
         }else if ($exp instanceof Expr\Variable) {
             return self::resolveVariableTaint($exp);
-        }else if($exp instanceof Expr\ClassConstFetch || $exp instanceof Expr\ConstFetch){
+        }else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
             return Annotation::SAFE;
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
@@ -174,8 +174,8 @@ class StmtAnalyser {
         $array_var = $exp->var;
         $array_var_name = $array_var->name;
 //        $array_field = $exp->var->dim;
-        var_dump($array_var_name);
-        if(Dephenses\Taint\InputSources::isInputVariableName($array_var_name)){
+
+        if(InputSources::isInputVariableName($array_var_name)){
             self::annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }
@@ -205,7 +205,8 @@ class StmtAnalyser {
             return $annot;
         }
         
-        if(Dephenses\Taint\InputSources::isInputVariable($exp)){
+
+        if(InputSources::isInputVariable($exp)){
             self::annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }

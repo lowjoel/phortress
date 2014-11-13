@@ -1,6 +1,9 @@
 <?php
 namespace Phortress\Dephenses\Taint;
+
 use PhpParser\Node;
+use PhpParser\Node\Expr\FuncCall;
+
 /**
  * Contains the list of input sources
  * Has a method which checks if the variable is an input variable, 
@@ -94,25 +97,27 @@ class InputSources {
 
 
     public static function isInputVariable(Node\Expr\Variable $var){
-        return in_array($var->name, self::$USER_INPUT_GLOBALS);
+        return in_array($var->name, self::USER_INPUT_GLOBALS);
     }
     
     public static function isInputVariableName(String $name){
-        return in_array($name, self::$USER_INPUT_GLOBALS);
+        return in_array($name, self::USER_INPUT_GLOBALS);
     }
     
     public static function isDatabaseRead(FuncCall $func){
         $name = $func->name->getLast();
         return in_array($name, self::$DATABASE_READ_FUNCTIONS);
+
     }
     
     public static function isFileRead(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, self::$FILE_READ_FUNCTIONS);
+        return in_array($name, self::FILE_READ_FUNCTIONS);
     }
     
     public static function isInputRead(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, self::$INPUT_READ_FUNCTIONS);
+
+        return in_array($name, self::INPUT_READ_FUNCTIONS);
     }
 }

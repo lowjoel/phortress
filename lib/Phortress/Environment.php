@@ -2,6 +2,7 @@
 namespace Phortress;
 use Phortress\Exception\UnboundIdentifierException;
 use PhpParser\Node;
+use PhpParser\Node\Name;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
 
@@ -180,7 +181,7 @@ abstract class Environment {
 	public function resolveVariable($variableName) {
 		if (array_key_exists($variableName, $this->variables)) {
 			$result = $this->variables[$variableName];
-			if ($result == self::UNSET_) {
+			if ($result === self::UNSET_) {
 				throw new UnboundIdentifierException($variableName, $this);
 			} else {
 				return $result;
@@ -188,7 +189,8 @@ abstract class Environment {
 
 		// We can only check our own local environment. We cannot pass a
 		// function environment and check our namespace for variables.
-		} else if ($this->shouldResolveVariablesInParentEnvironment()) {
+		} else if (!empty($this->getParent()) &&
+			$this->shouldResolveVariablesInParentEnvironment()) {
 			return $this->getParent()->resolveVariable($variableName);
 		} else {
 			throw new UnboundIdentifierException($variableName, $this);
@@ -249,11 +251,15 @@ abstract class Environment {
 	/**
 	 * Checks if the given symbol is absolutely qualified.
 	 *
-	 * @param string $symbol The name of the symbol.
+	 * @param string|Name $symbol The name of the symbol.
 	 * @return bool
 	 */
 	protected static function isAbsolutelyQualified($symbol) {
-		return substr($symbol, 0, 1) === '\\';
+		if (is_string($symbol)) {
+			return substr($symbol, 0, 1) === '\\';
+		} else {
+			return $symbol instanceof Name\FullyQualified;
+		}
 	}
 
 	/**
@@ -273,7 +279,9 @@ abstract class Environment {
 	 * @return bool True if the symbol is unqualified.
 	 */
 	protected static function isUnqualified($symbol) {
-		return self::isRelativelyQualified($symbol) &&
-		strpos($symbol, '\\') === false;
+		return self::isRelativelyQualified($symbol) && (
+				(is_string($symbol) && strpos($symbol, '\\') === false) ||
+				!($symbol instanceof Name\Relative)
+			);
 	}
 }
