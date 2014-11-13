@@ -12,7 +12,9 @@ use \PhpParser\Node\Stmt;
  */
 class ClassEnvironment extends Environment {
 	use EnvironmentHasFunctionsTrait,
-		EnvironmentHasConstantsTrait;
+		EnvironmentHasConstantsTrait {
+		createFunction as traitCreateFunction;
+	}
 
 	/**
 	 * The instance environment for class instances.
@@ -58,7 +60,7 @@ class ClassEnvironment extends Environment {
 	public function createFunction(Stmt $function) {
 		assert($function instanceof Stmt\ClassMethod, 'Only accepts class methods');
 		if ($function->isStatic()) {
-			return parent::createFunction($function);
+			return $this->traitCreateFunction($function);
 		} else {
 			$this->instanceEnvironment->createFunction($function);
 			return $this;
