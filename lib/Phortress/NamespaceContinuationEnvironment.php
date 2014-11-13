@@ -33,7 +33,7 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 		return $this->getNamespace()->resolveClass($className);
 	}
 
-	public function resolveNamespace(Name $namespaceName) {
+	public function resolveNamespace(Name $namespaceName = null) {
 		return $this->getNamespace()->resolveNamespace($namespaceName);
 	}
 

@@ -164,7 +164,7 @@ abstract class Environment {
 	 * @return NamespaceEnvironment
 	 * @throws UnboundIdentifierException When the identifier cannot be found.
 	 */
-	public function resolveNamespace(Name $namespaceName) {
+	public function resolveNamespace(Name $namespaceName = null) {
 		return $this->getNamespace()->resolveNamespace($namespaceName);
 	}
 
@@ -323,8 +323,8 @@ abstract class Environment {
 		return array(
 			count($symbol->parts) === 1 ?
 				null :
-				new Name(array_slice($symbol->parts, 1), $symbol->getAttributes()),
-			$symbol->parts[0]
+				new Name($symbol->parts[0], $symbol->getAttributes()),
+			new Name\Relative(array_slice($symbol->parts, 1), $symbol->getAttributes())
 		);
 	}
 

@@ -24,7 +24,7 @@ class NamespaceEnvironment extends Environment {
 	 */
 	protected $classes = array();
 
-	public function resolveNamespace(Name $namespaceName) {
+	public function resolveNamespace(Name $namespaceName = null) {
 		if ($namespaceName === null) {
 			return $this;
 		} else if (self::isAbsolutelyQualified($namespaceName)) {
