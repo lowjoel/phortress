@@ -181,7 +181,7 @@ abstract class Environment {
 	public function resolveVariable($variableName) {
 		if (array_key_exists($variableName, $this->variables)) {
 			$result = $this->variables[$variableName];
-			if ($result == self::UNSET_) {
+			if ($result === self::UNSET_) {
 				throw new UnboundIdentifierException($variableName, $this);
 			} else {
 				return $result;
