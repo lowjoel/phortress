@@ -31,4 +31,8 @@ class GlobalEnvironment extends NamespaceEnvironment {
 
 		self::copyValueReferences($this->variables, $this->superglobals);
 	}
+
+	public function getGlobal() {
+		return $this;
+	}
 }
