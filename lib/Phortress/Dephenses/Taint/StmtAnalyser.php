@@ -174,14 +174,13 @@ class StmtAnalyser {
         $array_var = $exp->var;
         $array_var_name = $array_var->name;
 //        $array_field = $exp->var->dim;
-
         if(InputSources::isInputVariableName($array_var_name)){
             self::annotateVariable($exp, Annotation::TAINTED);
             return $exp->taint;
         }
         $env = $array_var->environment;
         if(!empty($env)){
-            return resolveVariableTaintInEnvironment($env, $array_var);
+            return self::resolveVariableTaintInEnvironment($env, $array_var);
         }else{
             self::annotateVariable($array_var, Annotation::UNASSIGNED);
             return Annotation::UNASSIGNED;

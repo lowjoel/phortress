@@ -288,7 +288,8 @@ class FunctionAnalyser{
         $filter = function($item) use ($name){
             return ($item->name == $name);
         };
-        return !empty(array_filter($this->params, $filter));
+        $matches = array_filter($this->params, $filter);
+        return !empty($matches);
     }
     
     private function constructVariableDetails(Expr\Variable $var, $taint = Annotation::UNASSIGNED, $sanitising = array()){

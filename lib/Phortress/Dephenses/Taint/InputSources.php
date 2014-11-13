@@ -97,11 +97,11 @@ class InputSources {
 
 
     public static function isInputVariable(Node\Expr\Variable $var){
-        return in_array($var->name, self::USER_INPUT_GLOBALS);
+        return in_array($var->name, self::$USER_INPUT_GLOBALS);
     }
     
-    public static function isInputVariableName(String $name){
-        return in_array($name, self::USER_INPUT_GLOBALS);
+    public static function isInputVariableName($name){
+        return in_array($name, self::$USER_INPUT_GLOBALS);
     }
     
     public static function isDatabaseRead(FuncCall $func){
@@ -112,12 +112,12 @@ class InputSources {
     
     public static function isFileRead(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, self::FILE_READ_FUNCTIONS);
+        return in_array($name, self::$FILE_READ_FUNCTIONS);
     }
     
     public static function isInputRead(FuncCall $func){
         $name = $func->name->getLast();
 
-        return in_array($name, self::INPUT_READ_FUNCTIONS);
+        return in_array($name, self::$INPUT_READ_FUNCTIONS);
     }
 }
