@@ -5,6 +5,7 @@ use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
+use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 
 class ClassInstanceEnvironment extends Environment {
@@ -46,10 +47,11 @@ class ClassInstanceEnvironment extends Environment {
 		$result = $this->traitCreateFunction($function);
 
 		// Assign $this
-		$result->variables['this'] = (new Assign(
-				new Variable('this'),
-				new New_(new Name($this->classEnvironment->getName()))
-			));
+		$result->variables['this'] = new Param(
+			'this',
+			null,
+			new Name($this->classEnvironment->getName())
+		);
 
 		return $result;
 	}
