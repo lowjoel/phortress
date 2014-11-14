@@ -6,8 +6,10 @@ use PhpParser\Node\Stmt\Global_;
 class FunctionEnvironment extends Environment {
 	public function __construct($name, Environment $parent) {
 		parent::__construct($name, $parent);
-		self::copyValueReferences($this->variables,
-			$parent->getGlobal()->getSuperglobals());
+		if (!($parent instanceof FunctionEnvironment)) {
+			self::copyValueReferences($this->variables,
+				$parent->getGlobal()->getSuperglobals());
+		}
 	}
 
 	public function shouldResolveVariablesInParentEnvironment() {
