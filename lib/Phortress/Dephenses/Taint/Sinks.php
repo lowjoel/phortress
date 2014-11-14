@@ -365,6 +365,6 @@ class Sinks {
 
 	public static function isSQLInjectionSinkFunction(Expr\FuncCall $func){
 		$funcName = $func->name->getLast();
-		return in_array($funcName, self::$DATABASE_SINKS);
+		return array_key_exists($funcName, self::$DATABASE_SINKS);
 	}
 }

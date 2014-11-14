@@ -76,10 +76,14 @@ class VariableInfo {
 		return array_intersect($sanitising1, $sanitising2);
 	}
 
-
+	/**
+	 * Takes in of the form: array(array(var name => VariableInfo))
+	 * Flattens it to a single array mapping a variable's name to the variable's corresponding
+	 * VariableInfo object. In otherwords, the return array should be of the form:
+	 * array(variable_name => VariableInfo)
+	 */
 	public static function mergeVariables($vars){
 		$merged = array();
-		//This takes in an array of the $item is of the form: array(array(var name => VariableInfo))
 		foreach($vars as $item){
 			foreach($item as $var_name => $varInfo){
 				if(empty($varInfo)){
