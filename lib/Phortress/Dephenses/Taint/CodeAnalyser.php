@@ -22,4 +22,8 @@ class CodeAnalyser {
         }
         return array();
     }
+
+	public function runVulnerabilityChecks(){
+
+	}
 }

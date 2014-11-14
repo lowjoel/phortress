@@ -4,14 +4,14 @@ namespace Phortress\Dephenses\Taint;
 use \Phortress\Dephenses;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+
 /**
  *  Most basic unit of the taint analyser. Takes in a statement and annotates the taint values of
  * the variables that are modified by the statement, according the taint values of the items their
- * values are
- * dependant on.
+ * values are dependant on.
  * In otherwords, if the current value of a variable is computed based on a tainted variable or a
  * tainted data source, it is considered to be tainted.
- *
+ * Currently, this only considers variable modification made by an Assign or AssignOp expression
 *@author naomileow
  */
 class StmtAnalyser {
@@ -263,7 +263,8 @@ class StmtAnalyser {
                 return Annotation::UNKNOWN;
             }
             $func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
-            $analysis_res = $func_analyser->analyseFunctionCall($exp->args); //TODO: figure out how to include the sanitising functions
+            $analysis_res = $func_analyser->analyseFunctionCall($exp->args);
+            //TODO: figure out how to include the sanitising functions
             $taint_res = $analysis_res[0];
 	        $taint_res = max($taint_res, Annotation::SAFE);
 	        return $taint_res;
