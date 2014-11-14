@@ -105,20 +105,44 @@ class InputSources {
         return in_array($name, self::$USER_INPUT_GLOBALS);
     }
     
-    public static function isDatabaseRead(FuncCall $func){
+    public static function isDatabaseReadFuncCall(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, self::$DATABASE_READ_FUNCTIONS);
+        return self::isDatabaseRead($name);
 
     }
+
+	public static function isDatabaseRead($funcName){
+		return in_array($funcName, self::$DATABASE_READ_FUNCTIONS);
+	}
     
-    public static function isFileRead(FuncCall $func){
+    public static function isFileReadFuncCall(FuncCall $func){
         $name = $func->name->getLast();
-        return in_array($name, self::$FILE_READ_FUNCTIONS);
+        return self::isFileRead($name);
     }
+
+	public static function isFileRead($funcName){
+		return in_array($funcName, self::$FILE_READ_FUNCTIONS);
+	}
     
-    public static function isInputRead(FuncCall $func){
+    public static function isInputReadFuncCall(FuncCall $func){
         $name = $func->name->getLast();
 
-        return in_array($name, self::$INPUT_READ_FUNCTIONS);
+        return self::isInputRead($name);
     }
+
+	public static function isInputRead($funcName){
+		return in_array($funcName, self::$INPUT_READ_FUNCTIONS);
+	}
+
+	public static function isInputSourceFuncCall(FuncCall $func){
+		$name = $func->name->getLast();
+		return self::isInputSource($name);
+	}
+
+	public static function isInputSourceFunction($funcName){
+		return self::isFileRead($funcName) || self::isInputRead($funcName) ||
+		self::isDatabaseRead($funcName);
+	}
+
+
 }
