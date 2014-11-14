@@ -260,7 +260,9 @@ class StmtAnalyser {
             }
             $func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
             $analysis_res = $func_analyser->analyseFunctionCall($exp->args); //TODO: figure out how to include the sanitising functions
-            return $analysis_res[0];
+            $taint_res = $analysis_res[0];
+	        $taint_res = max($taint_res, Annotation::SAFE);
+	        return $taint_res;
         }
     }
     

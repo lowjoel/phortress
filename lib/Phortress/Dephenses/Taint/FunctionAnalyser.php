@@ -131,7 +131,6 @@ class FunctionAnalyser{
 
 	private function traceStatementVariables(Stmt $stmt){
 		if($stmt instanceof Stmt\If_){
-			var_dump("processing if");
 			return $this->traceIfStatement($stmt);
 		}else if($stmt instanceof Stmt\Else_){
 			$items = $stmt->stmts;

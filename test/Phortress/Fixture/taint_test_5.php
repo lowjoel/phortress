@@ -1,7 +1,7 @@
 <?php
 $tainted = $_GET['tainted'];
 function func($a, $b) {
-	$ret = 0;
+	$ret = 5;
 	if($a > 3){
 		$ret = $b;
 	}else{

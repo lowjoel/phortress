@@ -70,6 +70,8 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testTaintedParamsWithTernarySingleReturn(){
+		//This test fails because the back trace leads to each assignment in the if-else block
+		//individually, instead of seeing them in the context of a conditional.
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program4->parseTree);
 //		$taint1 = $this->program4->parseTree[2]->var->taint;
