@@ -44,6 +44,12 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 			(new \TestObject($globalNamespace[1]->stmts[0]->environment))->variables);
 	}
 
+	public function testCanFindGlobalInFunction() {
+		$globalStmt = $this->program->environment->resolveFunction(new Name('c'))->stmts[2];
+		$globalStmtEnvironment = new \TestObject($globalStmt->environment);
+		$this->assertArrayHasKey('glob', $globalStmtEnvironment->variables);
+	}
+
 	public function testCanFindClassInTopLevel() {
 		$this->assertArrayHasKey('A',
 			(new \TestObject($this->program->environment))->classes);
