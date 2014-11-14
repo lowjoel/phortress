@@ -58,6 +58,10 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 			$this->pushEnvironment($node->environment);
 		} else if ($node instanceof Stmt\Property) {
 			$this->currentEnvironment()->defineVariableByValue($node);
+		} else if ($node instanceof Stmt\Global_) {
+			$node->environment = $this->currentEnvironment()->
+				defineVariableByReference($node);
+			$this->setCurrentEnvironment($node->environment);
 		} else if ($node instanceof Expr\Assign) {
 			$node->environment = $this->currentEnvironment()->
 				defineVariableByValue($node);
