@@ -1,4 +1,5 @@
 <?php
+namespace Phortress\Dephenses\Taint;
 use \PhpParser\Node\Expr;
 
 /**

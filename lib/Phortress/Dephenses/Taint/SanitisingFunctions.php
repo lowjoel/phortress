@@ -1,5 +1,5 @@
 <?php
-
+namespace Phortress\Dephenses\Taint;
 /**
  * Contains the list of sanitising functions
  * Has a method which checks if an expression correctly sanitises the variable 
