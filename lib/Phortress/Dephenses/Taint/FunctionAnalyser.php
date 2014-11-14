@@ -2,9 +2,10 @@
 namespace Phortress\Dephenses\Taint;
 
 use Phortress\Exception\UnboundIdentifierException;
-use PhpParser\Node;
-use PhpParser\Node\Expr;
-use PhpParser\Node\Stmt;
+use \PhpParser\Node;
+use \PhpParser\Node\Expr;
+use \PhpParser\Node\Stmt;
+use \PhpParser\NodeTraverser;
 
 class FunctionAnalyser{
 
@@ -42,6 +43,9 @@ class FunctionAnalyser{
     public function __construct(\Phortress\Environment $env, $functionName) {
         assert(!($functionName instanceof Expr));
         //For now we do not handle dynamic function names;
+	    $this->variables = array();
+	    $this->unresolved_variables = array();
+
         $this->environment = $env;
         $this->function = $env->resolveFunction($functionName);
         $this->functionStmts = $this->function->stmts;
@@ -105,6 +109,9 @@ class FunctionAnalyser{
         return $mappings;
     }
 
+	/**
+	 * This is run once to construct an array of variables the return statement is dependent on
+	 */
     private function analyseReturnStatementsDependencies($stmts){
         $retStmts = $this->getReturnStatements($stmts);
         $stmt_dependencies = array();
@@ -202,6 +209,7 @@ class FunctionAnalyser{
             return $this->traceVariable($var);
         }else if($exp instanceof Expr\StaticPropertyFetch){
             //TODO:
+	        return array();
         }else if($exp instanceof Expr\FuncCall){
             return $this->traceFunctionCall($exp);
         }else if($exp instanceof Expr\MethodCall){
@@ -359,11 +367,14 @@ class FunctionAnalyser{
         }
     }
     
-    private function getReturnStatements($stmts){
-        $filter_returns = function($item){
-            return ($item instanceof Stmt\Return_);
-        };
-        return array_filter($stmts, $filter_returns);
+    private function getReturnStatements(array $stmts){
+	    $traverser = new NodeTraverser();
+	    $finder = new ReturnStatementFinder();
+	    $traverser->addVisitor($finder);
+	    $traverser->traverse($stmts);
+	    return $finder->getReturnStatements();
     }
+
+
     
 }
