@@ -304,8 +304,10 @@ class FunctionAnalyser{
 		        $details_ret = array($name => $var_details);
 		        return $details_ret;
 	        }
-
-	        return $this->traceVariableAssignmentToParameters($var, $var_details, $ignore_vars);
+	        $details_ret = array($var->name => $var_details);
+	        $trace_res = $this->traceVariableAssignmentToParameters($var, $var_details,
+		        $ignore_vars);
+	        return VariableInfo::mergeVariables(array($details_ret, $trace_res));
         }
 
     }
@@ -313,11 +315,11 @@ class FunctionAnalyser{
 	private function traceVariableAssignmentToParameters(Expr\Variable $var,
 	                                                     VariableInfo $var_details,
 	                                                     $ignore_vars = array()){
-		$details_ret = array($var->name => $var_details);
+
 		if(in_array($var, $ignore_vars)){
-			return $details_ret;
+			return array();
 		}
-		$ignore_vars[] = $var;
+
 		if(!$this->isFunctionParameter($var)){
 			$assign = $var_details->getDefinition();
 			if(empty($assign)){
@@ -331,11 +333,12 @@ class FunctionAnalyser{
 			}
 
 			if(!empty($assign)) {
+				$ignore_vars[] = $var;
 				$ref_expr = $assign->expr;
 				return $this->traceExpressionVariables($ref_expr, $ignore_vars);
 			}
 		}
-		return $details_ret;
+		return array();
 	}
     
     private function isFunctionParameter(Expr\Variable $var){
