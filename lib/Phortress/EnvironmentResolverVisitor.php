@@ -58,6 +58,10 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 			$this->pushEnvironment($node->environment);
 		} else if ($node instanceof Stmt\Property) {
 			$this->currentEnvironment()->defineVariableByValue($node);
+		} else if ($node instanceof Stmt\Global_) {
+			$node->environment = $this->currentEnvironment()->
+				defineVariableByReference($node);
+			$this->setCurrentEnvironment($node->environment);
 		} else if ($node instanceof Expr\Assign) {
 			$node->environment = $this->currentEnvironment()->
 				defineVariableByValue($node);
@@ -65,15 +69,20 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 		} else if ($node instanceof Node\Expr) {
 			$node->environment = $this->currentEnvironment();
 		} else {
+			$ignoredNodes = array_flip(array(
+				'PhpParser\Node\Name',
+				'PhpParser\Node\Name\FullyQualified',
+				'PhpParser\Node\Name\Relative',
+				'PhpParser\Node\Arg',
+				'PhpParser\Node\Param',
+				'PhpParser\Node\Stmt\PropertyProperty',
+				'PhpParser\Node\Stmt\Echo_',
+				'PhpParser\Node\Stmt\If_',
+				'PhpParser\Node\Stmt\Else_',
+				'PhpParser\Node\Stmt\Return_'));
 			$className = get_class($node);
-			switch ($className) {
-				case 'PhpParser\Node\Name':
-				case 'PhpParser\Node\Stmt\PropertyProperty':
-				case 'PhpParser\Node\Stmt\Echo_':
-				case 'PhpParser\Node\Stmt\Return_':
-					break;
-				default:
-					printf('Unknown node type: %s'."\n", $className);
+			if (!array_key_exists($className, $ignoredNodes)) {
+				printf('Unknown node type: %s, ignored.'."\n", $className);
 			}
 		}
 	}

@@ -25,17 +25,29 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('glob',
 			(new \TestObject($globalNamespace[0]->environment))->variables);
 		$this->assertArrayHasKey('b',
-			(new \TestObject($globalNamespace[2]->environment))->variables);
+			(new \TestObject($globalNamespace[4]->environment))->variables);
 		$this->assertNotEmpty(
-			$globalNamespace[2]->environment->resolveVariable('glob'));
+			$globalNamespace[4]->environment->resolveVariable('glob'));
 		$this->assertNotEmpty(
-			$globalNamespace[2]->environment->resolveVariable('b'));
+			$globalNamespace[4]->environment->resolveVariable('b'));
+	}
+
+	public function testCanFindArgumentInFunction() {
+		$bEnvironment = new \TestObject(
+			$this->program->environment->resolveFunction(new Name('b'))->environment);
+		$this->assertArrayHasKey('argA', $bEnvironment->variables);
 	}
 
 	public function testCanFindVariableDefinitionInFunction() {
 		$globalNamespace = $this->program->parseTree[0]->stmts;
 		$this->assertArrayHasKey('glob',
 			(new \TestObject($globalNamespace[1]->stmts[0]->environment))->variables);
+	}
+
+	public function testCanFindGlobalInFunction() {
+		$globalStmt = $this->program->environment->resolveFunction(new Name('c'))->stmts[2];
+		$globalStmtEnvironment = new \TestObject($globalStmt->environment);
+		$this->assertArrayHasKey('glob', $globalStmtEnvironment->variables);
 	}
 
 	public function testCanFindClassInTopLevel() {
