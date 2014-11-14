@@ -47,7 +47,7 @@ class NamespaceContinuationEnvironment extends NamespaceEnvironment {
 	 */
 	public function getNamespace() {
 		$parent = $this->getParent();
-		while ($parent && get_class($parent) === '\Phortress\NamespaceContinuationEnvironment') {
+		while ($parent && get_class($parent) === 'Phortress\NamespaceContinuationEnvironment') {
 			$parent = $parent->getParent();
 		}
 

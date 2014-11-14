@@ -26,7 +26,7 @@ class ClassInstanceEnvironment extends Environment {
 		$this->classEnvironment = $classEnvironment;
 	}
 
-	public function shouldResolveVariablesInParentEnvironment() {
+	protected function shouldResolveVariablesInParentEnvironment() {
 		// Only ourself.
 		return false;
 	}
