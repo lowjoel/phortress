@@ -68,12 +68,18 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 			$className = get_class($node);
 			switch ($className) {
 				case 'PhpParser\Node\Name':
+				case 'PhpParser\Node\Name\FullyQualified':
+				case 'PhpParser\Node\Name\Relative':
+				case 'PhpParser\Node\Arg':
+				case 'PhpParser\Node\Param':
 				case 'PhpParser\Node\Stmt\PropertyProperty':
 				case 'PhpParser\Node\Stmt\Echo_':
+				case 'PhpParser\Node\Stmt\If_':
+				case 'PhpParser\Node\Stmt\Else_':
 				case 'PhpParser\Node\Stmt\Return_':
 					break;
 				default:
-					printf('Unknown node type: %s'."\n", $className);
+					printf('Unknown node type: %s, ignored.'."\n", $className);
 			}
 		}
 	}
