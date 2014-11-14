@@ -8,6 +8,7 @@ function a() {
 }
 
 function b($argA) {
+	$b = $argA;
 	return $argA;
 }
 

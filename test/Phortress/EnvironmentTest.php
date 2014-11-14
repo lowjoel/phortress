@@ -33,9 +33,12 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testCanFindArgumentInFunction() {
-		$bEnvironment = new \TestObject(
-			$this->program->environment->resolveFunction(new Name('b'))->environment);
+		$b = $this->program->environment->resolveFunction(new Name('b'));
+		$bEnvironment = new \TestObject($b->environment);
 		$this->assertArrayHasKey('argA', $bEnvironment->variables);
+
+		$this->assertEquals($bEnvironment->variables['argA'],
+			$b->stmts[1]->expr->environment->resolveVariable('argA'));
 	}
 
 	public function testCanFindVariableDefinitionInFunction() {

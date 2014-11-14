@@ -11,7 +11,7 @@ class FunctionEnvironment extends Environment {
 	}
 
 	public function shouldResolveVariablesInParentEnvironment() {
-		return get_class($this->getParent()) === '\Phortress\FunctionEnvironment';
+		return get_class($this->getParent()) === 'Phortress\FunctionEnvironment';
 	}
 
 	public function createChild() {
