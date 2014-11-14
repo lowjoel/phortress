@@ -95,6 +95,7 @@ class FunctionAnalyser{
                 $taint_val = max($taint_val, $taint_mappings[$var_name]);
             }
         }
+	    //taint_val might be UNASSIGNED if the return values trace to a scalar.
         return array($taint_val, $sanitising_funcs);
     }
     
