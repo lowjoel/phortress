@@ -338,11 +338,7 @@ class FunctionAnalyser{
 			$assign = $var_details->getDefinition();
 			if(empty($assign)){
 				if(!($var->name instanceof Expr)){
-					try{
-						$assign = $this->environment->resolveVariable($var->name);
-					}catch (UnboundIdentifierException $e){
-					//TODO: remove this when fix in environment is done
-					}
+					$assign = $this->environment->resolveVariable($var->name);
 				}
 			}
 
@@ -384,14 +380,9 @@ class FunctionAnalyser{
             if(array_key_exists($name, $this->variables)){
                 return $this->variables[$name];
             }else{
-	            try{
-		            $assign = $var->environment->resolveVariable($name);
-	            }catch(UnboundIdentifierException $e){
-					var_dump($name);
-		            var_dump("error happened");
-	            }
-//	            $assign = $var->environment->resolveVariable($name);
-                $varInfo = new VariableInfo($var);
+
+	            $assign = $var->environment->resolveVariable($name);
+	            $varInfo = new VariableInfo($var);
 	            if(!empty($assign)){
 		            $varInfo->setDefinition($assign);
 	            }
