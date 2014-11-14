@@ -25,11 +25,11 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('glob',
 			(new \TestObject($globalNamespace[0]->environment))->variables);
 		$this->assertArrayHasKey('b',
-			(new \TestObject($globalNamespace[3]->environment))->variables);
+			(new \TestObject($globalNamespace[4]->environment))->variables);
 		$this->assertNotEmpty(
-			$globalNamespace[3]->environment->resolveVariable('glob'));
+			$globalNamespace[4]->environment->resolveVariable('glob'));
 		$this->assertNotEmpty(
-			$globalNamespace[3]->environment->resolveVariable('b'));
+			$globalNamespace[4]->environment->resolveVariable('b'));
 	}
 
 	public function testCanFindArgumentInFunction() {

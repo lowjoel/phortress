@@ -11,6 +11,12 @@ function b($argA) {
 	return $argA;
 }
 
+function c() {
+	$d = $_GET['a'];
+	global $glob;
+	$glob = 3;
+}
+
 $b = a();
 
 class A {

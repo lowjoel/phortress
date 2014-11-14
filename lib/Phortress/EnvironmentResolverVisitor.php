@@ -76,7 +76,8 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 				'PhpParser\Node\Stmt\If_',
 				'PhpParser\Node\Stmt\Else_',
 				'PhpParser\Node\Stmt\Return_'));
-			if (!array_key_exists(get_class($node), $ignoredNodes)) {
+			$className = get_class($node);
+			if (!array_key_exists($className, $ignoredNodes)) {
 				printf('Unknown node type: %s, ignored.'."\n", $className);
 			}
 		}
