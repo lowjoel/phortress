@@ -89,7 +89,7 @@ class VariableInfo {
 					$merged[$var_name] = $varInfo;
 				}else{
 					$existing = $merged[$var_name];
-					$merged[$var_name] = self::mergeVariableRecords($existing, $varInfo);
+					$merged[$var_name] = self::mergeVariableInfo($existing, $varInfo);
 				}
 			}
 		}
