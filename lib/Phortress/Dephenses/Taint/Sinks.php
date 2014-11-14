@@ -1,11 +1,13 @@
 <?php
+use \PhpParser\Node\Expr;
+
 /**
  * List of Sink Functions adapted from RIPS
  *
  * @author naomileow
  */
 class Sinks {
-    public $XSS_SINKS = array(
+    public static $XSS_SINKS = array(
 		'echo'							=> array(), 
 		'print'							=> array(),
 		'print_r'						=> array(),
@@ -16,13 +18,13 @@ class Sinks {
 	);
 	
 	// HTTP header injections
-    public $HTTP_HEADER = array(
+    public static $HTTP_HEADER = array(
 		'header' 						=> array(array(1), array())
 	);
 	
 	// code evaluating functions  => (parameters to scan, securing functions)
 	// example parameter array(1,3) will trace only first and third parameter 
-    public $CODE_EXE_SINKS = array(
+    public static $CODE_EXE_SINKS = array(
 		'array_diff_uassoc'				=> array(array(3), array()),
 		'array_diff_ukey'				=> array(array(3), array()),
 		'array_filter'					=> array(array(2), array()),
@@ -95,7 +97,7 @@ class Sinks {
 	);
 	
 	// file inclusion functions => (parameters to scan, securing functions)
-	public $FILE_INCLUSION_SINKS = array(
+	public static $FILE_INCLUSION_SINKS = array(
 		'include' 						=> array(array(1)),
 		'include_once' 					=> array(array(1)),
 		'parsekit_compile_file'			=> array(array(1)),
@@ -110,7 +112,7 @@ class Sinks {
 	// file handler functions like fopen() are added as parameter 
 	// for functions that use them like fread() and fwrite()
 //	$NAME_FILE_READ = 'File Disclosure';
-	public $FILE_READ_SINKS = array(
+	public static $FILE_READ_SINKS = array(
 		'bzread'						=> array(array(1), array()), 
 		'bzflush'						=> array(array(1), array()), 
 		'dio_read'						=> array(array(1), array()),   
@@ -168,7 +170,7 @@ class Sinks {
 	
 	// file or file system affecting functions
 //	$NAME_FILE_AFFECT = 'File Manipulation';
-	public $FILE_AFFECT_SINKS = array(
+	public static $FILE_AFFECT_SINKS = array(
 		'bzwrite'						=> array(array(2), array()),
 		'chmod'							=> array(array(1), array()),
 		'chgrp'							=> array(array(1), array()),
@@ -212,7 +214,7 @@ class Sinks {
 	);
 	// OS Command executing functions => (parameters to scan, securing functions)
 //	$NAME_EXEC = 'Command Execution';
-	public $FILE_EXEC_SINKS = array(
+	public static $FILE_EXEC_SINKS = array(
 		'backticks'						=> array(array(1), array()), # transformed during parsing
 		'exec'							=> array(array(1), array()),
 		'expect_popen'					=> array(array(1), array()),
@@ -227,7 +229,7 @@ class Sinks {
 		'w32api_register_function'		=> array(array(2), array()),
 	);
 	// SQL executing functions => (parameters to scan, securing functions)
-	public $DATABASE_SINKS = array(
+	public static $DATABASE_SINKS = array(
 	// Abstraction Layers
 		'dba_open'						=> array(array(1), array()),
 		'dba_popen'						=> array(array(1), array()), 
@@ -287,14 +289,14 @@ class Sinks {
 	);
 	
 	// xpath injection
-	public $XPATH_SINKS = array(
+	public static $XPATH_SINKS = array(
 		'xpath_eval'					=> array(array(2), array()),	
 		'xpath_eval_expression'			=> array(array(2), array()),		
 		'xptr_eval'						=> array(array(2), array())
 	);
 	
 	// ldap injection
-	public $LDAP_SINKS = array(
+	public static $LDAP_SINKS = array(
 		'ldap_add'						=> array(array(2,3), array()),
 		'ldap_delete'					=> array(array(2), array()),
 		'ldap_list'						=> array(array(3), array()),
@@ -304,7 +306,7 @@ class Sinks {
 		
 	// connection handling functions
 //	$NAME_CONNECT = 'Header Injection';
-        public $CONNECTION_SINKS = array(
+	public static $CONNECTION_SINKS = array(
 		'curl_setopt'					=> array(array(2,3), array()),
 		'curl_setopt_array' 			=> array(array(2), array()),
 		'cyrus_query' 					=> array(array(2), array()),
@@ -335,7 +337,7 @@ class Sinks {
 	
 	// other critical functions
 //	$NAME_OTHER = 'Possible Flow Control'; // :X
-	public $FLOW_CONTROL_SINKS = array(
+	public static $FLOW_CONTROL_SINKS = array(
 		'dl' 							=> array(array(1), array()),	
 		'ereg'							=> array(array(2), array()), # nullbyte injection affected		
 		'eregi'							=> array(array(2), array()), # nullbyte injection affected			
@@ -360,4 +362,9 @@ class Sinks {
 //		'unserialize'					=> array(array(1), array()), // calls __destruct
 //		'is_a'							=> array(array(1), array())	 // calls __autoload in php 5.3.7, 5.3.8
 //	);
+
+	public static function isSQLInjectionSinkFunction(Expr\FuncCall $func){
+		$funcName = $func->name->getLast();
+		return in_array($funcName, self::$DATABASE_SINKS);
+	}
 }

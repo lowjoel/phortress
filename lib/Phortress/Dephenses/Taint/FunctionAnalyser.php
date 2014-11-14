@@ -391,10 +391,11 @@ class FunctionAnalyser{
     
     private function getReturnStatements(array $stmts){
 	    $traverser = new NodeTraverser();
-	    $finder = new ReturnStatementFinder();
+	    $filter = function($node) {return ($node instanceof Node\Stmt\Return_);};
+	    $finder = new NodeFinder($filter);
 	    $traverser->addVisitor($finder);
 	    $traverser->traverse($stmts);
-	    return $finder->getReturnStatements();
+	    return $finder->getNodes();
     }
 
 
