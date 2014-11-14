@@ -63,4 +63,6 @@ abstract class Dephense {
 	 * @return Message[] The messages raised by this Dephense.
 	 */
 	public abstract function run(array $parseTree);
+
+	public abstract function runChecks(array $parseTree);
 }

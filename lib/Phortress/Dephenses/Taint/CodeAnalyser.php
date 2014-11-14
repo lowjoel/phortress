@@ -1,6 +1,7 @@
 <?php
 
 namespace Phortress\Dephenses\Taint;
+use Phortress\Dephenses\Engine\SQLVulnerabilityFinder;
 
 /**
  * Description of CodeAnalyser
@@ -24,6 +25,7 @@ class CodeAnalyser {
     }
 
 	public function runVulnerabilityChecks(){
-
+		$sql_vul_finder = new SQLVulnerabilityFinder($this->parseTree);
+		return $sql_vul_finder->findVulnerabilities();
 	}
 }
