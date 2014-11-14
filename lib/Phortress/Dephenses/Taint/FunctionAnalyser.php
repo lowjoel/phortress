@@ -166,7 +166,7 @@ class FunctionAnalyser{
 	private function traceArrayOfItems($arr){
 		$result = array();
 		foreach($arr as $item){
-			$trace = $this->traceItem($result);
+			$trace = $this->traceItem($item);
 			$result[] = $trace;
 		}
 		return TaintInfo::mergeVariables($result);
@@ -182,30 +182,33 @@ class FunctionAnalyser{
 		return $trace;
 	}
 
-    private function traceExpressionVariables(Expr $exp){
+    private function traceExpressionVariables(Expr $exp, $ignore_vars = array()){
+	    if(in_array($exp, $ignore_vars)){
+		    return array();
+	    }
         if($exp instanceof Node\Scalar){
 	        return array();
         }else if ($exp instanceof Expr\Variable) {
-            return $this->traceVariable($exp);
+            return $this->traceVariable($exp, $ignore_vars);
         }else if(($exp instanceof Expr\ClassConstFetch) || ($exp instanceof Expr\ConstFetch)){
 	        return array();
         }else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
             $var = $exp->var;
-            return $this->traceVariable($var);
+            return $this->traceVariable($var, $ignore_vars);
         }else if($exp instanceof Expr\BinaryOp){
-            return $this->traceBinaryOp($exp);
+            return $this->traceBinaryOp($exp, $ignore_vars);
         }else if($exp instanceof Expr\UnaryMinus || $exp instanceof Expr\UnaryPlus){
             $var = $exp->expr;
-            return $this->traceVariable($var);
+            return $this->traceVariable($var, $ignore_vars);
         }else if($exp instanceof Expr\Array_){
-            return $this->traceVariablesInArray($exp);
+            return $this->traceVariablesInArray($exp, $ignore_vars);
         }else if($exp instanceof Expr\ArrayDimFetch){
             //For now treat all array dimension fields as one
             $var = $exp->var;
-            return $this->traceVariable($var);
+            return $this->traceVariable($var, $ignore_vars);
         }else if($exp instanceof Expr\PropertyFetch){
             $var = $exp->var;
-            return $this->traceVariable($var);
+            return $this->traceVariable($var, $ignore_vars);
         }else if($exp instanceof Expr\StaticPropertyFetch){
             //TODO:
 	        return array();
@@ -215,10 +218,10 @@ class FunctionAnalyser{
             return $this->traceMethodCall($exp);
         }else if($exp instanceof Expr\Ternary){
             //If-else block
-           return $this->traceTernary($exp);
+           return $this->traceTernary($exp, $ignore_vars);
         }else if($exp instanceof Expr\Eval_){
 			//TODO:
-	        return traceExpressionVariable($exp->expr);
+	        return traceExpressionVariable($exp->expr, $ignore_vars);
         }else{
             //Other expressions we will not handle.
 	        return array();
@@ -262,35 +265,35 @@ class FunctionAnalyser{
 	    $class_obj = StmtAnalyser::getVariableTerminalReference($var);
     }
     
-     private function traceTernary(Expr\Ternary $exp){
+     private function traceTernary(Expr\Ternary $exp, $ignore_vars = array()){
         $if = $exp->if;
         $else = $exp->else;
-        return $this->traceAndMergeTwoExpr($if, $else);
+        return $this->traceAndMergeTwoExpr($if, $else, $ignore_vars = array());
     }
     
-    private function traceVariablesInArray(Expr\Array_ $arr){
+    private function traceVariablesInArray(Expr\Array_ $arr, $ignore_vars = array()){
         $arr_items = $arr->items;
         $var_traces = array();
         foreach($arr_items as $item){
             $exp = $item->value;
-            $var_traces[] = $this->traceExpressionVariables($exp);
+            $var_traces[] = $this->traceExpressionVariables($exp, $ignore_vars);
         }
         return TaintInfo::mergeVariables($var_traces);
     }
     
-    private function traceBinaryOp(Expr\BinaryOp $exp){
+    private function traceBinaryOp(Expr\BinaryOp $exp, $ignore_vars = array()){
         $left = $exp->left;
         $right = $exp->right;
-        return $this->traceAndMergeTwoExpr($left, $right);
+        return $this->traceAndMergeTwoExpr($left, $right, $ignore_vars);
     }
 
-	private function traceAndMergeTwoExpr(Expr $left, Expr $right){
-		$left_var = $this->traceExpressionVariables($left);
-		$right_var = $this->traceExpressionVariables($right);
+	private function traceAndMergeTwoExpr(Expr $left, Expr $right, $ignore_vars = array()){
+		$left_var = $this->traceExpressionVariables($left, $ignore_vars);
+		$right_var = $this->traceExpressionVariables($right, $ignore_vars);
 		return VariableInfo::mergeVariables(array($left_var, $right_var));
 	}
 
-    private function traceVariable(Expr\Variable $var){
+    private function traceVariable(Expr\Variable $var, $ignore_vars = array()){
         $name = $var->name;
 	    $var_details = $this->getVariableDetails($var);
         if($name instanceof Expr){
@@ -302,20 +305,36 @@ class FunctionAnalyser{
 		        return $details_ret;
 	        }
 
-	        return $this->traceVariableAssignmentToParameters($var, $var_details);
+	        return $this->traceVariableAssignmentToParameters($var, $var_details, $ignore_vars);
         }
 
     }
 
-	private function traceVariableAssignmentToParameters(Expr\Variable $var, VariableInfo $var_details){
+	private function traceVariableAssignmentToParameters(Expr\Variable $var,
+	                                                     VariableInfo $var_details,
+	                                                     $ignore_vars = array()){
+		$details_ret = array($var->name => $var_details);
+		if(in_array($var, $ignore_vars)){
+			return $details_ret;
+		}
+		$ignore_vars[] = $var;
 		if(!$this->isFunctionParameter($var)){
 			$assign = $var_details->getDefinition();
+			if(empty($assign)){
+				if(!($var->name instanceof Expr)){
+					try{
+						$assign = $this->environment->resolveVariable($var->name);
+					}catch (UnboundIdentifierException $e){
+					//TODO: remove this when fix in environment is done
+					}
+				}
+			}
+
 			if(!empty($assign)) {
 				$ref_expr = $assign->expr;
-				return $this->traceExpressionVariables($ref_expr);
+				return $this->traceExpressionVariables($ref_expr, $ignore_vars);
 			}
 		}
-		$details_ret = array($var->name => $var_details);
 		return $details_ret;
 	}
     
