@@ -7,6 +7,10 @@ function a() {
 	return $glob;
 }
 
+function b($argA) {
+	return $argA;
+}
+
 $b = a();
 
 class A {
