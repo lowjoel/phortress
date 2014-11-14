@@ -8,6 +8,13 @@ use PhpParser\Node\Expr;
 
 class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 	/**
+	 * All nodes to ignore.
+	 *
+	 * @var array
+	 */
+	private static $ignoredNodes;
+
+	/**
 	 * The global environment for the program.
 	 *
 	 * @var GlobalEnvironment
@@ -22,12 +29,35 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 	private $environmentStack = array();
 
 	/**
+	 * Static constructor.
+	 */
+	private static function __staticConstruct() {
+		if (self::$ignoredNodes) {
+			return;
+		}
+
+		self::$ignoredNodes = array_flip(array(
+			'PhpParser\Node\Name',
+			'PhpParser\Node\Name\FullyQualified',
+			'PhpParser\Node\Name\Relative',
+			'PhpParser\Node\Arg',
+			'PhpParser\Node\Param',
+			'PhpParser\Node\Stmt\PropertyProperty',
+			'PhpParser\Node\Stmt\Echo_',
+			'PhpParser\Node\Stmt\If_',
+			'PhpParser\Node\Stmt\Else_',
+			'PhpParser\Node\Stmt\While_',
+			'PhpParser\Node\Stmt\Return_'));
+	}
+	/**
 	 * Constructor.
 	 *
 	 * @param GlobalEnvironment $globalEnvironment The global environment to use
 	 * for traversal.
 	 */
 	public function __construct(GlobalEnvironment $globalEnvironment) {
+		self::__staticConstruct();
+
 		$this->globalEnvironment = $globalEnvironment;
 	}
 
@@ -69,20 +99,8 @@ class EnvironmentResolverVisitor extends NodeVisitorAbstract {
 		} else if ($node instanceof Node\Expr) {
 			$node->environment = $this->currentEnvironment();
 		} else {
-			$ignoredNodes = array_flip(array(
-				'PhpParser\Node\Name',
-				'PhpParser\Node\Name\FullyQualified',
-				'PhpParser\Node\Name\Relative',
-				'PhpParser\Node\Arg',
-				'PhpParser\Node\Param',
-				'PhpParser\Node\Stmt\PropertyProperty',
-				'PhpParser\Node\Stmt\Echo_',
-				'PhpParser\Node\Stmt\If_',
-				'PhpParser\Node\Stmt\Else_',
-				'PhpParser\Node\Stmt\While_',
-				'PhpParser\Node\Stmt\Return_'));
 			$className = get_class($node);
-			if (!array_key_exists($className, $ignoredNodes)) {
+			if (!array_key_exists($className, self::$ignoredNodes)) {
 				printf('Unknown node type: %s, ignored.'."\n", $className);
 			}
 		}
