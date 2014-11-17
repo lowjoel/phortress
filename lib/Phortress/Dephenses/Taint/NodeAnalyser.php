@@ -7,6 +7,8 @@
  */
 
 namespace Phortress\Dephenses\Taint;
+use Phortress\Dephenses\Taint;
+use Phortress\Environment;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
@@ -17,8 +19,9 @@ use PhpParser\Node\Stmt;
  * @param \PhpParser\Node $node
  */
 class NodeAnalyser {
-	public static function analyse(){
-
+	public static function analyse(Node $node){
+		resolveAssignmentTaintEnvironment($node);
+		
 	}
 
 	protected  static function resolveAssignmentTaintEnvironment(Expr $exp){
@@ -30,7 +33,18 @@ class NodeAnalyser {
 	}
 
 	protected static function resolveTaintEnvironmentForAssignOp(Expr\AssignOp $assignOp){
-		
+		$var = $assignOp->var;
+		$varName = $var->name;
+		if($varName instanceof Expr){
+			//Cannot resolve variable variables.
+			return;
+		}
+
+		$exp = $assignOp->expr;
+
+		$varEnv = self::getVariableAssignmentEnvironment($var);
+		$expTaint = self::resolveExprTaint($exp);
+		self::mergeVariableTaintEnvironment($varEnv, $varName, $expTaint);
 	}
 
 	protected static function resolveTaintEnvironmentForAssign(Expr\Assign $assign){
@@ -41,20 +55,47 @@ class NodeAnalyser {
 			return;
 		}
 		$exp = $assign->expr;
-		$environment = $assign->environment;
-		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($environment);
-		if(!isset($taintEnv)){
-			$taintEnv = new TaintEnvironment($environment);
-		}
+
 		if($var instanceof Expr\List_){
 			self::resolveListAssignment($assign);
 		}else{
+			$environment = $assign->environment;
 			$expTaint = self::resolveExprTaint($exp);
-			$taintEnv->setTaintResult($varName, $expTaint);
+			self::setVariableTaintEnvironment($environment, $varName, $expTaint);
 		}
 	}
 
-	private static function resolveListAssignment(Expr\Assign $assign){
+	private static function setVariableTaintEnvironment(Environment $env, $varName,
+	                                                    TaintResult $taintRes){
+		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
+		if(!isset($taintEnv)){
+			$taintEnv = new TaintEnvironment($env);
+		}
+		$taintEnv->setTaintResult($varName, $taintRes);
+		TaintEnvironment::setTaintEnvironmentForEnvironment($env, $taintEnv);
+	}
+
+	private static function mergeVariableTaintEnvironment(Environment $env, $varName,
+	                                                    TaintResult $taintRes){
+		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
+		if(!isset($taintEnv)){
+			$taintEnv = new TaintEnvironment($env);
+		}
+		$taintEnv->mergeAndSetTaintResult($varName, $taintRes);
+		TaintEnvironment::setTaintEnvironmentForEnvironment($env, $taintEnv);
+	}
+
+	private static function getVariableAssignmentEnvironment(Expr\Variable $var){
+		$varName = $var->name;
+		if($var instanceof Expr){
+			return $var->environment;
+		}else{
+			$resolution = $var->environment->resolveVariable($varName);
+			return $resolution->environment;
+		}
+	}
+
+	protected  static function resolveListAssignment(Expr\Assign $assign){
 		assert($assign->var instanceof Expr\List_);
 		$list_of_vars = $assign->var->vars;
 		$exp = $assign->expr;
@@ -73,11 +114,9 @@ class NodeAnalyser {
 			$var = $list_of_vars[$i];
 			$varName = $var->name;
 
-			$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
-			if(!isset($taintEnv)){
-				$taintEnv = new TaintEnvironment($var->environment);
-			}
-			$taintEnv->setTaintResult($varName, $taint_vals[$i]);
+			$env = self::getVariableAssignmentEnvironment($var);
+			assert(isset($env));
+			self::setVariableTaintEnvironment($env, $varName, $taint_vals[$i]);
 		}
 
 
