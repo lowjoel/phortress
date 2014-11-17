@@ -21,7 +21,7 @@ use PhpParser\Node\Stmt;
 class NodeAnalyser {
 	public static function analyse(Node $node){
 		resolveAssignmentTaintEnvironment($node);
-		
+
 	}
 
 	protected  static function resolveAssignmentTaintEnvironment(Expr $exp){
@@ -42,8 +42,16 @@ class NodeAnalyser {
 
 		$exp = $assignOp->expr;
 
-		$varEnv = self::getVariableAssignmentEnvironment($var);
+		$assignEnv = self::getVariableAssignmentEnvironment($var);
+		$varEnv = $var->environment;
+
+		$assignEnvTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);
+		$assignEnvTaintResult = $assignEnvTaintEnv->getTaintResult($varName);
+
 		$expTaint = self::resolveExprTaint($exp);
+		assert(isset($expTaint));
+		$expTaint->merge($assignEnvTaintResult);
+
 		self::mergeVariableTaintEnvironment($varEnv, $varName, $expTaint);
 	}
 
@@ -122,8 +130,22 @@ class NodeAnalyser {
 
 	}
 
-	protected static function resolveTaintOfExprsInArray(Expr\Cast\Array_ $array_){
-
+	/**
+	 * Takes in an array of Nodes and resolves their taint values if they are are variables.
+	 * Returns an array containing the taint value of each item in the array.
+	 */
+	protected static function resolveTaintOfExprsInArray(Expr\Cast\Array_ $array){
+		$arr_items = $array->items;
+		$taint_vals = array();
+		foreach($arr_items as $item){
+			$exp = $item->value;
+			$taint_val = Annotation::UNKNOWN;
+			if($exp instanceof Expr){
+				$taint_val = self::resolveExprTaint($exp);
+			}
+			$taint_vals[] = $taint_val;
+		}
+		return $taint_vals;
 	}
 
 	protected  static function resolveExprTaint(Expr $exp){
