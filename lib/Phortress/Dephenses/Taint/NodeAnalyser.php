@@ -21,22 +21,80 @@ class NodeAnalyser {
 
 	}
 
-	public static function resolveAssignmentTaintEnvironment(Expr $exp){
+	protected  static function resolveAssignmentTaintEnvironment(Expr $exp){
 		if($exp instanceof Expr\Assign){
-
+			self::resolveTaintEnvironmentForAssign($exp);
 		}else if($exp instanceof Expr\AssignOp){
-
+			self::resolveTaintEnvironmentForAssignOp($exp);
 		}
 	}
 
-	public static function resolveExprTaint(Expr $exp){
-		if($exp instanceof Node\Scalar){
+	protected static function resolveTaintEnvironmentForAssignOp(Expr\AssignOp $assignOp){
+		
+	}
 
+	protected static function resolveTaintEnvironmentForAssign(Expr\Assign $assign){
+		$var = $assign->var;
+		$varName = $var->name;
+		if($varName instanceof Expr){
+			//Cannot resolve variable variables.
+			return;
+		}
+		$exp = $assign->expr;
+		$environment = $assign->environment;
+		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($environment);
+		if(!isset($taintEnv)){
+			$taintEnv = new TaintEnvironment($environment);
+		}
+		if($var instanceof Expr\List_){
+			self::resolveListAssignment($assign);
+		}else{
+			$expTaint = self::resolveExprTaint($exp);
+			$taintEnv->setTaintResult($varName, $expTaint);
+		}
+	}
+
+	private static function resolveListAssignment(Expr\Assign $assign){
+		assert($assign->var instanceof Expr\List_);
+		$list_of_vars = $assign->var->vars;
+		$exp = $assign->expr;
+
+		if($exp instanceof Expr\Array_){
+			$taint_vals = self::resolveTaintOfExprsInArray($exp);
+
+		}else{
+			$taint_vals = array();
+			$taintRes = self::resolveExprTaint($exp);
+			for($i = 0; $i < count(list_of_vars); $i++){
+				$taint_vals[$i] = $taintRes;
+			}
+		}
+		for($i = 0; $i < count(list_of_vars); $i++){
+			$var = $list_of_vars[$i];
+			$varName = $var->name;
+
+			$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
+			if(!isset($taintEnv)){
+				$taintEnv = new TaintEnvironment($var->environment);
+			}
+			$taintEnv->setTaintResult($varName, $taint_vals[$i]);
+		}
+
+
+	}
+
+	protected static function resolveTaintOfExprsInArray(Expr\Cast\Array_ $array_){
+
+	}
+
+	protected  static function resolveExprTaint(Expr $exp){
+		if($exp instanceof Node\Scalar){
+			return new TaintResult(Annotation::SAFE);
 		}else if($exp instanceof Expr\Variable) {
 
 		}else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof
 				Expr\ConstFetch)){
-
+			return new TaintResult(Annotation::SAFE);
 		}else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
 
 		}else if($exp instanceof Expr\BinaryOp){
@@ -61,11 +119,11 @@ class NodeAnalyser {
 
 		}else{
 			//Other expressions we will not handle.
-
+			return new TaintResult(Annotation::UNKNOWN);
 		}
 	}
 
-	public static function resolveStmtTaintEnvironment(Stmt $exp){
+	protected  static function resolveStmtTaintEnvironment(Stmt $exp){
 		if($exp instanceof Stmt\If_){
 
 		}else if($exp instanceof Stmt\Else_){

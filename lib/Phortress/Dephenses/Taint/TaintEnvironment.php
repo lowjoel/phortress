@@ -20,7 +20,7 @@ class TaintEnvironment {
 	private $taintResults = array();
 	private $environment;
 
-	public function __construct(Environment $env, $taints = array()){
+	public function __construct(Environment $env = null, $taints = array()){
 		$this->environment = $env;
 		$this->taintResults = $taints;
 	}
@@ -40,11 +40,19 @@ class TaintEnvironment {
 		}
 	}
 
-	protected static function getTaintEnvironmentFromEnvironment(Environment $env){
+	public  static function getTaintEnvironmentFromEnvironment(Environment $env){
 		return $env->taintEnvironment;
 	}
 
+	public  static function setTaintEnvironmentForEnvironment(Environment $env,
+	                                                          TaintEnvironment $taintEnv){
+		$env->taintEnvironment = $taintEnv;
+	}
+
 	private function checkParentTaintPropagationCondition(){
+		if(is_null($this->environment)){
+			return false;
+		}
 		if(is_null($this->environment->getParent())){
 			return false;
 		}else if(get_class($this->environment) !== 'Phortress\FunctionEnvironment'){
@@ -59,7 +67,7 @@ class TaintEnvironment {
 			return $this->taintResults[$varName];
 		}else if($this->checkParentTaintPropagationCondition()){
 			$parentTaintEnv = self::getTaintEnvironmentFromEnvironment($this->environment->getParent());
-			if(isset($parentTaintEnv)){
+			if(!is_null($this->environment) && isset($parentTaintEnv)){
 				return $parentTaintEnv->getTaintResult($varName);
 			}else{
 				return new TaintResult(Annotation::UNKNOWN);
