@@ -19,10 +19,17 @@ use PhpParser\Node\Stmt;
  * @param \PhpParser\Node $node
  */
 class NodeAnalyser {
-	public static function analyse(Node $node){
-		resolveAssignmentTaintEnvironment($node);
+	public static function analyse(Node $node, TaintEnvironment $taintEnv = null){
+
 		if($node instanceof Stmt){
-			self::resolveStmtTaintEnvironment($node);
+			if(is_null($taintEnv)){
+				$taintEnv = new TaintEnvironment();
+			}
+			return self::resolveStmtTaintEnvironment($node, $taintEnv);
+		}else if($node instanceof Expr){
+			return self::resolveAssignmentTaintEnvironment($node);
+		}else{
+			return new TaintEnvironment();
 		}
 	}
 
@@ -32,6 +39,8 @@ class NodeAnalyser {
 		}else if($exp instanceof Expr\AssignOp){
 			self::resolveTaintEnvironmentForAssignOp($exp);
 		}
+		$env = $exp->environment;
+		return TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
 	}
 
 	protected static function resolveTaintEnvironmentForAssignOp(Expr\AssignOp $assignOp){
@@ -300,29 +309,48 @@ class NodeAnalyser {
 		return $taint;
 	}
 
-	protected  static function resolveStmtTaintEnvironment(Stmt $exp){
+	protected  static function resolveStmtTaintEnvironment(Stmt $exp, TaintEnvironment $taintEnv){
 		if($exp instanceof Stmt\If_){
-
+			return self::resolveIfStatementTaints($exp, $taintEnv);
 		}else if($exp instanceof Stmt\Else_){
 			$items = $exp->stmts;
-
 		}else if($exp instanceof Stmt\ElseIf_){
 			$items = $exp->stmts;
-
 		}else if($exp instanceof Stmt\Do_){
 			$items = $exp->stmts;
-
 		}else if($exp instanceof Stmt\For_){
 			$items = $exp->stmts;
-
 		}else if($exp instanceof Stmt\Foreach_){
 			$items = $exp->stmts;
-
 		}else if($exp instanceof Stmt\While_){
 			$items = $exp->stmts;
-
+		}
+		if(isset($items)){
+			return self::resolveTaintForArrayOfStatements($items, $taintEnv);
+		}else{
+			return $taintEnv;
 		}
 	}
 
+	protected static function resolveIfStatementTaints(Stmt\If_ $stmt, TaintEnvironment $taintEnv){
+		$if_items = $stmt->stmts;
+		$if_res = self::resolveTaintForArrayOfStatements($if_items, $taintEnv);
+		$else = $stmt->else;
+		if(isset($else)){
+			$else_res = self::resolveTaintForArrayOfStatements($else, $taintEnv);
+			return $if_res->mergeTaintEnvironment($else_res);
+		}else{
+			return $if_res;
+		}
+	}
+
+	protected static function resolveTaintForArrayOfStatements($nodes, TaintEnvironment $taintEnv){
+		$envResult = $taintEnv->copy();
+		foreach($nodes as $node){
+			$nodeTaintEnv = self::analyse($node);
+			$envResult->mergeTaintEnvironment($nodeTaintEnv);
+		}
+		return $envResult;
+	}
 
 } 

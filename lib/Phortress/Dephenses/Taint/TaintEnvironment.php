@@ -10,6 +10,7 @@ namespace Phortress\Dephenses\Taint;
 
 
 use Phortress\Environment;
+use Phortress\GlobalEnvironment;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
 
@@ -21,7 +22,11 @@ class TaintEnvironment {
 	private $environment;
 
 	public function __construct(Environment $env = null, $taints = array()){
-		$this->environment = $env;
+		if(!is_null($env)){
+			$this->environment = $env;
+		}else{
+			$this->environment = new GlobalEnvironment();
+		}
 		$this->taintResults = $taints;
 	}
 
@@ -50,9 +55,6 @@ class TaintEnvironment {
 	}
 
 	private function checkParentTaintPropagationCondition(){
-		if(is_null($this->environment)){
-			return false;
-		}
 		if(is_null($this->environment->getParent())){
 			return false;
 		}else if(get_class($this->environment) !== 'Phortress\FunctionEnvironment'){
@@ -67,7 +69,7 @@ class TaintEnvironment {
 			return $this->taintResults[$varName];
 		}else if($this->checkParentTaintPropagationCondition()){
 			$parentTaintEnv = self::getTaintEnvironmentFromEnvironment($this->environment->getParent());
-			if(!is_null($this->environment) && isset($parentTaintEnv)){
+			if(isset($parentTaintEnv)){
 				return $parentTaintEnv->getTaintResult($varName);
 			}else{
 				return new TaintResult(Annotation::UNKNOWN);
@@ -106,5 +108,9 @@ class TaintEnvironment {
 		foreach($envTaints as $varName => $taintRes){
 			$this->mergeAndSetTaintResult($varName, $taintRes);
 		}
+	}
+
+	public function copy(){
+		return new TaintEnvironment($this->environment, $this->taintResults);
 	}
 } 
