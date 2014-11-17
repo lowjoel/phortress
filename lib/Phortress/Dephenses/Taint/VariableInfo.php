@@ -9,20 +9,17 @@
 namespace Phortress\Dephenses\Taint;
 
 use PhpParser\Node\Expr;
-class VariableInfo {
+class VariableInfo extends TaintResult{
 	protected $variable;
-	protected $taintResult;
-	protected $definition; //This is derived from the variable's environment. Can probably be
-//removed
 	/**
 	 * Array of Variables (function parameters) which will affect the variable's taint value.
 	 */
-	protected $affecting_params;
+	protected $affecting_params = array();
 
 	public function __construct(Expr\Variable $var = null, $taint = Annotation::UNASSIGNED,
 	                            $sanitising = array()){
+		parent::__construct($taint, $sanitising);
 		$this->variable = $var;
-		$this->taintResult = new TaintResult($taint, $sanitising);
 	}
 
 	public function isEmpty(){
@@ -37,43 +34,33 @@ class VariableInfo {
 		$this->variable = $var;
 	}
 
-	public function getTaintResult(){
-		return $this->taintResult;
-	}
-
-	public function setTaintResult($result){
-		$this->taintResult = $result;
-	}
-
-	public function getTaint(){
-		return $this->taintResult->getAnnotation();
-	}
-
-	public function setTaint($taint){
-		$this->taintResult->setAnnotation($taint);
-	}
-
-	public function getSanitisingFunctions(){
-		return $this->taintResult->getSanitisingFunctions();
-	}
-
-	public function setSanitisingFunctions($funcs){
-		$this->taintResult->setSanitisingFunctions($funcs);
-	}
-
 	public function getDefinition(){
-		return $this->definition;
+		return $this->variable->environment->resolveVariable($this->variable->name);
 	}
 
-	public function setDefinition($def){
-		$this->definition = $def;
+	public function getAffectingParameters(){
+		return $this->affecting_params;
+	}
+
+	public function setAffectingParameters($params){
+		$this->affecting_params = $params;
+	}
+
+	public function merge($info){
+		parent::merge($info);
+		assert($info instanceof VariableInfo);
+		$other_params = $info->getAffectingParameters();
+		$params = array_merge($this->affecting_params, $other_params);
+		$this->affecting_params = $params;
 	}
 
 	public static function mergeVariableInfo(VariableInfo $var1, VariableInfo $var2){
-		$mergedResult = TaintResult::mergeTaintResults($var1->getTaintResult(), $var2->getTaintResult());
-		$varInfo = new VariableInfo($var1->getVariable());
-		$varInfo->setDefinition($var2->getDefinition());
-		$varInfo->setTaintResult($mergedResult);
+		$mergedResult = TaintResult::mergeTaintResults($var1, $var2);
+		$varInfo = new VariableInfo($var1->getVariable(), $mergedResult->getTaint(),
+		$mergedResult->getSanitisingFunctions());
+		
+		$params = array_merge($var1->getAffectingParameters(), $var2->getAffectingParameters());
+		$varInfo->setAffectingParameters($params);
 		return $varInfo;
 	}
 

@@ -381,11 +381,11 @@ class FunctionAnalyser{
                 return $this->variables[$name];
             }else{
 
-	            $assign = $var->environment->resolveVariable($name);
+//	            $assign = $var->environment->resolveVariable($name);
 	            $varInfo = new VariableInfo($var);
-	            if(!empty($assign)){
-		            $varInfo->setDefinition($assign);
-	            }
+//	            if(!empty($assign)){
+//		            $varInfo->setDefinition($assign);
+//	            }
 
                 $this->variables[$name] = $varInfo;
                 return $varInfo;

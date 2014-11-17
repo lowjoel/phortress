@@ -26,11 +26,10 @@ class TaintEnvironment {
 	public function mergeAndSetTaintResult($varName, TaintResult $result){
 		if(array_key_exists($varName, $this->taintResults)){
 			$existingResult = $this->taintResults[$varName];
-			$newTaintResult = TaintResult::mergeTaintResults($existingResult, $result);
+			$existingResult->merge($result);
 		}else{
-			$newTaintResult = $result;
+			$this->setTaintResult($varName, $result);
 		}
-		$this->setTaintResult($varName, $newTaintResult);
 	}
 
 	public function getTaintResult($varName){
