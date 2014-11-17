@@ -148,19 +148,38 @@ class NodeAnalyser {
 		return $taint_vals;
 	}
 
+	protected static function resolveVariableTaint(Expr\Variable $var){
+		if(InputSources::isInputVariable($var)){
+			return TaintResult(Annotation::TAINTED);
+		}else{
+			$varName = $var->name;
+			if($varName instanceof Expr){
+				return TaintResult(Annotation::UNKNOWN);
+			}
+			$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
+			if(!isset($varTaintEnv)){
+				$assignEnv = self::getVariableAssignmentEnvironment($var);
+				$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);
+			}
+			return $varTaintEnv->getTaintResult($varName);
+		}
+	}
+
 	protected  static function resolveExprTaint(Expr $exp){
 		if($exp instanceof Node\Scalar){
 			return new TaintResult(Annotation::SAFE);
-		}else if($exp instanceof Expr\Variable) {
-
 		}else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof
 				Expr\ConstFetch)){
 			return new TaintResult(Annotation::SAFE);
+		}else if($exp instanceof Expr\Variable) {
+			return self::resolveVariableTaint($exp);
 		}else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
-
-		}else if($exp instanceof Expr\BinaryOp){
-
+			$var = $exp->var;
+			return self::resolveVariableTaint($var);
 		}else if($exp instanceof Expr\UnaryMinus || $exp instanceof Expr\UnaryPlus){
+			$var = $exp->expr;
+			return self::resolveVariableTaint($var);
+		}else if($exp instanceof Expr\BinaryOp){
 
 		}else if($exp instanceof Expr\Array_){
 
