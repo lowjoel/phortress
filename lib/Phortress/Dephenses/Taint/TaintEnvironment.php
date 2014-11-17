@@ -28,6 +28,7 @@ class TaintEnvironment {
 			$this->environment = new GlobalEnvironment();
 		}
 		$this->taintResults = $taints;
+		$this->environment->taintEnvironment = $this;
 	}
 
 	public function setTaintResult($varName, TaintResult $result){
@@ -46,7 +47,11 @@ class TaintEnvironment {
 	}
 
 	public  static function getTaintEnvironmentFromEnvironment(Environment $env){
-		return $env->taintEnvironment;
+		if(property_exists($env, 'taintEnvironment')){
+			return $env->taintEnvironment;
+		}else{
+			return null;
+		}
 	}
 
 	public  static function setTaintEnvironmentForEnvironment(Environment $env,

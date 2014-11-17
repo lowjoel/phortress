@@ -161,22 +161,38 @@ class NodeAnalyser {
 
 	protected static function resolveVariableTaint(Expr\Variable $var){
 		if(InputSources::isInputVariable($var)){
-			return TaintResult(Annotation::TAINTED);
+			return new TaintResult(Annotation::TAINTED);
 		}else{
 			$varName = $var->name;
 			if($varName instanceof Expr){
-				return TaintResult(Annotation::UNKNOWN);
+				return new TaintResult(Annotation::UNKNOWN);
 			}
 			$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
 			if(!isset($varTaintEnv)){
 				$assignEnv = self::getVariableAssignmentEnvironment($var);
 				$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);
 			}
-			return $varTaintEnv->getTaintResult($varName);
+			if(isset($varTaintEnv)){
+				return $varTaintEnv->getTaintResult($varName);
+			}
+			return self::traceVariableTaint($var);
 		}
 	}
 
-	protected  static function resolveExprTaint(Expr $exp){
+	protected static function traceVariableTaint(Expr\Variable $var){
+		$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
+		if(!isset($varTaintEnv)){
+			$assignEnv = self::getVariableAssignmentEnvironment($var);
+			$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);
+			if(!isset($varTaintEnv)){
+				$assign = $assignEnv->resolveVariable($var->name);
+				return self::resolveExprTaint($assign->expr);
+			}
+		}
+		return $varTaintEnv->getTaintResult($var->name);
+	}
+
+	protected static function resolveExprTaint(Expr $exp){
 		if($exp instanceof Node\Scalar){
 			return new TaintResult(Annotation::SAFE);
 		}else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof
