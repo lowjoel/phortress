@@ -34,6 +34,10 @@ class TaintResult {
 		$this->sanitising_functions = $functions;
 	}
 
+	public function addSanitisingFunction($func){
+		$this->sanitising_functions[] = $func;
+	}
+
 	public function merge($result){
 		assert($result instanceof TaintResult);
 		$this->setTaint(max($this->getTaint(), $result->getTaint()));
