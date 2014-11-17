@@ -9,6 +9,7 @@
 namespace Phortress\Dephenses\Taint;
 
 
+use Phortress\Environment;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
 
@@ -17,6 +18,12 @@ use PhpParser\Node\Expr\Variable;
  */
 class TaintEnvironment {
 	private $taintResults = array();
+	private $environment;
+
+	public function __construct(Environment $env, $taints = array()){
+		$this->environment = $env;
+		$this->taintResults = $taints;
+	}
 
 	public function setTaintResult($varName, TaintResult $result){
 		assert(!($varName instanceof Expr));
@@ -24,7 +31,8 @@ class TaintEnvironment {
 	}
 
 	public function mergeAndSetTaintResult($varName, TaintResult $result){
-		if(array_key_exists($varName, $this->taintResults)){
+		$existingResult = $this->getTaintResult($varName);
+		if(isset($existingResult)){
 			$existingResult = $this->taintResults[$varName];
 			$existingResult->merge($result);
 		}else{
@@ -32,9 +40,31 @@ class TaintEnvironment {
 		}
 	}
 
+	protected static function getTaintEnvironmentFromEnvironment(Environment $env){
+		return $env->taintEnvironment;
+	}
+
+	private function checkParentTaintPropagationCondition(){
+		if(is_null($this->environment->getParent())){
+			return false;
+		}else if(get_class($this->environment) !== 'Phortress\FunctionEnvironment'){
+			return true;
+		}else{
+			return get_class($this->environment->getParent()) === 'Phortress\FunctionEnvironment';
+		}
+	}
+
 	public function getTaintResult($varName){
 		if(array_key_exists($varName, $this->taintResults)){
 			return $this->taintResults[$varName];
+		}else if($this->checkParentTaintPropagationCondition()){
+			$parentTaintEnv = self::getTaintEnvironmentFromEnvironment($this->environment->getParent());
+			if(isset($parentTaintEnv)){
+				return $parentTaintEnv->getTaintResult($varName);
+			}else{
+				return new TaintResult(Annotation::UNKNOWN);
+			}
+
 		}else{
 			return new TaintResult(Annotation::UNKNOWN);
 		}

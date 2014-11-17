@@ -58,7 +58,7 @@ class VariableInfo extends TaintResult{
 		$mergedResult = TaintResult::mergeTaintResults($var1, $var2);
 		$varInfo = new VariableInfo($var1->getVariable(), $mergedResult->getTaint(),
 		$mergedResult->getSanitisingFunctions());
-		
+
 		$params = array_merge($var1->getAffectingParameters(), $var2->getAffectingParameters());
 		$varInfo->setAffectingParameters($params);
 		return $varInfo;
