@@ -76,7 +76,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		//individually, instead of seeing them in the context of a conditional.
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program4->parseTree);
-//		$taint1 = $this->program4->parseTree[2]->var->taint;
+		$taint1 = $this->program4->parseTree[2]->var->taint;
 //		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
 //		$taint2 = $this->program4->parseTree[3]->var->taint;
 //		$this->assertEquals(Taint\Annotation::SAFE, $taint2);

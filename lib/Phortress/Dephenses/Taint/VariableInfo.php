@@ -11,15 +11,18 @@ namespace Phortress\Dephenses\Taint;
 use PhpParser\Node\Expr;
 class VariableInfo {
 	protected $variable;
-	protected $sanitising_functions;
-	protected $taint_value;
-	protected $definition;
+	protected $taintResult;
+	protected $definition; //This is derived from the variable's environment. Can probably be
+//removed
+	/**
+	 * Array of Variables (function parameters) which will affect the variable's taint value.
+	 */
+	protected $affecting_params;
 
 	public function __construct(Expr\Variable $var = null, $taint = Annotation::UNASSIGNED,
 	                            $sanitising = array()){
 		$this->variable = $var;
-		$this->taint_value = $taint;
-		$this->sanitising_functions = $sanitising;
+		$this->taintResult = new TaintResult($taint, $sanitising);
 	}
 
 	public function isEmpty(){
@@ -34,20 +37,28 @@ class VariableInfo {
 		$this->variable = $var;
 	}
 
+	public function getTaintResult(){
+		return $this->taintResult;
+	}
+
+	public function setTaintResult($result){
+		$this->taintResult = $result;
+	}
+
 	public function getTaint(){
-		return $this->taint_value;
+		return $this->taintResult->getAnnotation();
 	}
 
 	public function setTaint($taint){
-		$this->taint_value = $taint;
+		$this->taintResult->setAnnotation($taint);
 	}
 
 	public function getSanitisingFunctions(){
-		return $this->sanitising_functions;
+		return $this->taintResult->getSanitisingFunctions();
 	}
 
 	public function setSanitisingFunctions($funcs){
-		$this->sanitising_functions = $funcs;
+		$this->taintResult->setSanitisingFunctions($funcs);
 	}
 
 	public function getDefinition(){
@@ -59,21 +70,11 @@ class VariableInfo {
 	}
 
 	public static function mergeVariableInfo(VariableInfo $var1, VariableInfo $var2){
-		$taint = self::mergeTaintValues($var1, $var2);
-		$san = self::mergeSanitisingFunctions($var1, $var2);
-		$varInfo = new VariableInfo($var1->getVariable(), $taint, $san);
+		$mergedResult = TaintResult::mergeTaintResults($var1->getTaintResult(), $var2->getTaintResult());
+		$varInfo = new VariableInfo($var1->getVariable());
 		$varInfo->setDefinition($var2->getDefinition());
+		$varInfo->setTaintResult($mergedResult);
 		return $varInfo;
-	}
-
-	public static function mergeTaintValues(VariableInfo $var1, VariableInfo $var2){
-		return max($var1->getTaint(), $var2->getTaint());
-	}
-
-	public static function mergeSanitisingFunctions(VariableInfo $var1, VariableInfo $var2){
-		$sanitising1 = $var1->getSanitisingFunctions();
-		$sanitising2 = $var2->getSanitisingFunctions();
-		return array_intersect($sanitising1, $sanitising2);
 	}
 
 	/**
