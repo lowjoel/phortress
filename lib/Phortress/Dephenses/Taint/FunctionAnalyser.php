@@ -8,27 +8,8 @@
 
 namespace Phortress\Dephenses\Taint;
 
-
-use PhpParser\Node\Expr\ArrayDimFetch;
-use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\AssignOp;
 use PhpParser\Node\Expr\BinaryOp;
-use PhpParser\Node\Expr\Cast\Array_;
-use PhpParser\Node\Expr\ClassConstFetch;
-use PhpParser\Node\Expr\ConstFetch;
-use PhpParser\Node\Expr\Eval_;
-use PhpParser\Node\Expr\FuncCall;
-use PhpParser\Node\Expr\MethodCall;
-use PhpParser\Node\Expr\PostDec;
-use PhpParser\Node\Expr\PostInc;
-use PhpParser\Node\Expr\PreDec;
-use PhpParser\Node\Expr\PreInc;
-use PhpParser\Node\Expr\PropertyFetch;
-use PhpParser\Node\Expr\StaticPropertyFetch;
-use PhpParser\Node\Expr\Ternary;
-use PhpParser\Node\Expr\UnaryMinus;
-use PhpParser\Node\Expr\UnaryPlus;
-use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
@@ -40,6 +21,8 @@ class FunctionAnalyser{
 	 * Return statements in the function
 	 */
 	protected $returnStmts = array();
+
+	protected $returnStmtTaintResults = array();
 
 	/**
 	 * The parameters to the function
@@ -88,6 +71,7 @@ class FunctionAnalyser{
 			$nodeTaintEnv = $funcNodeAnalyser->analyse($statement, $currentTaintEnv);
 			$currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
 		}
+		$this->returnStmtTaintResults = $funcNodeAnalyser->getReturnTaintResult();
 	}
 
 	/**
@@ -106,20 +90,18 @@ class FunctionAnalyser{
 	}
 
 	private function analyseArgumentsEffectOnReturnStmt($argTaints, Stmt\Return_ $return){
-		$retExpEnv = $return->expr->environment;
-		if(!empty($retExpEnv)){
-			$retExpTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($retExpEnv);
-			$retTaint = $retExpTaintEnv->getTaintResult(FunctionNodeAnalyser::RETURN_STMT_KEY);
-			$taintResult = new TaintResult($retTaint->getTaint(), $retTaint->getSanitisingFunctions());
-			foreach($argTaints as $paramName => $taint){
-				if($retTaint->isAffectingParameter($paramName)){
-					$taintResult->merge($taint);
-				}
-			}
-			return $taintResult;
-		}else{
+		$retTaint = $this->returnStmtTaintResults[$return->getLine()];
+		if(empty($retTaint)){
 			return new TaintResult(Annotation::UNASSIGNED);
 		}
+		$taintResult = new TaintResult($retTaint->getTaint(), $retTaint->getSanitisingFunctions());
+		foreach($argTaints as $paramName => $taint){
+			if($retTaint->isAffectingParameter($paramName)){
+				$taintResult->merge($taint);
+			}
+		}
+		return $taintResult;
+
 	}
 
 	private function getParametersToTaintResultMappings($args){

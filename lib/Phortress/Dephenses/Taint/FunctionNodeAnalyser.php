@@ -17,8 +17,8 @@ use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Return_;
 
 class FunctionNodeAnalyser extends NodeAnalyser{
-	const RETURN_STMT_KEY = "--return--";
 	protected $functionParams = array();
+	protected $returnResults = array();
 
 	public function __construct($params){
 		$this->functionParams = $params;
@@ -37,7 +37,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		return false;
 	}
 
-	private function addAffectingFunctionToAnalysisResult(FunctionTaintResult $result, $name){
+	private function addAffectingParameterToAnalysisResult(FunctionTaintResult $result, $name){
 		if(!empty($name) && $this->isFunctionParameter($name)){
 			$result->addAffectingParameter($name);
 		}
@@ -48,7 +48,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		if(empty($result)){
 			$result = $this->createTaintResult(Annotation::UNASSIGNED);
 		}
-		$this->addAffectingFunctionToAnalysisResult($result, $var->name);
+		$this->addAffectingParameterToAnalysisResult($result, $var->name);
 		return $result;
 	}
 
@@ -57,7 +57,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		$args = $exp->args;
 		foreach($args as $arg){
 			$argExpName = $arg->value->name;
-			$this->addAffectingFunctionToAnalysisResult($result, $argExpName);
+			$this->addAffectingParameterToAnalysisResult($result, $argExpName);
 		}
 		return $result;
 	}
@@ -69,8 +69,8 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		}
 		$leftName = $exp->left->name;
 		$rightName = $exp->right->name;
-		$this->addAffectingFunctionToAnalysisResult($result, $leftName);
-		$this->addAffectingFunctionToAnalysisResult($result, $rightName);
+		$this->addAffectingParameterToAnalysisResult($result, $leftName);
+		$this->addAffectingParameterToAnalysisResult($result, $rightName);
 		return $result;
 	}
 
@@ -81,22 +81,35 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		if(empty($result)){
 			$result = $this->createTaintResult(Annotation::UNASSIGNED);
 		}
-		$this->addAffectingFunctionToAnalysisResult($result, $array_var_name);
+		$this->addAffectingParameterToAnalysisResult($result, $array_var_name);
 		return $result;
 	}
 
 	protected function resolveStmtTaintEnvironment(Stmt $exp, TaintEnvironment $taintEnv){
 		if($exp instanceof Return_){
-			$retExp = $exp->expr;
-			$retExpTaint = $this->resolveExprTaint($retExp);
-			$retEnv = $taintEnv->copy();
-			$retEnv->setTaintResult(self::RETURN_STMT_KEY, $retExpTaint);
-			TaintEnvironment::setTaintEnvironmentForEnvironment($retExp->environment, $retEnv);
-			return $retEnv;
+			return $this->resolveReturnStatementTaintEnvironment($exp, $taintEnv);
 
 		}else{
 			return parent::resolveStmtTaintEnvironment($exp, $taintEnv);
 		}
+	}
+
+	protected function resolveReturnStatementTaintEnvironment(Return_ $exp,
+	                                                          TaintEnvironment $taintEnv){
+		$retExp = $exp->expr;
+		TaintEnvironment::updateTaintEnvironmentForEnvironment($retExp->environment, $taintEnv);
+		$retExpTaint = $this->resolveExprTaint($retExp);
+		$retEnv = $taintEnv->copy();
+		$retEnv->setTaintResult($exp->getLine(), $retExpTaint);
+		$this->addReturnTaintResult($exp, $retExpTaint);
+		return $retEnv;
+	}
+	private function addReturnTaintResult(Return_ $ret, FunctionTaintResult $result){
+		$this->returnResults[$ret->getLine()] = $result;
+	}
+
+	public function getReturnTaintResult(){
+		return $this->returnResults;
 	}
 //	protected function mergeAnalysisResults(array $results){
 //		$mergeResult = self::createTaintResult(Annotation::UNASSIGNED);

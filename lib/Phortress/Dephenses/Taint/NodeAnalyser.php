@@ -314,7 +314,7 @@ class NodeAnalyser {
 		foreach($results as $result){
 			$mergeResult->merge($result);
 		}
-		return $result;
+		return $mergeResult;
 	}
 
 	protected function resolveBinaryOpTaint(Expr\BinaryOp $exp){

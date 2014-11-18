@@ -64,11 +64,9 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
 		$taint3 = $this->getVariableTaint($this->program2->parseTree[4]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint3);
-//		$taint4 = $this->getVariableTaint($this->program2->parseTree[6]->var);
-//		$this->assertEquals(Taint\Annotation::SAFE, $taint4);
 	}
-/*
-	public function testTaintedParamsWithTernaryOps(){
+
+	public function testTaintedParamsWithIfElse(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program3->parseTree);
 		$taint1 = $this->getVariableTaint($this->program3->parseTree[2]->var);
@@ -79,15 +77,13 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint3);
 	}
 
-	public function testTaintedParamsWithTernarySingleReturn(){
-		//This test fails because the back trace leads to each assignment in the if-else block
-		//individually, instead of seeing them in the context of a conditional.
+	public function testTaintedParamsWithIfElseSingleReturn(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program4->parseTree);
 		$taint1 = $this->getVariableTaint($this->program4->parseTree[2]->var);
-//		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
-//		$taint2 = $this->getVariableTaint($this->program4->parseTree[3]->var);
-//		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
+		$taint2 = $this->getVariableTaint($this->program4->parseTree[3]->var);
+		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
 
 	public function testWhileLoop(){
@@ -98,7 +94,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$taint2 = $this->getVariableTaint($this->program5->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
-*/
+
 	public function getVariableTaint(Variable $var){
 		$assignEnv = $var->environment->resolveVariable($var->name)->environment;
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);

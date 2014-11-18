@@ -9,12 +9,3 @@ function func($a, $b) {
 $a = func($tainted, 1);
 $b = func(1, $tainted);
 $c = func($tainted, 3);
-
-// function func($a, $b) {
-// 	$t = $a + $a;
-// 	$s = $a + 1;
-// 	return $s;
-// }
-
-// $c = func(1, 1);
-// $d = func(1, $tainted);

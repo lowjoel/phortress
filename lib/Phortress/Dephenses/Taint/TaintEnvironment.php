@@ -85,7 +85,7 @@ class TaintEnvironment {
 		}else if(get_class($this->environment) !== 'Phortress\FunctionEnvironment'){
 			return true;
 		}else{
-			return get_class($this->environment->getParent()) === 'Phortress\FunctionEnvironment';
+			return get_class($this->environment->getParent()) === get_class($this->environment);
 		}
 	}
 
