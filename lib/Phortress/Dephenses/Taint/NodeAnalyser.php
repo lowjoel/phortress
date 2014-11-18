@@ -283,7 +283,7 @@ class NodeAnalyser {
 		}
 	}
 
-	private function getArgumentsTaintValuesForAnalysis($args){
+	protected function getArgumentsTaintValuesForAnalysis($args){
 		$mappings = array();
 		for($i = 0; $i<count($args);$i++){
 			$arg_val = $args[$i]->value;

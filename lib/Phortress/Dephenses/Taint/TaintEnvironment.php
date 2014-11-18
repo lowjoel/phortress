@@ -54,6 +54,20 @@ class TaintEnvironment {
 		}
 	}
 
+	public static function getTaintEnvironmentFromEnvironmentRecursive(Environment $env){
+		if(empty($env)){
+			return null;
+		}
+		$taintEnv = self::getTaintEnvironmentFromEnvironment($env);
+		if(!empty($taintEnv)){
+			return $taintEnv;
+		}else if(self::checkParentPropagationCondition($env)){
+			return self::getTaintEnvironmentFromEnvironmentRecursive($env->getParent());
+		}else{
+			return null;
+		}
+	}
+
 	public static function setTaintEnvironmentForEnvironment(Environment $env,
 	                                                          TaintEnvironment $taintEnv){
 		$env->taintEnvironment = $taintEnv;
@@ -82,10 +96,16 @@ class TaintEnvironment {
 	private function checkParentTaintPropagationCondition(){
 		if(is_null($this->environment->getParent())){
 			return false;
-		}else if(get_class($this->environment) !== 'Phortress\FunctionEnvironment'){
+		}else{
+			return self::checkParentPropagationCondition($this->environment);
+		}
+	}
+
+	private static function checkParentPropagationCondition($env){
+		if(get_class($env) !== 'Phortress\FunctionEnvironment'){
 			return true;
 		}else{
-			return get_class($this->environment->getParent()) === get_class($this->environment);
+			return get_class($env->getParent()) === get_class($env);
 		}
 	}
 

@@ -8,6 +8,7 @@
 
 namespace Phortress\Dephenses\Taint;
 
+use Phortress\Dephenses\Engine\VulnerabilityReporter;
 use PhpParser\Node\Expr\AssignOp;
 use PhpParser\Node\Expr\BinaryOp;
 use PhpParser\Node\Name;
@@ -77,11 +78,11 @@ class FunctionAnalyser{
 	}
 
 	/**
-	 * Takes in an array of Node\Args[]
+	 * Takes in an array of argument Taint Results
 	 * Returns an array containing taint value of the value returned by the function,
 	 * and the array of sanitising functions applied
 	 */
-	public function analyseFunctionCall($argMappings, $reporter = null){
+	public function analyseFunctionCall($argMappings, VulnerabilityReporter $reporter = null){
 		$paramTaintMappings = $this->getParametersToTaintResultMappings($argMappings);
 		$result = new TaintResult(Annotation::UNASSIGNED);
 		foreach($this->returnStmts as $retStmt){
@@ -89,13 +90,27 @@ class FunctionAnalyser{
 			$result->merge($retStmtResult);
 		}
 		if(!empty($reporter)){
-			$this->checkSinkFunctionCalls($argMappings, $reporter);
+			$this->checkSinkFunctionCalls($paramTaintMappings, $reporter);
 		}
 		return $result;
 	}
 
-	private function checkSinkFunctionCalls($argMappings, $reporter){
-
+	private function checkSinkFunctionCalls($paramMappings, VulnerabilityReporter $reporter){
+		foreach($this->sinkFunctionCalls as $funcCallArr){
+			$argTaintMappings = $funcCallArr[0];
+			$funcCall = $funcCallArr[1];
+			$argTaints = array();
+			foreach($argTaintMappings as $argTaint){
+				$argTaint = $argTaint->copy();
+				foreach($paramMappings as $paramName => $taint){
+					if($argTaint->isAffectingParameter($paramName)){
+						$argTaint->merge($taint);
+					}
+					$argTaints[] = $argTaint;
+				}
+			}
+			$reporter->runVulnerabilityChecks($funcCall, $argTaints);
+		}
 	}
 
 	private function analyseArgumentsEffectOnReturnStmt($argTaints, Stmt\Return_ $return){
