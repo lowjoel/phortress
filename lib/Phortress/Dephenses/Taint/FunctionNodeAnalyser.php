@@ -10,11 +10,11 @@ namespace Phortress\Dephenses\Taint;
 
 
 class FunctionNodeAnalyser extends NodeAnalyser{
-	protected static function createTaintResult($taint, $sanitising_funcs = array()){
+	protected function createTaintResult($taint, $sanitising_funcs = array()){
 		return new FunctionTaintResult($taint, $sanitising_funcs);
 	}
 
-	protected static function mergeAnalysisResults(array $results){
+	protected function mergeAnalysisResults(array $results){
 //		$mergeResult = self::createTaintResult(Annotation::UNASSIGNED);
 //		foreach($results as $result){
 //			$mergeResult->merge($result);

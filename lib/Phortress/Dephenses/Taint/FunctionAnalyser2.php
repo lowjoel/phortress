@@ -109,11 +109,12 @@ class FunctionAnalyser2{
 	}
 
 	private function getParametersToTaintResultMappings($args){
+		$nodeAnalyser = new NodeAnalyser();
 		$mappings = array();
 		for($i = 0; $i<count($args);$i++){
 			$param = $this->params[$i];
 			$arg_val = $args[$i]->value;
-			$result = NodeAnalyser::resolveExprTaint($arg_val);
+			$result = $nodeAnalyser->resolveExprTaint($arg_val);
 			$mappings[$param->name] = $result;
 		}
 		return $mappings;

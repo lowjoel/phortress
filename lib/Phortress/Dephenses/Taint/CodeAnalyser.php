@@ -19,9 +19,10 @@ class CodeAnalyser {
     
     public function analyse(){
 	    $currentTaintEnv = new TaintEnvironment();
+	    $nodeAnalyser = new NodeAnalyser();
         foreach($this->parseTree as $statement){
 //            StmtAnalyser::reduce($statement);
-	        $nodeTaintEnv = NodeAnalyser::analyse($statement, $currentTaintEnv);
+	        $nodeTaintEnv = $nodeAnalyser->analyse($statement, $currentTaintEnv);
 //	        assert($nodeTaintEnv != null);
 //	        var_dump($nodeTaintEnv->getTaintResult('c')->getTaint());
 	        $currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
