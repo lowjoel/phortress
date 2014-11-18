@@ -28,6 +28,7 @@ class NodeAnalyser {
 			assert($result != null);
 			return $result;
 		}else if($node instanceof Expr){
+			TaintEnvironment::mergeTaintEnvironmentForEnvironment($node->environment, $taintEnv);
 			$result = self::resolveAssignmentTaintEnvironment($node);
 			if(empty($result)){
 				return $taintEnv;
@@ -90,7 +91,7 @@ class NodeAnalyser {
 		}
 	}
 
-	protected  static function setVariableTaintEnvironment(Environment $env, $varName,
+	protected static function setVariableTaintEnvironment(Environment $env, $varName,
 	                                                    TaintResult $taintRes){
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
 		if(!isset($taintEnv)){
@@ -100,7 +101,7 @@ class NodeAnalyser {
 		TaintEnvironment::setTaintEnvironmentForEnvironment($env, $taintEnv);
 	}
 
-	protected  static function mergeVariableTaintEnvironment(Environment $env, $varName,
+	protected static function mergeVariableTaintEnvironment(Environment $env, $varName,
 	                                                    TaintResult $taintRes){
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
 		if(!isset($taintEnv)){
@@ -187,15 +188,20 @@ class NodeAnalyser {
 
 	protected static function traceVariableTaint(Expr\Variable $var){
 		$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
+		$varName = $var->name;
+		$assignEnv = self::getVariableAssignmentEnvironment($var);
 		if(!isset($varTaintEnv)){
-			$assignEnv = self::getVariableAssignmentEnvironment($var);
 			$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);
-			if(!isset($varTaintEnv)){
-				$assign = $assignEnv->resolveVariable($var->name);
-				return self::resolveExprTaint($assign->expr);
-			}
 		}
-		return $varTaintEnv->getTaintResult($var->name);
+		if(isset($varTaintEnv)){
+			$taintResult = $varTaintEnv->getTaintResult($var->name);
+		}
+		if(empty($taintResult) || $taintResult->getTaint() == Annotation::UNASSIGNED){
+			$assign = $assignEnv->resolveVariable($varName);
+			return self::resolveExprTaint($assign->expr);
+		}
+
+		return $taintResult;
 	}
 
 	public static function resolveExprTaint(Expr $exp){

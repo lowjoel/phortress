@@ -46,7 +46,7 @@ class TaintEnvironment {
 		}
 	}
 
-	public  static function getTaintEnvironmentFromEnvironment(Environment $env){
+	public static function getTaintEnvironmentFromEnvironment(Environment $env){
 		if(property_exists($env, 'taintEnvironment')){
 			return $env->taintEnvironment;
 		}else{
@@ -54,9 +54,19 @@ class TaintEnvironment {
 		}
 	}
 
-	public  static function setTaintEnvironmentForEnvironment(Environment $env,
+	public static function setTaintEnvironmentForEnvironment(Environment $env,
 	                                                          TaintEnvironment $taintEnv){
 		$env->taintEnvironment = $taintEnv;
+	}
+
+	public static function mergeTaintEnvironmentForEnvironment(Environment $env,
+	                                                           TaintEnvironment $taintEnv){
+		$originalEnv = self::getTaintEnvironmentFromEnvironment($env);
+		if(isset($originalEnv)){
+			$originalEnv->mergeTaintEnvironment($taintEnv);
+		}else{
+			self::setTaintEnvironmentForEnvironment($env, $taintEnv);
+		}
 	}
 
 	private function checkParentTaintPropagationCondition(){
@@ -77,11 +87,11 @@ class TaintEnvironment {
 			if(isset($parentTaintEnv)){
 				return $parentTaintEnv->getTaintResult($varName);
 			}else{
-				return new TaintResult(Annotation::UNKNOWN);
+				return new TaintResult(Annotation::UNASSIGNED);
 			}
 
 		}else{
-			return new TaintResult(Annotation::UNKNOWN);
+			return new TaintResult(Annotation::UNASSIGNED);
 		}
 	}
 
