@@ -34,7 +34,7 @@ class FunctionTaintResult extends TaintResult{
 	}
 
 	public function addAffectingParameter($paramName){
-		$this->affecting_params[] = $paramName;
+		$this->affecting_params = array_merge($this->affecting_params, array($paramName));
 	}
 
 	public function merge($info){

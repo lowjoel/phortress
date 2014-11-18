@@ -24,7 +24,6 @@ class CodeAnalyser {
 	        $nodeTaintEnv = $nodeAnalyser->analyse($statement, $currentTaintEnv);
 	        $currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
         }
-	    return $this->runVulnerabilityChecks();
     }
 
 	public function runVulnerabilityChecks(){
