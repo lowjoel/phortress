@@ -54,7 +54,7 @@ class FunctionTaintResult extends TaintResult{
 		$this->affecting_params = $params;
 	}
 
-	public static function mergeVariableInfo(FunctionTaintResult $var1, FunctionTaintResult $var2){
+	public static function mergeFunctionTaintResults(FunctionTaintResult $var1, FunctionTaintResult $var2){
 		$mergedResult = TaintResult::mergeTaintResults($var1, $var2);
 		$varInfo = new FunctionTaintResult($var1->getVariable(), $mergedResult->getTaint(),
 		$mergedResult->getSanitisingFunctions());
@@ -81,7 +81,7 @@ class FunctionTaintResult extends TaintResult{
 					$merged[$var_name] = $varInfo;
 				}else{
 					$existing = $merged[$var_name];
-					$merged[$var_name] = self::mergeVariableInfo($existing, $varInfo);
+					$merged[$var_name] = self::mergeFunctionTaintResults($existing, $varInfo);
 				}
 			}
 		}

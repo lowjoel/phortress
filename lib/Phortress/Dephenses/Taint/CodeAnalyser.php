@@ -23,6 +23,7 @@ class CodeAnalyser {
 //            StmtAnalyser::reduce($statement);
 	        $nodeTaintEnv = NodeAnalyser::analyse($statement, $currentTaintEnv);
 	        assert($nodeTaintEnv != null);
+//	        var_dump($nodeTaintEnv->getTaintResult('c'));
 	        $currentTaintEnv->mergeTaintEnvironment($nodeTaintEnv);
         }
         return array();
