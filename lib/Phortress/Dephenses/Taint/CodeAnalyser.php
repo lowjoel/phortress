@@ -22,15 +22,13 @@ class CodeAnalyser {
 	    $nodeAnalyser = new NodeAnalyser();
         foreach($this->parseTree as $statement){
 	        $nodeTaintEnv = $nodeAnalyser->analyse($statement, $currentTaintEnv);
-//	        assert($nodeTaintEnv != null);
-//	        var_dump($nodeTaintEnv->getTaintResult('c')->getTaint());
 	        $currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
         }
-        return array();
+	    return $this->runVulnerabilityChecks();
     }
 
 	public function runVulnerabilityChecks(){
-		$sql_vul_finder = new SQLVulnerabilityFinder($this->parseTree);
-		return $sql_vul_finder->findVulnerabilities();
+//		$sql_vul_finder = new SQLVulnerabilityFinder($this->parseTree);
+//		return $sql_vul_finder->findVulnerabilities();
 	}
 }

@@ -267,9 +267,20 @@ class NodeAnalyser {
 			return $this->resolveSanitisationFuncCall($exp);
 		}else{
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
-			$analysis_res = $func_analyser->analyseFunctionCall($exp->args);
+			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
+			$analysis_res = $func_analyser->analyseFunctionCall($args_with_taints);
 			return $analysis_res;
 		}
+	}
+
+	private function getArgumentsTaintValuesForAnalysis($args){
+		$mappings = array();
+		for($i = 0; $i<count($args);$i++){
+			$arg_val = $args[$i]->value;
+			$result = $this->resolveExprTaint($arg_val);
+			$mappings[$i] = $result;
+		}
+		return $mappings;
 	}
 
 	protected function resolveSanitisationFuncCall(Expr\FuncCall $exp){

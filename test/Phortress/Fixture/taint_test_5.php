@@ -10,5 +10,5 @@ function func($a, $b) {
 	return $ret;
 }
 
-$a = func(5, $_GET['tainted']);
+$a = func(5, $tainted);
 $b = func(5, 5);

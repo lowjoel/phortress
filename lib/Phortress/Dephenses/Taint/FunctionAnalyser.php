@@ -79,11 +79,11 @@ class FunctionAnalyser{
 	 * Returns an array containing taint value of the value returned by the function,
 	 * and the array of sanitising functions applied
 	 */
-	public function analyseFunctionCall($args){
-		$argTaintMappings = $this->getParametersToTaintResultMappings($args);
+	public function analyseFunctionCall($argMappings){
+		$paramTaintMappings = $this->getParametersToTaintResultMappings($argMappings);
 		$result = new TaintResult(Annotation::UNASSIGNED);
 		foreach($this->returnStmts as $retStmt){
-			$retStmtResult = $this->analyseArgumentsEffectOnReturnStmt($argTaintMappings, $retStmt);
+			$retStmtResult = $this->analyseArgumentsEffectOnReturnStmt($paramTaintMappings, $retStmt);
 			$result->merge($retStmtResult);
 		}
 		return $result;
@@ -104,14 +104,11 @@ class FunctionAnalyser{
 
 	}
 
-	private function getParametersToTaintResultMappings($args){
-		$nodeAnalyser = new NodeAnalyser();
+	private function getParametersToTaintResultMappings($argTaints){
 		$mappings = array();
-		for($i = 0; $i<count($args);$i++){
+		for($i = 0; $i<count($argTaints);$i++){
 			$param = $this->params[$i];
-			$arg_val = $args[$i]->value;
-			$result = $nodeAnalyser->resolveExprTaint($arg_val);
-			$mappings[$param->name] = $result;
+			$mappings[$param->name] = $argTaints[$i];
 		}
 		return $mappings;
 	}
