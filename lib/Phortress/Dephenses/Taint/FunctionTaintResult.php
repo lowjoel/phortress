@@ -46,6 +46,10 @@ class FunctionTaintResult extends TaintResult{
 		$this->affecting_params = $params;
 	}
 
+	public function addAffectingParameter($param){
+		$this->affecting_params[] = $param;
+	}
+
 	public function merge($info){
 		parent::merge($info);
 		assert($info instanceof FunctionTaintResult);
