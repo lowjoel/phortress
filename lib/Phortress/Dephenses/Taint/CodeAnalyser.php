@@ -21,7 +21,6 @@ class CodeAnalyser {
 	    $currentTaintEnv = new TaintEnvironment();
 	    $nodeAnalyser = new NodeAnalyser();
         foreach($this->parseTree as $statement){
-//            StmtAnalyser::reduce($statement);
 	        $nodeTaintEnv = $nodeAnalyser->analyse($statement, $currentTaintEnv);
 //	        assert($nodeTaintEnv != null);
 //	        var_dump($nodeTaintEnv->getTaintResult('c')->getTaint());

@@ -22,20 +22,12 @@ class FunctionTaintResult extends TaintResult{
 		$this->variable = $var;
 	}
 
-	public function isEmpty(){
-		return $this->variable === null;
-	}
-
 	public function getVariable(){
 		return $this->variable;
 	}
 
 	public function setVariable(Expr\Variable $var){
 		$this->variable = $var;
-	}
-
-	public function getDefinition(){
-		return $this->variable->environment->resolveVariable($this->variable->name);
 	}
 
 	public function getAffectingParameters(){
@@ -46,22 +38,26 @@ class FunctionTaintResult extends TaintResult{
 		$this->affecting_params = $params;
 	}
 
-	public function addAffectingParameter($param){
-		$this->affecting_params[] = $param;
+	public function isAffectingParameter($paramName){
+		return in_array($paramName, $this->affecting_params);
+	}
+
+	public function addAffectingParameter($paramName){
+		$this->affecting_params[] = $paramName;
 	}
 
 	public function merge($info){
 		parent::merge($info);
-		assert($info instanceof FunctionTaintResult);
-		$other_params = $info->getAffectingParameters();
-		$params = array_merge($this->affecting_params, $other_params);
-		$this->affecting_params = $params;
+		if($info instanceof FunctionTaintResult){
+			$other_params = $info->getAffectingParameters();
+			$params = array_merge($this->affecting_params, $other_params);
+			$this->affecting_params = $params;
+		}
 	}
 
 	public static function mergeFunctionTaintResults(FunctionTaintResult $var1, FunctionTaintResult $var2){
 		$mergedResult = TaintResult::mergeTaintResults($var1, $var2);
-		$varInfo = new FunctionTaintResult($var1->getVariable(), $mergedResult->getTaint(),
-		$mergedResult->getSanitisingFunctions());
+		$varInfo = new FunctionTaintResult($mergedResult->getTaint(), $mergedResult->getSanitisingFunctions());
 
 		$params = array_merge($var1->getAffectingParameters(), $var2->getAffectingParameters());
 		$varInfo->setAffectingParameters($params);

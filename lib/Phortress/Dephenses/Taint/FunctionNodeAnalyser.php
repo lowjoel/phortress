@@ -13,8 +13,10 @@ use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\BinaryOp;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Stmt\Return_;
 
 class FunctionNodeAnalyser extends NodeAnalyser{
+	const RETURN_STMT_KEY = "--return--";
 	protected $functionParams = array();
 
 	public function __construct($params){
@@ -73,7 +75,19 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		return $result;
 	}
 
+	protected function resolveStmtTaintEnvironment(Stmt $exp, TaintEnvironment $taintEnv){
+		if($exp instanceof Return_){
+			$retExp = $exp->expr;
+			$retExpTaint = $this->resolveExprTaint($retExp);
+			$retEnv = $taintEnv->copy();
+			$retEnv->setTaintResult(RETURN_STMT_KEY, $retExpTaint);
+			TaintEnvironment::setTaintEnvironmentForEnvironment($retExp->environment, $retEnv);
+			return $retEnv;
 
+		}else{
+			return parent::resolveStmtTaintEnvironment($exp, $taintEnv);
+		}
+	}
 //	protected function mergeAnalysisResults(array $results){
 //		$mergeResult = self::createTaintResult(Annotation::UNASSIGNED);
 //		foreach($results as $result){
