@@ -19,6 +19,13 @@ use PhpParser\Node\Stmt;
  * @param \PhpParser\Node $node
  */
 class NodeAnalyser {
+	protected $vulnerabilityReporter;
+	public function __construct($reporter = null){
+		if(!empty($reporter)){
+			$this->vulnerabilityReporter = $reporter;
+		}
+	}
+
 	public function analyse(Node $node, TaintEnvironment $taintEnv){
 		$taintEnv = $taintEnv->copy();
 		if($node instanceof Stmt){
@@ -265,6 +272,9 @@ class NodeAnalyser {
 		if(SanitisingFunctions::isGeneralSanitisingFunction($func_name_str)||
 			SanitisingFunctions::isSanitisingReverseFunction($func_name_str)){
 			return $this->resolveSanitisationFuncCall($exp);
+		}else if(Sinks::isSinkFunction($exp) && !empty($this->vulnerabilityReporter)){
+			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
+			$this->vulnerabilityReporter->runVulnerabilityChecks($exp, $args_with_taints);
 		}else{
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);

@@ -368,4 +368,19 @@ class Sinks {
 		$funcName = $func->name->getLast();
 		return array_key_exists($funcName, self::$DATABASE_SINKS);
 	}
+
+	public static function isXSSSinkFunction(Expr\FuncCall $func){
+		$funcName = $func->name->getLast();
+		return array_key_exists($funcName, self::$XSS_SINKS);
+	}
+
+	public static function isCodeInjectionSinkFunction(Expr\FuncCall $func){
+		$funcName = $func->name->getLast();
+		return array_key_exists($funcName, self::$CODE_EXE_SINKS);
+	}
+
+	public static function isSinkFunction(Expr\FuncCall $func){
+		return self::isCodeInjectionSinkFunction($func) || self::isSQLInjectionSinkFunction
+		($func) || self::isXSSSinkFunction($func);
+	}
 }
