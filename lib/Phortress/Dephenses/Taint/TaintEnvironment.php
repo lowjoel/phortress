@@ -39,7 +39,6 @@ class TaintEnvironment {
 	public function mergeAndSetTaintResult($varName, TaintResult $result){
 		$existingResult = $this->getTaintResult($varName);
 		if(isset($existingResult)){
-			$existingResult = $this->taintResults[$varName];
 			$existingResult->merge($result);
 		}else{
 			$this->setTaintResult($varName, $result);
