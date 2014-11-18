@@ -69,6 +69,16 @@ class TaintEnvironment {
 		}
 	}
 
+	public static function updateTaintEnvironmentForEnvironment(Environment $env,
+	                                                           TaintEnvironment $taintEnv){
+		$originalEnv = self::getTaintEnvironmentFromEnvironment($env);
+		if(isset($originalEnv)){
+			$originalEnv->updateTaintEnvironment($taintEnv);
+		}else{
+			self::setTaintEnvironmentForEnvironment($env, $taintEnv);
+		}
+	}
+
 	private function checkParentTaintPropagationCondition(){
 		if(is_null($this->environment->getParent())){
 			return false;

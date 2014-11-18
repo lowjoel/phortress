@@ -22,13 +22,15 @@ class NodeAnalyser {
 	public static function analyse(Node $node, TaintEnvironment $taintEnv = null){
 		if(is_null($taintEnv)){
 			$taintEnv = new TaintEnvironment();
+		}else{
+			$taintEnv = $taintEnv->copy();
 		}
 		if($node instanceof Stmt){
 			$result = self::resolveStmtTaintEnvironment($node, $taintEnv);
 			assert($result != null);
 			return $result;
 		}else if($node instanceof Expr){
-			TaintEnvironment::mergeTaintEnvironmentForEnvironment($node->environment, $taintEnv);
+			TaintEnvironment::updateTaintEnvironmentForEnvironment($node->environment, $taintEnv);
 			$result = self::resolveAssignmentTaintEnvironment($node);
 			if(empty($result)){
 				return $taintEnv;

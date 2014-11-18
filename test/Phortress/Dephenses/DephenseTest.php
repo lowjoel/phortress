@@ -51,13 +51,13 @@ class DephenseTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
 
-//	public function testIfElse(){
-//		$taintDephense = new Taint();
-//		$taintDephense->run($this->program2->parseTree);
-//
-//		$taint1 = $this->getVariableTaint($this->program2->parseTree[2]->var);
-//		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
-//		$taint2 = $this->getVariableTaint($this->program2->parseTree[4]->var);
-//		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
-//	}
+	public function testIfElse(){
+		$taintDephense = new Taint();
+		$taintDephense->run($this->program2->parseTree);
+
+		$taint1 = $this->getVariableTaint($this->program2->parseTree[2]->var);
+		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
+		$taint2 = $this->getVariableTaint($this->program2->parseTree[4]->var);
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
+	}
 }
