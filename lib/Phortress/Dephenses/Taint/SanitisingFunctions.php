@@ -61,19 +61,19 @@ class SanitisingFunctions {
     );	
     
     public static function isGeneralSanitisingFunction($func_name){
-        return in_array($func_name, self::general_sanitising);
+        return in_array($func_name, self::$general_sanitising);
     }
     
     public static function isShellSanitisingFunction($func_name){
-        return in_array($func_name, self::shell_sanitising);
+        return in_array($func_name, self::$shell_sanitising);
     }
     
     public static function isXSSSanitisingFunction($func_name){
-        return in_array($func_name, self::xss_sanitising());
+        return in_array($func_name, self::$xss_sanitising);
     }
     
     public static function isSQLSanitisingFunction($func_name){
-        return in_array($func_name, self::sql_sanitising);
+        return in_array($func_name, self::$sql_sanitising);
     }
     
     public static function isSanitisingFunction($func_name){

@@ -41,9 +41,9 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program1->parseTree);
 
-		$taint1 = $this->program1->parseTree[2]->var->taint;
+		$taint1 = $this->getVariableTaint($this->program1->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
-		$taint2 = $this->program1->parseTree[3]->var->taint;
+		$taint2 = $this->getVariableTaint($this->program1->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
 
 	}
@@ -52,22 +52,22 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program2->parseTree);
 
-		$taint1 = $this->program2->parseTree[2]->var->taint;
+		$taint1 = $this->getVariableTaint($this->program2->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
-		$taint2 = $this->program2->parseTree[3]->var->taint;
+		$taint2 = $this->getVariableTaint($this->program2->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
-		$taint3 = $this->program2->parseTree[5]->var->taint;
+		$taint3 = $this->getVariableTaint($this->program2->parseTree[5]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint3);
 	}
 
 	public function testTaintedParamsWithTernaryOps(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program3->parseTree);
-		$taint1 = $this->program3->parseTree[2]->var->taint;
+		$taint1 = $this->getVariableTaint($this->program3->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
-		$taint2 = $this->program3->parseTree[3]->var->taint;
+		$taint2 = $this->getVariableTaint($this->program3->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
-		$taint3 = $this->program3->parseTree[4]->var->taint;
+		$taint3 = $this->getVariableTaint($this->program3->parseTree[4]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint3);
 	}
 
@@ -76,18 +76,25 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		//individually, instead of seeing them in the context of a conditional.
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program4->parseTree);
-		$taint1 = $this->program4->parseTree[2]->var->taint;
+		$taint1 = $this->getVariableTaint($this->program4->parseTree[2]->var);
 //		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
-//		$taint2 = $this->program4->parseTree[3]->var->taint;
+//		$taint2 = $this->getVariableTaint($this->program4->parseTree[3]->var);
 //		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
 
 	public function testWhileLoop(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program5->parseTree);
-		$taint1 = $this->program5->parseTree[2]->var->taint;
+		$taint1 = $this->getVariableTaint($this->program5->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
-		$taint2 = $this->program5->parseTree[3]->var->taint;
+		$taint2 = $this->getVariableTaint($this->program5->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
+	}
+
+	public function getVariableTaint(Variable $var){
+		$assignEnv = $var->environment->resolveVariable($var->name)->environment;
+		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);
+		$taintResult = $taintEnv->getTaintResult($var->name);
+		return $taintResult->getTaint();
 	}
 }

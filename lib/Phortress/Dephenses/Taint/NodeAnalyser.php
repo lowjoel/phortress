@@ -259,7 +259,6 @@ class NodeAnalyser {
 			SanitisingFunctions::isSanitisingReverseFunction($func_name)){
 			return $this->resolveSanitisationFuncCall($exp, $func_name);
 		}else{
-			//TODO:
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
 			$analysis_res = $func_analyser->analyseFunctionCall($exp->args);
 			return $analysis_res;
