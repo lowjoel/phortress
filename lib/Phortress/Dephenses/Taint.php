@@ -7,9 +7,4 @@ class Taint extends Dephense {
 
 		return $analyser->analyse();
 	}
-
-	public function runChecks(array $parseTree){
-		$analyser = new Taint\CodeAnalyser($parseTree);
-		return $analyser->runVulnerabilityChecks();
-	}
 }

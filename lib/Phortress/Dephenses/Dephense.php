@@ -64,5 +64,4 @@ abstract class Dephense {
 	 */
 	public abstract function run(array $parseTree);
 
-	public abstract function runChecks(array $parseTree);
 }

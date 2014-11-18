@@ -20,12 +20,21 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	protected $functionParams = array();
 	protected $returnResults = array();
 
+	/**
+	 * array(int lineNumber => FuncCall functionCall)
+	 */
+	protected $sinkFunctionCalls = array();
+
 	public function __construct($params){
 		$this->functionParams = $params;
 	}
 
 	protected function createTaintResult($taint, $sanitising_funcs = array()){
 		return new FunctionTaintResult($taint, $sanitising_funcs);
+	}
+
+	public function getSinkFunctionCalls(){
+		return $this->sinkFunctionCalls;
 	}
 
 	private function isFunctionParameter($name){
@@ -53,8 +62,12 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	}
 
 	protected function resolveFuncResultTaint(FuncCall $exp){
-		$result = parent::resolveFuncResultTaint($exp);
 		$args = $exp->args;
+		if(Sinks::isSinkFunction($exp)){
+			$this->sinkFunctionCalls[$exp->getLine()] = $exp;
+			return;
+		}
+		$result = parent::resolveFuncResultTaint($exp);
 		foreach($args as $arg){
 			$argExpName = $arg->value->name;
 			$this->addAffectingParameterToAnalysisResult($result, $argExpName);
@@ -111,11 +124,4 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	public function getReturnTaintResult(){
 		return $this->returnResults;
 	}
-//	protected function mergeAnalysisResults(array $results){
-//		$mergeResult = self::createTaintResult(Annotation::UNASSIGNED);
-//		foreach($results as $result){
-//			$mergeResult->merge($result);
-//		}
-//		return $result;
-//	}
 } 

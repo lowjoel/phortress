@@ -151,7 +151,7 @@ class Program {
 
 		$errors = array();
 		foreach ($dephenses as $dephense) {
-			$errors += $dephense->runChecks($this->parseTree);
+			$errors += $dephense->run($this->parseTree);
 		}
 
 		return $errors;

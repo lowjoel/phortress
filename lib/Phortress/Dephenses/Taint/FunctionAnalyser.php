@@ -34,6 +34,7 @@ class FunctionAnalyser{
 	 */
 	protected $functionStmts;
 
+	protected $sinkFunctionCalls = array();
 
 	/**
 	 * Environment where the function was defined
@@ -72,6 +73,7 @@ class FunctionAnalyser{
 			$currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
 		}
 		$this->returnStmtTaintResults = $funcNodeAnalyser->getReturnTaintResult();
+		$this->sinkFunctionCalls = $funcNodeAnalyser->getSinkFunctionCalls();
 	}
 
 	/**
@@ -79,14 +81,21 @@ class FunctionAnalyser{
 	 * Returns an array containing taint value of the value returned by the function,
 	 * and the array of sanitising functions applied
 	 */
-	public function analyseFunctionCall($argMappings){
+	public function analyseFunctionCall($argMappings, $reporter = null){
 		$paramTaintMappings = $this->getParametersToTaintResultMappings($argMappings);
 		$result = new TaintResult(Annotation::UNASSIGNED);
 		foreach($this->returnStmts as $retStmt){
 			$retStmtResult = $this->analyseArgumentsEffectOnReturnStmt($paramTaintMappings, $retStmt);
 			$result->merge($retStmtResult);
 		}
+		if(!empty($reporter)){
+			$this->checkSinkFunctionCalls($argMappings, $reporter);
+		}
 		return $result;
+	}
+
+	private function checkSinkFunctionCalls($argMappings, $reporter){
+
 	}
 
 	private function analyseArgumentsEffectOnReturnStmt($argTaints, Stmt\Return_ $return){

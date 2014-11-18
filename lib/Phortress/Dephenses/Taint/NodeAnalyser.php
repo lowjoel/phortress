@@ -278,7 +278,7 @@ class NodeAnalyser {
 		}else{
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
-			$analysis_res = $func_analyser->analyseFunctionCall($args_with_taints);
+			$analysis_res = $func_analyser->analyseFunctionCall($args_with_taints, $this->vulnerabilityReporter);
 			return $analysis_res;
 		}
 	}

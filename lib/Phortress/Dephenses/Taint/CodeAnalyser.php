@@ -26,10 +26,7 @@ class CodeAnalyser {
 	        $nodeTaintEnv = $nodeAnalyser->analyse($statement, $currentTaintEnv);
 	        $currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
         }
+	    return $vulnerabilityReporter->getVulnerabilityReport();
     }
 
-	public function runVulnerabilityChecks(){
-//		$sql_vul_finder = new SQLVulnerabilityFinder($this->parseTree);
-//		return $sql_vul_finder->findVulnerabilities();
-	}
 }
