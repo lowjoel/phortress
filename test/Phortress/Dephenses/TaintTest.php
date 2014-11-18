@@ -53,7 +53,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
 
 	}
-/*
+
 	public function testTaintedParamsWithBinaryOps(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program2->parseTree);
@@ -62,10 +62,12 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::SAFE, $taint1);
 		$taint2 = $this->getVariableTaint($this->program2->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
-		$taint3 = $this->getVariableTaint($this->program2->parseTree[5]->var);
+		$taint3 = $this->getVariableTaint($this->program2->parseTree[4]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint3);
+//		$taint4 = $this->getVariableTaint($this->program2->parseTree[6]->var);
+//		$this->assertEquals(Taint\Annotation::SAFE, $taint4);
 	}
-
+/*
 	public function testTaintedParamsWithTernaryOps(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program3->parseTree);

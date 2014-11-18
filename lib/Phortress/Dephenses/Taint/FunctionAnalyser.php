@@ -110,13 +110,13 @@ class FunctionAnalyser{
 		if(!empty($retExpEnv)){
 			$retExpTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($retExpEnv);
 			$retTaint = $retExpTaintEnv->getTaintResult(FunctionNodeAnalyser::RETURN_STMT_KEY);
+			$taintResult = new TaintResult($retTaint->getTaint(), $retTaint->getSanitisingFunctions());
 			foreach($argTaints as $paramName => $taint){
 				if($retTaint->isAffectingParameter($paramName)){
-					$retTaint->merge($taint);
+					$taintResult->merge($taint);
 				}
 			}
-			var_dump($retTaint->getTaint());
-			return new TaintResult($retTaint->getTaint(), $retTaint->getSanitisingFunctions());
+			return $taintResult;
 		}else{
 			return new TaintResult(Annotation::UNASSIGNED);
 		}

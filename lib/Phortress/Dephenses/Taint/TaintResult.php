@@ -71,4 +71,7 @@ class TaintResult {
 		return array_intersect($functions1, $functions2);
 	}
 
+	public function copy(){
+		return new TaintResult($this->getTaint(), $this->getSanitisingFunctions());
+	}
 } 

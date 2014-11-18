@@ -15,8 +15,10 @@ class FunctionTaintResult extends TaintResult{
 	 */
 	protected $affecting_params = array();
 
-	public function __construct($taint = Annotation::UNASSIGNED, $sanitising = array()){
+	public function __construct($taint = Annotation::UNASSIGNED, $sanitising = array(),
+	                            $affecting_params = array()){
 		parent::__construct($taint, $sanitising);
+		$this->affecting_params = $affecting_params;
 	}
 
 	public function getAffectingParameters(){
@@ -53,4 +55,8 @@ class FunctionTaintResult extends TaintResult{
 		return $varInfo;
 	}
 
+	public function copy(){
+		return new FunctionTaintResult($this->getTaint(), $this->getSanitisingFunctions(),
+			$this->affecting_params);
+	}
 } 
