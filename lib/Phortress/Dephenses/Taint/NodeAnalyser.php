@@ -282,7 +282,7 @@ class NodeAnalyser {
 			}
 			$results[] = $taintRes;
 		}
-		return self::mergeTaintResults($results);
+		return self::mergeAnalysisResults($results);
 	}
 
 	protected static function resolveClassPropertyTaint(Expr\StaticPropertyFetch $exp){
@@ -298,10 +298,10 @@ class NodeAnalyser {
 	protected static function resolveAndMergeTaintOfExprsInArray(Expr\Array_ $arr){
 		$taintResults = self::resolveTaintOfExprsInArray($arr);
 
-		return self::mergeTaintResults($taintResults);
+		return self::mergeAnalysisResults($taintResults);
 	}
 
-	protected static function mergeTaintResults(array $results){
+	protected static function mergeAnalysisResults(array $results){
 		$mergeResult = self::createTaintResult(Annotation::UNASSIGNED);
 		foreach($results as $result){
 			$mergeResult->merge($result);
@@ -316,7 +316,7 @@ class NodeAnalyser {
 		$right_taint = self::resolveExprTaint($right);
 		assert($left_taint != NULL);
 		assert($right_taint !=NULL);
-		return TaintResult::mergeTaintResults($left_taint, $right_taint);
+		return self::mergeAnalysisResults(array($left_taint, $right_taint));
 	}
 
 	protected static function resolveTernaryTaint(Expr\Ternary $exp){
@@ -324,7 +324,7 @@ class NodeAnalyser {
 		$else = $exp->else;
 		$if_taint = self::resolveExprTaint($if);
 		$else_taint = self::resolveExprTaint($else);
-		return TaintResult::mergeTaintResults($if_taint, $else_taint);
+		return self::mergeAnalysisResults(array($if_taint, $else_taint));
 	}
 
 	protected static function resolveArrayFieldTaint(Expr\ArrayDimFetch $exp){

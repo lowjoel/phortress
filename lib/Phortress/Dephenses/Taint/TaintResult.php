@@ -51,7 +51,7 @@ class TaintResult {
 		return new TaintResult($mergedTaint, $mergedSanitisation);
 	}
 
-	public static function mergeTaintResultSanitisingFunctions(TaintResult $result1,
+	protected static function mergeTaintResultSanitisingFunctions(TaintResult $result1,
 	                                                           TaintResult $result2){
 		$taint1 = $result1->getTaint();
 		$taint2 = $result2->getTaint();
@@ -67,7 +67,7 @@ class TaintResult {
 	/**
 	 * Merges two arrays of sanitising functions.
 	 */
-	public static function mergeSanitisingFunctions($functions1, $functions2){
+	protected static function mergeSanitisingFunctions($functions1, $functions2){
 		return array_intersect($functions1, $functions2);
 	}
 
