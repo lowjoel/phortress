@@ -252,12 +252,15 @@ class NodeAnalyser {
 		}
 		$func_name = $exp->name;
 		if($func_name instanceof Expr){
+			//cannot evaluate the taint when the function's name is dynamically determined
 			return $this->createTaintResult(Annotation::UNKNOWN);
 		}
 
-		if(SanitisingFunctions::isGeneralSanitisingFunction($func_name)||
-			SanitisingFunctions::isSanitisingReverseFunction($func_name)){
-			return $this->resolveSanitisationFuncCall($exp, $func_name);
+		$func_name_str = $func_name->getLast();
+
+		if(SanitisingFunctions::isGeneralSanitisingFunction($func_name_str)||
+			SanitisingFunctions::isSanitisingReverseFunction($func_name_str)){
+			return $this->resolveSanitisationFuncCall($exp);
 		}else{
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
 			$analysis_res = $func_analyser->analyseFunctionCall($exp->args);
@@ -265,7 +268,8 @@ class NodeAnalyser {
 		}
 	}
 
-	protected function resolveSanitisationFuncCall(Expr\FuncCall $exp, $func_name){
+	protected function resolveSanitisationFuncCall(Expr\FuncCall $exp){
+		$func_name = $exp->name;
 		$func_args = $exp->args;
 		$results = array();
 		foreach($func_args as $arg){

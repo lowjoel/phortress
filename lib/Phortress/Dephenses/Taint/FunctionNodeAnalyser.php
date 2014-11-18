@@ -13,6 +13,7 @@ use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\BinaryOp;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Return_;
 
 class FunctionNodeAnalyser extends NodeAnalyser{
@@ -80,7 +81,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 			$retExp = $exp->expr;
 			$retExpTaint = $this->resolveExprTaint($retExp);
 			$retEnv = $taintEnv->copy();
-			$retEnv->setTaintResult(RETURN_STMT_KEY, $retExpTaint);
+			$retEnv->setTaintResult(self::RETURN_STMT_KEY, $retExpTaint);
 			TaintEnvironment::setTaintEnvironmentForEnvironment($retExp->environment, $retEnv);
 			return $retEnv;
 

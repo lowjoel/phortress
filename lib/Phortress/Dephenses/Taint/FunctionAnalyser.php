@@ -29,9 +29,11 @@ use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\UnaryMinus;
 use PhpParser\Node\Expr\UnaryPlus;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 use Phortress\Environment;
+use PhpParser\NodeTraverser;
 
 class FunctionAnalyser{
 	/**
@@ -67,7 +69,7 @@ class FunctionAnalyser{
 		$this->analyseFunction();
 	}
 
-	public static function getFunctionAnalyser(Environment $env, $functionName){
+	public static function getFunctionAnalyser(Environment $env, Name $functionName){
 		assert(!($functionName instanceof Expr));
 		assert(!empty($env));
 		$func_def = $env->resolveFunction($functionName);
@@ -82,7 +84,7 @@ class FunctionAnalyser{
 	private function analyseFunction(){
 		$currentTaintEnv = new TaintEnvironment($this->function->environment);
 		$funcNodeAnalyser = new FunctionNodeAnalyser($this->params);
-		foreach($this->parseTree as $statement){
+		foreach($this->functionStmts as $statement){
 			$nodeTaintEnv = $funcNodeAnalyser->analyse($statement, $currentTaintEnv);
 			$currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
 		}
