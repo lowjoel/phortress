@@ -33,7 +33,7 @@ class NodeAnalyser {
 		}
 	}
 
-	protected  static function resolveAssignmentTaintEnvironment(Expr $exp){
+	protected static function resolveAssignmentTaintEnvironment(Expr $exp){
 		if($exp instanceof Expr\Assign){
 			self::resolveTaintEnvironmentForAssign($exp);
 		}else if($exp instanceof Expr\AssignOp){
@@ -84,7 +84,7 @@ class NodeAnalyser {
 		}
 	}
 
-	private static function setVariableTaintEnvironment(Environment $env, $varName,
+	protected  static function setVariableTaintEnvironment(Environment $env, $varName,
 	                                                    TaintResult $taintRes){
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
 		if(!isset($taintEnv)){
@@ -94,7 +94,7 @@ class NodeAnalyser {
 		TaintEnvironment::setTaintEnvironmentForEnvironment($env, $taintEnv);
 	}
 
-	private static function mergeVariableTaintEnvironment(Environment $env, $varName,
+	protected  static function mergeVariableTaintEnvironment(Environment $env, $varName,
 	                                                    TaintResult $taintRes){
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($env);
 		if(!isset($taintEnv)){
@@ -104,7 +104,7 @@ class NodeAnalyser {
 		TaintEnvironment::setTaintEnvironmentForEnvironment($env, $taintEnv);
 	}
 
-	private static function getVariableAssignmentEnvironment(Expr\Variable $var){
+	protected  static function getVariableAssignmentEnvironment(Expr\Variable $var){
 		$varName = $var->name;
 		if($var instanceof Expr){
 			return $var->environment;
@@ -150,7 +150,7 @@ class NodeAnalyser {
 		$taint_vals = array();
 		foreach($arr_items as $item){
 			$exp = $item->value;
-			$taint_val = Annotation::UNKNOWN;
+			$taint_val = self::createTaintResult(Annotation::UNKNOWN);
 			if($exp instanceof Expr){
 				$taint_val = self::resolveExprTaint($exp);
 			}
@@ -161,11 +161,11 @@ class NodeAnalyser {
 
 	protected static function resolveVariableTaint(Expr\Variable $var){
 		if(InputSources::isInputVariable($var)){
-			return new TaintResult(Annotation::TAINTED);
+			return self::createTaintResult(Annotation::TAINTED);
 		}else{
 			$varName = $var->name;
 			if($varName instanceof Expr){
-				return new TaintResult(Annotation::UNKNOWN);
+				return self::createTaintResult(Annotation::UNKNOWN);
 			}
 			$varTaintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($var->environment);
 			if(!isset($varTaintEnv)){
@@ -192,12 +192,12 @@ class NodeAnalyser {
 		return $varTaintEnv->getTaintResult($var->name);
 	}
 
-	protected static function resolveExprTaint(Expr $exp){
+	public static function resolveExprTaint(Expr $exp){
 		if($exp instanceof Node\Scalar){
-			return new TaintResult(Annotation::SAFE);
+			return self::createTaintResult(Annotation::SAFE);
 		}else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof
 				Expr\ConstFetch)){
-			return new TaintResult(Annotation::SAFE);
+			return self::createTaintResult(Annotation::SAFE);
 		}else if($exp instanceof Expr\Variable) {
 			return self::resolveVariableTaint($exp);
 		}else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
@@ -227,21 +227,22 @@ class NodeAnalyser {
 			return self::resolveExprTaint($exp->expr);
 		}else{
 			//Other expressions we will not handle.
-			return new TaintResult(Annotation::UNKNOWN);
+			return self::createTaintResult(Annotation::UNKNOWN);
 		}
 	}
 
-	protected  static function resolveMethodResultTaint(Expr\MethodCall $exp){
-		return new TaintResult(Annotation::UNKNOWN);
+	protected static function resolveMethodResultTaint(Expr\MethodCall $exp){
+		//Method stub
+		return self::createTaintResult(Annotation::UNKNOWN);
 	}
 
-	protected  static function resolveFuncResultTaint(Expr\FuncCall $exp){
+	protected static function resolveFuncResultTaint(Expr\FuncCall $exp){
 		if(InputSources::isInputReadFuncCall($exp)){
-			return new TaintResult(Annotation::TAINTED);
+			return self::createTaintResult(Annotation::TAINTED);
 		}
 		$func_name = $exp->name;
 		if($func_name instanceof Expr){
-			return new TaintEnvironment(Annotation::UNKNOWN);
+			return self::createTaintResult(Annotation::UNKNOWN);
 		}
 
 		if(SanitisingFunctions::isGeneralSanitisingFunction($func_name)||
@@ -275,7 +276,7 @@ class NodeAnalyser {
 		$classEnv = $exp->environment->resolveClass($exp->class);
 		$varName = $exp->name;
 		if($varName instanceof Expr){
-			return new TaintResult(Annotation::UNKNOWN);
+			return self::createTaintResult(Annotation::UNKNOWN);
 		}
 		$varAssignEnv = $classEnv->resolveVariable($varName);
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($varAssignEnv);
@@ -288,7 +289,7 @@ class NodeAnalyser {
 	}
 
 	protected static function mergeTaintResults(array $results){
-		$mergeResult = new TaintResult(Annotation::UNASSIGNED);
+		$mergeResult = self::createTaintResult(Annotation::UNASSIGNED);
 		foreach($results as $result){
 			$mergeResult->merge($result);
 		}
@@ -313,19 +314,19 @@ class NodeAnalyser {
 		return TaintResult::mergeTaintResults($if_taint, $else_taint);
 	}
 
-	protected  static function resolveArrayFieldTaint(Expr\ArrayDimFetch $exp){
+	protected static function resolveArrayFieldTaint(Expr\ArrayDimFetch $exp){
 		//Treats all the fields in an array as a single entity
 		$array_var = $exp->var;
 		$array_var_name = $array_var->name;
 
 		if(!($array_var_name instanceof Expr) && InputSources::isInputVariableName($array_var_name)){
-			return new TaintResult(Annotation::TAINTED);
+			return self::createTaintResult(Annotation::TAINTED);
 		}
 		$taint = self::resolveExprTaint($array_var);
 		return $taint;
 	}
 
-	protected  static function resolveStmtTaintEnvironment(Stmt $exp, TaintEnvironment $taintEnv){
+	protected static function resolveStmtTaintEnvironment(Stmt $exp, TaintEnvironment $taintEnv){
 		if($exp instanceof Stmt\If_){
 			return self::resolveIfStatementTaints($exp, $taintEnv);
 		}else if($exp instanceof Stmt\Else_){
@@ -369,4 +370,7 @@ class NodeAnalyser {
 		return $envResult;
 	}
 
+	protected static function createTaintResult($taint, $sanitising_funcs = array()){
+		return new TaintResult($taint, $sanitising_funcs);
+	}
 } 

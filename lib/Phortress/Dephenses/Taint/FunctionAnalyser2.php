@@ -36,7 +36,7 @@ use Phortress\Environment;
 class FunctionAnalyser2{
 	/**
 	 * Return statements and the variables they are dependent on.
-	 * array(Stmt => array(variable_name)
+	 * array(Stmt line number => array(variable_name)
 	 */
 	protected $returnStmts = array();
 
@@ -108,15 +108,25 @@ class FunctionAnalyser2{
 
 	}
 
-	private function getParametersToTaintMappings($args){
+	private function getParametersToTaintResultMappings($args){
 		$mappings = array();
 		for($i = 0; $i<count($args);$i++){
 			$param = $this->params[$i];
 			$arg_val = $args[$i]->value;
-			$taint_val = StmtAnalyser::resolveExprTaint($arg_val);
-			$mappings[$param->name] = $taint_val;
+			$result = NodeAnalyser::resolveExprTaint($arg_val);
+			$mappings[$param->name] = $result;
 		}
 		return $mappings;
+	}
+
+	private function analyseFunctionArgumentsEffect($args, $return){
+		$taint_mappings = $this->getParametersToTaintResultMappings($args);
+
+		foreach($return as $var_name => $var_info){
+
+		}
+		//taint_val might be UNASSIGNED if the return values trace to a scalar.
+
 	}
 
 	private function traceStatementVariables(Stmt $stmt){
