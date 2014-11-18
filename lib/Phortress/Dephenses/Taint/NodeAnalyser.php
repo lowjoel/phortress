@@ -19,12 +19,8 @@ use PhpParser\Node\Stmt;
  * @param \PhpParser\Node $node
  */
 class NodeAnalyser {
-	public static function analyse(Node $node, TaintEnvironment $taintEnv = null){
-		if(is_null($taintEnv)){
-			$taintEnv = new TaintEnvironment();
-		}else{
-			$taintEnv = $taintEnv->copy();
-		}
+	public static function analyse(Node $node, TaintEnvironment $taintEnv){
+		$taintEnv = $taintEnv->copy();
 		if($node instanceof Stmt){
 			$result = self::resolveStmtTaintEnvironment($node, $taintEnv);
 			assert($result != null);
@@ -384,7 +380,7 @@ class NodeAnalyser {
 	protected static function resolveTaintForArrayOfStatements($nodes, TaintEnvironment $taintEnv){
 		$envResult = $taintEnv->copy();
 		foreach($nodes as $node){
-			$nodeTaintEnv = self::analyse($node);
+			$nodeTaintEnv = self::analyse($node, $taintEnv);
 			$envResult->mergeTaintEnvironment($nodeTaintEnv);
 		}
 		return $envResult;
