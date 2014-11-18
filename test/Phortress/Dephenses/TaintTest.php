@@ -37,6 +37,10 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 	public function testTaint() {
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program->parseTree);
+		$taint1 = $this->getVariableTaint($this->program->parseTree[2]->var);
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint1);
+		$taint2 = $this->getVariableTaint($this->program->parseTree[3]->var);
+		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
 
 	public function testTaintedParams(){

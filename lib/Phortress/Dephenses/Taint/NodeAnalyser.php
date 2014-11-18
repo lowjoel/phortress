@@ -339,7 +339,7 @@ class NodeAnalyser {
 		//Treats all the fields in an array as a single entity
 		$array_var = $exp->var;
 		$array_var_name = $array_var->name;
-
+		var_dump($array_var_name);
 		if(!($array_var_name instanceof Expr) && InputSources::isInputVariableName($array_var_name)){
 			return $this->createTaintResult(Annotation::TAINTED);
 		}

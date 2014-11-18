@@ -46,7 +46,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	protected function resolveVariableTaint(Variable $var){
 		$result = parent::resolveVariableTaint($var);
 		if(empty($result)){
-			$result = $this->createTaintResult(Annotation::UNKNOWN);
+			$result = $this->createTaintResult(Annotation::UNASSIGNED);
 		}
 		$this->addAffectingFunctionToAnalysisResult($result, $var->name);
 		return $result;
@@ -65,7 +65,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	protected function resolveBinaryOpTaint(BinaryOp $exp){
 		$result = parent::resolveBinaryOpTaint($exp);
 		if(empty($result)){
-			$result = $this->createTaintResult(Annotation::UNKNOWN);
+			$result = $this->createTaintResult(Annotation::UNASSIGNED);
 		}
 		$leftName = $exp->left->name;
 		$rightName = $exp->right->name;
@@ -79,7 +79,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		$array_var_name = $exp->var->name;
 		$result = parent::resolveArrayFieldTaint($exp);
 		if(empty($result)){
-			$result = $this->createTaintResult(Annotation::UNKNOWN);
+			$result = $this->createTaintResult(Annotation::UNASSIGNED);
 		}
 		$this->addAffectingFunctionToAnalysisResult($result, $array_var_name);
 		return $result;

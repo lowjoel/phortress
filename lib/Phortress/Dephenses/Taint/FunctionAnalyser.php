@@ -115,6 +115,7 @@ class FunctionAnalyser{
 					$retTaint->merge($taint);
 				}
 			}
+			var_dump($retTaint->getTaint());
 			return new TaintResult($retTaint->getTaint(), $retTaint->getSanitisingFunctions());
 		}else{
 			return new TaintResult(Annotation::UNASSIGNED);
