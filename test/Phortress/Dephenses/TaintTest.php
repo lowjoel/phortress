@@ -1,7 +1,9 @@
 <?php
 namespace Phortress\Dephenses;
 
+use Phortress\Dephenses\Taint\TaintEnvironment;
 use Phortress\Program;
+use PhpParser\Node\Expr\Variable;
 
 class TaintTest extends \PHPUnit_Framework_TestCase {
 	/**
@@ -47,7 +49,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint2);
 
 	}
-
+/*
 	public function testTaintedParamsWithBinaryOps(){
 		$taintDephense = new Taint();
 		$taintDephense->run($this->program2->parseTree);
@@ -90,7 +92,7 @@ class TaintTest extends \PHPUnit_Framework_TestCase {
 		$taint2 = $this->getVariableTaint($this->program5->parseTree[3]->var);
 		$this->assertEquals(Taint\Annotation::SAFE, $taint2);
 	}
-
+*/
 	public function getVariableTaint(Variable $var){
 		$assignEnv = $var->environment->resolveVariable($var->name)->environment;
 		$taintEnv = TaintEnvironment::getTaintEnvironmentFromEnvironment($assignEnv);

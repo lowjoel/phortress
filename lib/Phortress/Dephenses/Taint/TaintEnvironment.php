@@ -96,12 +96,7 @@ class TaintEnvironment {
 			$parentTaintEnv = self::getTaintEnvironmentFromEnvironment($this->environment->getParent());
 			if(isset($parentTaintEnv)){
 				return $parentTaintEnv->getTaintResult($varName);
-			}else{
-				return new TaintResult(Annotation::UNASSIGNED);
 			}
-
-		}else{
-			return new TaintResult(Annotation::UNASSIGNED);
 		}
 	}
 

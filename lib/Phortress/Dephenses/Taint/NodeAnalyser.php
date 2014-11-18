@@ -194,7 +194,7 @@ class NodeAnalyser {
 		if(isset($varTaintEnv)){
 			$taintResult = $varTaintEnv->getTaintResult($var->name);
 		}
-		if(empty($taintResult) || $taintResult->getTaint() == Annotation::UNASSIGNED){
+		if(empty($taintResult)){
 			$assign = $assignEnv->resolveVariable($varName);
 			return $this->resolveExprTaint($assign->expr);
 		}
@@ -204,41 +204,45 @@ class NodeAnalyser {
 
 	public function resolveExprTaint(Expr $exp){
 		if($exp instanceof Node\Scalar){
-			return $this->createTaintResult(Annotation::SAFE);
+			$result = $this->createTaintResult(Annotation::SAFE);
 		}else if (($exp instanceof Expr\ClassConstFetch) || ($exp instanceof
 				Expr\ConstFetch)){
-			return $this->createTaintResult(Annotation::SAFE);
+			$result = $this->createTaintResult(Annotation::SAFE);
 		}else if($exp instanceof Expr\Variable) {
-			return $this->resolveVariableTaint($exp);
+			$result = $this->resolveVariableTaint($exp);
 		}else if($exp instanceof Expr\PreInc || $exp instanceof Expr\PreDec || $exp instanceof Expr\PostInc || $exp instanceof Expr\PostDec){
 			$var = $exp->var;
-			return $this->resolveVariableTaint($var);
+			$result = $this->resolveVariableTaint($var);
 		}else if($exp instanceof Expr\UnaryMinus || $exp instanceof Expr\UnaryPlus){
 			$var = $exp->expr;
-			return $this->resolveVariableTaint($var);
+			$result = $this->resolveVariableTaint($var);
 		}else if($exp instanceof Expr\PropertyFetch){
 			$var = $exp->var;
-			return $this->resolveVariableTaint($var);
+			$result = $this->resolveVariableTaint($var);
 		}else if($exp instanceof Expr\BinaryOp){
-			return $this->resolveBinaryOpTaint($exp);
+			$result = $this->resolveBinaryOpTaint($exp);
 		}else if($exp instanceof Expr\Array_){
-			return $this->resolveAndMergeTaintOfExprsInArray($exp);
+			$result = $this->resolveAndMergeTaintOfExprsInArray($exp);
 		}else if($exp instanceof Expr\ArrayDimFetch){
-			return $this->resolveArrayFieldTaint($exp);
+			$result = $this->resolveArrayFieldTaint($exp);
 		}else if($exp instanceof Expr\StaticPropertyFetch){
-			return $this->resolveClassPropertyTaint($exp);
+			$result = $this->resolveClassPropertyTaint($exp);
 		}else if($exp instanceof Expr\FuncCall){
-			return $this->resolveFuncResultTaint($exp);
+			$result = $this->resolveFuncResultTaint($exp);
 		}else if($exp instanceof Expr\MethodCall){
-			return $this->resolveMethodResultTaint($exp);
+			$result = $this->resolveMethodResultTaint($exp);
 		}else if($exp instanceof Expr\Ternary){
-			return $this->resolveTernaryTaint($exp);
+			$result = $this->resolveTernaryTaint($exp);
 		}else if($exp instanceof Expr\Eval_){
-			return $this->resolveExprTaint($exp->expr);
+			$result = $this->resolveExprTaint($exp->expr);
 		}else{
 			//Other expressions we will not handle.
 			return $this->createTaintResult(Annotation::UNKNOWN);
 		}
+		if(empty($result)){
+			$result = $this->createTaintResult(Annotation::UNASSIGNED);
+		}
+		return $result;
 	}
 
 	protected function resolveMethodResultTaint(Expr\MethodCall $exp){

@@ -10,24 +10,13 @@ namespace Phortress\Dephenses\Taint;
 
 use PhpParser\Node\Expr;
 class FunctionTaintResult extends TaintResult{
-	protected $variable;
 	/**
 	 * Array of Variables (function parameters) which will affect the variable's taint value.
 	 */
 	protected $affecting_params = array();
 
-	public function __construct($taint = Annotation::UNASSIGNED,
-	                            $sanitising = array(), Expr\Variable $var = null){
+	public function __construct($taint = Annotation::UNASSIGNED, $sanitising = array()){
 		parent::__construct($taint, $sanitising);
-		$this->variable = $var;
-	}
-
-	public function getVariable(){
-		return $this->variable;
-	}
-
-	public function setVariable(Expr\Variable $var){
-		$this->variable = $var;
 	}
 
 	public function getAffectingParameters(){
@@ -64,27 +53,4 @@ class FunctionTaintResult extends TaintResult{
 		return $varInfo;
 	}
 
-	/**
-	 * Takes in of the form: array(array(var name => VariableInfo))
-	 * Flattens it to a single array mapping a variable's name to the variable's corresponding
-	 * VariableInfo object. In otherwords, the return array should be of the form:
-	 * array(variable_name => VariableInfo)
-	 */
-	public static function mergeVariables($vars){
-		$merged = array();
-		foreach($vars as $item){
-			foreach($item as $var_name => $varInfo){
-				if(empty($varInfo)){
-					continue;
-				}
-				if(!array_key_exists($var_name, $merged)){
-					$merged[$var_name] = $varInfo;
-				}else{
-					$existing = $merged[$var_name];
-					$merged[$var_name] = self::mergeFunctionTaintResults($existing, $varInfo);
-				}
-			}
-		}
-		return $merged;
-	}
 } 
