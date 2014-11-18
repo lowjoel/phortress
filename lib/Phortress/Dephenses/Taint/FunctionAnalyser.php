@@ -161,7 +161,7 @@ class FunctionAnalyser{
 		$if_res = $this->traceArrayOfItems($if_items);
 		$else = $stmt->else;
 		$else_res = $this->traceStatementVariables($else);
-		return VariableInfo::mergeVariables(array($if_res, $else_res));
+		return FunctionTaintResult::mergeVariables(array($if_res, $else_res));
 	}
 
 	private function traceArrayOfItems($arr){
@@ -240,7 +240,7 @@ class FunctionAnalyser{
             
             $traced_args[] = $this->applyFunctionEffect($traced, $func_name);
         }
-        return VariableInfo::mergeVariables($traced_args);
+        return FunctionTaintResult::mergeVariables($traced_args);
     }
 
 	/**
@@ -304,7 +304,7 @@ class FunctionAnalyser{
 	private function traceAndMergeTwoExpr(Expr $left, Expr $right, $ignore_vars = array()){
 		$left_var = $this->traceExpressionVariables($left, $ignore_vars);
 		$right_var = $this->traceExpressionVariables($right, $ignore_vars);
-		return VariableInfo::mergeVariables(array($left_var, $right_var));
+		return FunctionTaintResult::mergeVariables(array($left_var, $right_var));
 	}
 
     private function traceVariable(Expr\Variable $var, $ignore_vars = array()){
@@ -321,13 +321,13 @@ class FunctionAnalyser{
 	        $details_ret = array($var->name => $var_details);
 	        $trace_res = $this->traceVariableAssignmentToParameters($var, $var_details,
 		        $ignore_vars);
-	        return VariableInfo::mergeVariables(array($details_ret, $trace_res));
+	        return FunctionTaintResult::mergeVariables(array($details_ret, $trace_res));
         }
 
     }
 
 	private function traceVariableAssignmentToParameters(Expr\Variable $var,
-	                                                     VariableInfo $var_details,
+	                                                     FunctionTaintResult $var_details,
 	                                                     $ignore_vars = array()){
 
 		if(in_array($var, $ignore_vars)){
@@ -372,7 +372,7 @@ class FunctionAnalyser{
             if(!empty($filter_res)){
                 return $filter_res;
             }else{
-                $varInfo = new VariableInfo($var, Annotation::UNKNOWN);
+                $varInfo = new FunctionTaintResult(Annotation::UNKNOWN, $var);
                 $this->unresolved_variables[] = $varInfo;
                 return $varInfo;
             }
@@ -382,7 +382,7 @@ class FunctionAnalyser{
             }else{
 
 //	            $assign = $var->environment->resolveVariable($name);
-	            $varInfo = new VariableInfo($var);
+	            $varInfo = new FunctionTaintResult(Annotation::UNASSIGNED, $var);
 //	            if(!empty($assign)){
 //		            $varInfo->setDefinition($assign);
 //	            }

@@ -9,15 +9,15 @@
 namespace Phortress\Dephenses\Taint;
 
 use PhpParser\Node\Expr;
-class VariableInfo extends TaintResult{
+class FunctionTaintResult extends TaintResult{
 	protected $variable;
 	/**
 	 * Array of Variables (function parameters) which will affect the variable's taint value.
 	 */
 	protected $affecting_params = array();
 
-	public function __construct(Expr\Variable $var = null, $taint = Annotation::UNASSIGNED,
-	                            $sanitising = array()){
+	public function __construct($taint = Annotation::UNASSIGNED,
+	                            $sanitising = array(), Expr\Variable $var = null){
 		parent::__construct($taint, $sanitising);
 		$this->variable = $var;
 	}
@@ -48,15 +48,15 @@ class VariableInfo extends TaintResult{
 
 	public function merge($info){
 		parent::merge($info);
-		assert($info instanceof VariableInfo);
+		assert($info instanceof FunctionTaintResult);
 		$other_params = $info->getAffectingParameters();
 		$params = array_merge($this->affecting_params, $other_params);
 		$this->affecting_params = $params;
 	}
 
-	public static function mergeVariableInfo(VariableInfo $var1, VariableInfo $var2){
+	public static function mergeVariableInfo(FunctionTaintResult $var1, FunctionTaintResult $var2){
 		$mergedResult = TaintResult::mergeTaintResults($var1, $var2);
-		$varInfo = new VariableInfo($var1->getVariable(), $mergedResult->getTaint(),
+		$varInfo = new FunctionTaintResult($var1->getVariable(), $mergedResult->getTaint(),
 		$mergedResult->getSanitisingFunctions());
 
 		$params = array_merge($var1->getAffectingParameters(), $var2->getAffectingParameters());

@@ -20,16 +20,22 @@ use PhpParser\Node\Stmt;
  */
 class NodeAnalyser {
 	public static function analyse(Node $node, TaintEnvironment $taintEnv = null){
-
+		if(is_null($taintEnv)){
+			$taintEnv = new TaintEnvironment();
+		}
 		if($node instanceof Stmt){
-			if(is_null($taintEnv)){
-				$taintEnv = new TaintEnvironment();
-			}
-			return self::resolveStmtTaintEnvironment($node, $taintEnv);
+			$result = self::resolveStmtTaintEnvironment($node, $taintEnv);
+			assert($result != null);
+			return $result;
 		}else if($node instanceof Expr){
-			return self::resolveAssignmentTaintEnvironment($node);
+			$result = self::resolveAssignmentTaintEnvironment($node);
+			if(empty($result)){
+				return $taintEnv;
+			}else{
+				return $result;
+			}
 		}else{
-			return new TaintEnvironment();
+			return $taintEnv;
 		}
 	}
 
@@ -250,6 +256,9 @@ class NodeAnalyser {
 			return self::resolveSanitisationFuncCall($exp, $func_name);
 		}else{
 			//TODO:
+			$func_analyser = FunctionAnalyser2::getFunctionAnalyser($exp->environment, $func_name);
+			$analysis_res = $func_analyser->analyseFunctionCall($exp->args);
+			return $analysis_res;
 		}
 	}
 
@@ -327,6 +336,7 @@ class NodeAnalyser {
 	}
 
 	protected static function resolveStmtTaintEnvironment(Stmt $exp, TaintEnvironment $taintEnv){
+		assert($taintEnv != null);
 		if($exp instanceof Stmt\If_){
 			return self::resolveIfStatementTaints($exp, $taintEnv);
 		}else if($exp instanceof Stmt\Else_){
@@ -342,8 +352,9 @@ class NodeAnalyser {
 		}else if($exp instanceof Stmt\While_){
 			$items = $exp->stmts;
 		}
-		if(isset($items)){
-			return self::resolveTaintForArrayOfStatements($items, $taintEnv);
+		if(!empty($items)){
+			$result = self::resolveTaintForArrayOfStatements($items, $taintEnv);
+			return $result;
 		}else{
 			return $taintEnv;
 		}
@@ -354,8 +365,9 @@ class NodeAnalyser {
 		$if_res = self::resolveTaintForArrayOfStatements($if_items, $taintEnv);
 		$else = $stmt->else;
 		if(isset($else)){
-			$else_res = self::resolveTaintForArrayOfStatements($else, $taintEnv);
-			return $if_res->mergeTaintEnvironment($else_res);
+			$else_res = self::resolveStmtTaintEnvironment($else, $taintEnv);
+			$if_res->mergeTaintEnvironment($else_res);
+			return $if_res;
 		}else{
 			return $if_res;
 		}

@@ -9,6 +9,6 @@
 namespace Phortress\Dephenses\Taint;
 
 
-class FunctionNodeAnalyser {
+class FunctionNodeAnalyser extends NodeAnalyser{
 
 } 
