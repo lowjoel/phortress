@@ -8,6 +8,7 @@ function func($a, $b) {
 	}
 	return $ret;
 }
+$a = "hello";
 
 $tainted = $_GET["tainted"];
 $result = func(1, $tainted);
