@@ -13,7 +13,7 @@ class Cli {
 	/**
 	 * The getopt configuration string.
 	 */
-	const GETOPT_STRING = 'f:';
+	const GETOPT_STRING = 'hf:';
 
 	/**
 	 * @var string[] The files which were specified to check.
@@ -27,22 +27,55 @@ class Cli {
 	 */
 	public static function run() {
 		$options = getopt(self::GETOPT_STRING);
-		self::parseOptions($options);
-
-		return self::check();
+		if (self::parseOptions($options)) {
+			return self::check();
+		} else {
+			return 0;
+		}
 	}
 
 	/**
 	 * Parses the given options specified by getopt.
 	 *
 	 * @param array $options The options given by getopt.
+	 * @return bool True if execution should continue.
 	 */
 	private static function parseOptions(array $options) {
-		if (isset($options['f'])) {
-			self::$files = (array)$options['f'];
+		if (isset($options['h']) || !isset($options['f'])) {
+			self::displayHelp();
+			return false;
 		} else {
-			self::$files = array();
+			self::$files = (array)$options['f'];
+			return true;
 		}
+	}
+
+	/**
+	 * Displays the help message
+	 */
+	private static function displayHelp() {
+		echo <<<EOH
+    uuu       uuu     ______
+   uuu|=====uuu |    / __  /_  ________________________________________
+   | |======| |'|   / /_/ / /_/ / __ / __  /_  __/ __  / ___/  __/ ___/
+   | | .==. | | |  / ____/ __  / /_// /_/_/ / / / / /_/ ___/__  /___ /
+   |___|##|___|/  /_/   /_/ /_/____/_/\_\  /_/ /_/\_\/____/____/ ___/
+
+
+EOH;
+		$color = new Color();
+		echo $color('Usage:')->yellow;
+		echo '
+    phortress.php [-hf] [arguments]
+
+';
+		echo $color('Options:')->yellow;
+		echo '
+    -h          Display this help message
+    -f [file1]  Runs Phortress on the given file
+
+Pretty fortress ASCII art, from http://ascii.co.uk/art/fortress
+';
 	}
 
 	/**
