@@ -22,9 +22,9 @@ class SanitisationTest extends \PHPUnit_Framework_TestCase {
 	public function testSQLInjectionSanitisation(){
 		$taintDephense = new Taint();
 		$runResult = $taintDephense->run($this->program->parseTree);
-//		$this->assertEquals(0, count($runResult));
+		$this->assertEquals(0, count($runResult));
 		$taint = $this->getVariableTaint($this->program->parseTree[3]->var);
-		$this->assertEquals(Taint\Annotation::SAFE, $taint);
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
 	}
 
 	public function getVariableTaint(Variable $var){

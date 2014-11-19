@@ -359,7 +359,6 @@ class NodeAnalyser {
 			$exp = $arg->value;
 			$taintRes = $this->resolveExprTaint($exp);
 			if(SanitisingFunctions::isSanitisingFunction($func_name)){
-				var_dump($func_name);
 				$taintRes->addSanitisingFunction($func_name);
 			}else if(SanitisingFunctions::isSanitisingReverseFunction($func_name)){
 				$reverse_func = SanitisingFunctions::getAffectedSanitiser($func_name);

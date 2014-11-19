@@ -11,5 +11,5 @@ function func($a, $b) {
 
 $tainted = $_GET["tainted"];
 $result = func(1, $tainted);
-$result = md5($result);
-mysql_query("Update stuff set stuff.store = " . $result);
+$cleaned = md5($result);
+mysql_query("Update stuff set stuff.store = " . $cleaned);

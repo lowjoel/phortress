@@ -41,8 +41,8 @@ class TaintResult {
 	public function merge($result){
 		assert($result instanceof TaintResult);
 		$this->setTaint(max($this->getTaint(), $result->getTaint()));
-		$this->setSanitisingFunctions(self::mergeSanitisingFunctions
-			($this->getSanitisingFunctions(), $result->getSanitisingFunctions()));
+		$sanitisingFuncs = self::mergeTaintResultSanitisingFunctions($this, $result);
+		$this->setSanitisingFunctions($sanitisingFuncs);
 	}
 
 	public static function mergeTaintResults(TaintResult $result1, TaintResult $result2){
@@ -56,8 +56,14 @@ class TaintResult {
 		$taint1 = $result1->getTaint();
 		$taint2 = $result2->getTaint();
 		if($taint1 >= Annotation::UNKNOWN && $taint2 >= Annotation::UNKNOWN){
-			return self::mergeSanitisingFunctions($result1->getSanitisingFunctions(),
-				$result2->getSanitisingFunctions());
+			$functions1 = $result1->getSanitisingFunctions();
+			$functions2 = $result2->getSanitisingFunctions();
+			if(empty($functions1)){
+				$merged = $functions2;
+			}else{
+				$merged = self::mergeSanitisingFunctions($functions1, $functions2);
+			}
+			return $merged;
 		}else if($taint1 >= Annotation::UNKNOWN){
 			return $result1->getSanitisingFunctions();
 		}else{
