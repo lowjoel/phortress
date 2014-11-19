@@ -40,29 +40,25 @@ class TaintResult {
 
 	public function merge($result){
 		assert($result instanceof TaintResult);
-		$this->setTaint(max($this->getTaint(), $result->getTaint()));
-		$sanitisingFuncs = self::mergeTaintResultSanitisingFunctions($this, $result);
+		$sanitisingFuncs = $this->mergeTaintResultSanitisingFunctions($this, $result);
 		$this->setSanitisingFunctions($sanitisingFuncs);
+		$this->setTaint(max($this->getTaint(), $result->getTaint()));
 	}
 
-	public static function mergeTaintResults(TaintResult $result1, TaintResult $result2){
+	public function mergeTaintResults(TaintResult $result1, TaintResult $result2){
 		$mergedTaint = max($result1->getTaint(), $result2->getTaint());
-		$mergedSanitisation = self::mergeTaintResultSanitisingFunctions($result1, $result2);
+		$mergedSanitisation = $this->mergeTaintResultSanitisingFunctions($result1, $result2);
 		return new TaintResult($mergedTaint, $mergedSanitisation);
 	}
 
-	protected static function mergeTaintResultSanitisingFunctions(TaintResult $result1,
+	protected function mergeTaintResultSanitisingFunctions(TaintResult $result1,
 	                                                           TaintResult $result2){
 		$taint1 = $result1->getTaint();
 		$taint2 = $result2->getTaint();
 		if($taint1 >= Annotation::UNKNOWN && $taint2 >= Annotation::UNKNOWN){
 			$functions1 = $result1->getSanitisingFunctions();
 			$functions2 = $result2->getSanitisingFunctions();
-			if(empty($functions1)){
-				$merged = $functions2;
-			}else{
-				$merged = self::mergeSanitisingFunctions($functions1, $functions2);
-			}
+			$merged = $this->mergeSanitisingFunctions($functions1, $functions2);
 			return $merged;
 		}else if($taint1 >= Annotation::UNKNOWN){
 			return $result1->getSanitisingFunctions();
@@ -73,7 +69,7 @@ class TaintResult {
 	/**
 	 * Merges two arrays of sanitising functions.
 	 */
-	protected static function mergeSanitisingFunctions($functions1, $functions2){
+	protected function mergeSanitisingFunctions($functions1, $functions2){
 		return array_intersect($functions1, $functions2);
 	}
 

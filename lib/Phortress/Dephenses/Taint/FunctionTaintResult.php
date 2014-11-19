@@ -37,22 +37,20 @@ class FunctionTaintResult extends TaintResult{
 		$this->affecting_params = array_merge($this->affecting_params, array($paramName));
 	}
 
-	public function merge($info){
-		parent::merge($info);
-		if($info instanceof FunctionTaintResult){
-			$other_params = $info->getAffectingParameters();
+	public function merge($taintResult){
+		parent::merge($taintResult);
+		if($taintResult instanceof FunctionTaintResult){
+			$other_params = $taintResult->getAffectingParameters();
 			$params = array_merge($this->affecting_params, $other_params);
 			$this->affecting_params = $params;
 		}
 	}
 
-	public static function mergeFunctionTaintResults(FunctionTaintResult $var1, FunctionTaintResult $var2){
-		$mergedResult = TaintResult::mergeTaintResults($var1, $var2);
-		$varInfo = new FunctionTaintResult($mergedResult->getTaint(), $mergedResult->getSanitisingFunctions());
-
-		$params = array_merge($var1->getAffectingParameters(), $var2->getAffectingParameters());
-		$varInfo->setAffectingParameters($params);
-		return $varInfo;
+	protected function mergeTaintResultSanitisingFunctions(TaintResult $result1,
+	                                                              TaintResult $result2){
+		$functions1 = $result1->getSanitisingFunctions();
+		$functions2 = $result2->getSanitisingFunctions();
+		return array_merge($functions1, $functions2);
 	}
 
 	public function copy(){

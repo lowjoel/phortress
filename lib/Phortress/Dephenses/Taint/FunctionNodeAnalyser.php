@@ -22,7 +22,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	protected $returnResults = array();
 
 	/**
-	 * array(int lineNumber => FuncCall functionCall)
+	 * array(int lineNumber => FunctionSinkNode node)
 	 */
 	protected $sinkNodes = array();
 

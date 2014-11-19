@@ -17,6 +17,8 @@ class SanitisationTest extends \PHPUnit_Framework_TestCase {
 		// Load a program
 		$this->file = realpath(__DIR__ . '/../Fixture/sanitisation_test_1.php');
 		$this->program = loadGlassBoxProgram($this->file);
+		$this->file1 = realpath(__DIR__ . '/../Fixture/sanitisation_test_2.php');
+		$this->program1 = loadGlassBoxProgram($this->file1);
 	}
 
 	public function testSQLInjectionSanitisation(){
@@ -24,6 +26,14 @@ class SanitisationTest extends \PHPUnit_Framework_TestCase {
 		$runResult = $taintDephense->run($this->program->parseTree);
 		$this->assertEquals(0, count($runResult));
 		$taint = $this->getVariableTaint($this->program->parseTree[3]->var);
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
+	}
+
+	public function testSQLInjectionInFunctionCallSanitisation(){
+		$taintDephense = new Taint();
+		$runResult = $taintDephense->run($this->program1->parseTree);
+		$this->assertEquals(0, count($runResult));
+		$taint = $this->getVariableTaint($this->program1->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
 	}
 
