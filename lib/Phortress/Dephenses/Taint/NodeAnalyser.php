@@ -304,7 +304,7 @@ class NodeAnalyser {
 			return $this->resolveSanitisationFuncCall($exp);
 		}else if(Sinks::isSinkFunction($exp) && !empty($this->vulnerabilityReporter)){
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
-			$this->vulnerabilityReporter->runFuncCallVulnerabilityChecks($exp, $args_with_taints);
+			$this->vulnerabilityReporter->runNodeVulnerabilityChecks($exp, $args_with_taints);
 		}else{
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
