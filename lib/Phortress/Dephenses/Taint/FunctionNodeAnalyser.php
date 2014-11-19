@@ -66,7 +66,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		$args = $exp->args;
 		if(Sinks::isSinkFunction($exp)){
 			$argTaints = $this->getArgumentsTaintValuesForAnalysis($args);
-			$this->sinkFunctionCalls[$exp->getLine()] = array($argTaints, $exp);
+			$this->sinkFunctionCalls[$exp->getLine()] = new FunctionSinkNode($exp, $argTaints);
 			return;
 		}
 		$result = parent::resolveFuncResultTaint($exp);

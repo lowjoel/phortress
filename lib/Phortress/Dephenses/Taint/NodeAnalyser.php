@@ -321,7 +321,6 @@ class NodeAnalyser {
 	}
 
 	protected function runEchoStatementCheck(Stmt $exp){
-
 		if(!empty($this->vulnerabilityReporter)){
 			$exprs = $exp->exprs;
 			$taints = array();

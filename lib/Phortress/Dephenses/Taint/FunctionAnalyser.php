@@ -96,9 +96,9 @@ class FunctionAnalyser{
 	}
 
 	private function checkSinkFunctionCalls($paramMappings, VulnerabilityReporter $reporter){
-		foreach($this->sinkFunctionCalls as $lineNum => $funcCallArr){
-			$argTaintMappings = $funcCallArr[0];
-			$funcCall = $funcCallArr[1];
+		foreach($this->sinkFunctionCalls as $lineNum => $funcCallNode){
+			$argTaintMappings = $funcCallNode->getTaints();
+			$funcCall = $funcCallNode->getNode();
 			$argTaints = array();
 			foreach($argTaintMappings as $argTaint){
 				$argTaint = $argTaint->copy();
