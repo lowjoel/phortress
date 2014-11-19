@@ -29,7 +29,7 @@ class NodeAnalyser {
 	public function analyse(Node $node, TaintEnvironment $taintEnv){
 		$taintEnv = $taintEnv->copy();
 		if($node instanceof Stmt\Echo_){
-			$this->runEchoStatementCheck($node);
+			$this->runEchoStatementCheck($node, $taintEnv);
 			return $taintEnv;
 		}else if($node instanceof Stmt){
 			$result = $this->resolveStmtTaintEnvironment($node, $taintEnv);
@@ -320,17 +320,22 @@ class NodeAnalyser {
 		}
 	}
 
-	protected function runEchoStatementCheck(Stmt $exp){
+	protected function runEchoStatementCheck(Stmt $exp, TaintEnvironment $taintEnv){
 		if(!empty($this->vulnerabilityReporter)){
 			$exprs = $exp->exprs;
-			$taints = $this->getExpressionsTaintValuesForAnalysis($exprs);
+			$taints = $this->getExpressionsTaintValuesForAnalysis($exprs, $taintEnv);
 			$this->vulnerabilityReporter->runNodeVulnerabilityChecks($exp, $taints);
 		}
 	}
 
-	protected function getExpressionsTaintValuesForAnalysis($exprs){
+	protected function getExpressionsTaintValuesForAnalysis($exprs, TaintEnvironment $taintEnv =
+		null){
 		$taints = array();
 		foreach($exprs as $expr){
+			if($taintEnv != null){
+				TaintEnvironment::updateTaintEnvironmentForEnvironment($expr->environment,
+					$taintEnv);
+			}
 			$taints[] = $this->resolveExprTaint($expr);
 		}
 		return $taints;

@@ -82,8 +82,8 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		$this->sinkNodes[$exp->getLine()] = new FunctionSinkNode($exp, array($expTaint));
 	}
 
-	protected function runEchoStatementCheck(Stmt $exp){
-		$expTaints = $this->getExpressionsTaintValuesForAnalysis($exp->exprs);
+	protected function runEchoStatementCheck(Stmt $exp, TaintEnvironment $taintEnv){
+		$expTaints = $this->getExpressionsTaintValuesForAnalysis($exp->exprs, $taintEnv);
 		$this->sinkNodes[$exp->getLine()] = new FunctionSinkNode($exp, $expTaints);
 	}
 
