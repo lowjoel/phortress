@@ -352,13 +352,14 @@ class NodeAnalyser {
 	}
 
 	protected function resolveSanitisationFuncCall(Expr\FuncCall $exp){
-		$func_name = $exp->name;
+		$func_name = $exp->name->getLast();
 		$func_args = $exp->args;
 		$results = array();
 		foreach($func_args as $arg){
 			$exp = $arg->value;
 			$taintRes = $this->resolveExprTaint($exp);
-			if(SanitisingFunctions::isGeneralSanitisingFunction($func_name)){
+			if(SanitisingFunctions::isSanitisingFunction($func_name)){
+				var_dump($func_name);
 				$taintRes->addSanitisingFunction($func_name);
 			}else if(SanitisingFunctions::isSanitisingReverseFunction($func_name)){
 				$reverse_func = SanitisingFunctions::getAffectedSanitiser($func_name);
