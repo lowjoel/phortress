@@ -35,7 +35,7 @@ class FunctionAnalyser{
 	 */
 	protected $functionStmts;
 
-	protected $sinkFunctionCalls = array();
+	protected $sinkNodes = array();
 
 	/**
 	 * Environment where the function was defined
@@ -74,7 +74,7 @@ class FunctionAnalyser{
 			$currentTaintEnv->updateTaintEnvironment($nodeTaintEnv);
 		}
 		$this->returnStmtTaintResults = $funcNodeAnalyser->getReturnTaintResult();
-		$this->sinkFunctionCalls = $funcNodeAnalyser->getSinkFunctionCalls();
+		$this->sinkNodes = $funcNodeAnalyser->getSinkNodes();
 	}
 
 	/**
@@ -90,27 +90,26 @@ class FunctionAnalyser{
 			$result->merge($retStmtResult);
 		}
 		if(!empty($reporter)){
-			$this->checkSinkFunctionCalls($paramTaintMappings, $reporter);
+			$this->checkSinkNodes($paramTaintMappings, $reporter);
 		}
 		return $result;
 	}
 
-	private function checkSinkFunctionCalls($paramMappings, VulnerabilityReporter $reporter){
-		foreach($this->sinkFunctionCalls as $lineNum => $funcCallNode){
-			$argTaintMappings = $funcCallNode->getTaints();
-			$funcCall = $funcCallNode->getNode();
-			$argTaints = array();
-			foreach($argTaintMappings as $argTaint){
-				$argTaint = $argTaint->copy();
+	private function checkSinkNodes($paramMappings, VulnerabilityReporter $reporter){
+		foreach($this->sinkNodes as $lineNum => $sinkNode){
+			$taintMappings = $sinkNode->getTaints();
+			$node = $sinkNode->getNode();
+			$finalTaints = array();
+			foreach($taintMappings as $taintResult){
+				$taintResult = $taintResult->copy();
 				foreach($paramMappings as $paramName => $taint){
-					if($argTaint->isAffectingParameter($paramName)){
-						var_dump($taint->getTaint());
-						$argTaint->merge($taint);
+					if($taintResult->isAffectingParameter($paramName)){
+						$taintResult->merge($taint);
 					}
-					$argTaints[] = $argTaint;
+					$finalTaints[] = $taintResult;
 				}
 			}
-			$reporter->runNodeVulnerabilityChecks($funcCall, $argTaints);
+			$reporter->runNodeVulnerabilityChecks($node, $finalTaints);
 		}
 	}
 

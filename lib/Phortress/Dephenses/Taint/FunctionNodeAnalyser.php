@@ -24,7 +24,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	/**
 	 * array(int lineNumber => FuncCall functionCall)
 	 */
-	protected $sinkFunctionCalls = array();
+	protected $sinkNodes = array();
 
 	public function __construct($params){
 		$this->functionParams = $params;
@@ -34,8 +34,8 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		return new FunctionTaintResult($taint, $sanitising_funcs);
 	}
 
-	public function getSinkFunctionCalls(){
-		return $this->sinkFunctionCalls;
+	public function getSinkNodes(){
+		return $this->sinkNodes;
 	}
 
 	private function isFunctionParameter($name){
@@ -66,7 +66,7 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 		$args = $exp->args;
 		if(Sinks::isSinkFunction($exp)){
 			$argTaints = $this->getArgumentsTaintValuesForAnalysis($args);
-			$this->sinkFunctionCalls[$exp->getLine()] = new FunctionSinkNode($exp, $argTaints);
+			$this->sinkNodes[$exp->getLine()] = new FunctionSinkNode($exp, $argTaints);
 			return;
 		}
 		$result = parent::resolveFuncResultTaint($exp);
