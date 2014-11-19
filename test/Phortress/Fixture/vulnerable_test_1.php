@@ -6,7 +6,6 @@ function func($a, $b) {
 	}else{
 		$ret = "hello";
 	}
-//	mysql_query("Update stuff set stuff.store = " . $ret);
 	return $ret;
 }
 

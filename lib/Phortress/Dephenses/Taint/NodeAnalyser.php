@@ -32,6 +32,13 @@ class NodeAnalyser {
 			$result = $this->resolveStmtTaintEnvironment($node, $taintEnv);
 			assert($result != null);
 			return $result;
+		}else if($node instanceof Expr\FuncCall){
+			$result = $this->checkFunctionCall($node);
+			if(empty($result)){
+				return $taintEnv;
+			}else{
+				return $result;
+			}
 		}else if($node instanceof Expr){
 			TaintEnvironment::updateTaintEnvironmentForEnvironment($node->environment, $taintEnv);
 			$result = $this->resolveAssignmentTaintEnvironment($node);
@@ -44,6 +51,11 @@ class NodeAnalyser {
 			return $taintEnv;
 		}
 	}
+
+	protected function checkFunctionCall(Expr\FuncCall $funcCall){
+		$this->resolveExprTaint($funcCall);
+		return TaintEnvironment::getTaintEnvironmentFromEnvironment($funcCall->environment);
+    }
 
 	protected function resolveAssignmentTaintEnvironment(Expr $exp){
 		if($exp instanceof Expr\Assign){

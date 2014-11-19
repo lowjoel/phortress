@@ -22,7 +22,7 @@ class SinkTest extends \PHPUnit_Framework_TestCase {
 	public function testSQLInjection(){
 		$taintDephense = new Taint();
 		$runResult = $taintDephense->run($this->program->parseTree);
-//		$this->assertEquals(1, count($runResult));
+		$this->assertGreaterThan(0, count($runResult));
 		$taint = $this->getVariableTaint($this->program->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
 	}
