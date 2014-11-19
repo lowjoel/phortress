@@ -314,13 +314,22 @@ class NodeAnalyser {
 	}
 
 	protected function runSinkExpressionCheck(Expr $exp){
-		$expTaint = $this->resolveExprTaint($exp->expr);
-
+		if(!empty($this->vulnerabilityReporter)){
+			$expTaint = $this->resolveExprTaint($exp->expr);
+			$this->vulnerabilityReporter->runNodeVulnerabilityChecks($exp, array($expTaint));
+		}
 	}
 
 	protected function runEchoStatementCheck(Stmt $exp){
-		$exprs = $exp->exprs;
 
+		if(!empty($this->vulnerabilityReporter)){
+			$exprs = $exp->exprs;
+			$taints = array();
+			foreach($exprs as $expr){
+				$taints[] = $this->resolveExprTaint($expr);
+			}
+			$this->vulnerabilityReporter->runNodeVulnerabilityChecks($exp, $taints);
+		}
 	}
 
 	protected function getArgumentsTaintValuesForAnalysis($args){
