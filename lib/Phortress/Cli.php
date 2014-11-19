@@ -3,6 +3,7 @@ namespace Phortress;
 
 use \Colors\Color;
 use \Phortress\Dephenses\Error;
+use Phortress\Dephenses\Warning;
 
 /**
  * Manages running Phortress from the command line.
@@ -114,7 +115,9 @@ Pretty fortress ASCII art, from http://ascii.co.uk/art/fortress
 		foreach ($results as $result) {
 			if ($result instanceof Error) {
 				echo $color('[Error]   ')->red;
-			} else {
+			} else if($result instanceof Warning){
+				echo $color('[Warning]   ')->yellow;
+			}else {
 				echo '[Message] ';
 			}
 
