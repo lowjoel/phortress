@@ -1,6 +1,7 @@
 <?php
 namespace Phortress\Dephenses\Taint;
 use \PhpParser\Node\Expr;
+use PhpParser\Node\Stmt;
 
 /**
  * List of Sink Functions adapted from RIPS
@@ -383,4 +384,5 @@ class Sinks {
 		return self::isCodeInjectionSinkFunction($func) || self::isSQLInjectionSinkFunction
 		($func) || self::isXSSSinkFunction($func);
 	}
+
 }

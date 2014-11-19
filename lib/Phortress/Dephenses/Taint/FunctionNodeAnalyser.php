@@ -9,6 +9,7 @@
 namespace Phortress\Dephenses\Taint;
 
 
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\BinaryOp;
 use PhpParser\Node\Expr\FuncCall;
@@ -74,6 +75,14 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 			$this->addAffectingParameterToAnalysisResult($result, $argExpName);
 		}
 		return $result;
+	}
+
+	protected function runSinkExpressionCheck(Expr $exp){
+
+	}
+
+	protected function runEchoStatementCheck(Stmt $exp){
+
 	}
 
 	protected function resolveBinaryOpTaint(BinaryOp $exp){

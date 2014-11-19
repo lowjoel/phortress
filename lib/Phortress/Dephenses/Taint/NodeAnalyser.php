@@ -28,14 +28,17 @@ class NodeAnalyser {
 
 	public function analyse(Node $node, TaintEnvironment $taintEnv){
 		$taintEnv = $taintEnv->copy();
-		if($node instanceof Stmt){
+		if($node instanceof Stmt\Echo_){
+			$this->runEchoStatementCheck($node);
+			return $taintEnv;
+		}else if($node instanceof Stmt){
 			$result = $this->resolveStmtTaintEnvironment($node, $taintEnv);
 			assert($result != null);
 			return $result;
 		}else if($node instanceof Expr){
 			TaintEnvironment::updateTaintEnvironmentForEnvironment($node->environment, $taintEnv);
-			if($node instanceof Expr\FuncCall){
-				$result = $this->checkFunctionCall($node);
+			if($this->isSinkExpression($node)){
+				$result = $this->checkSinkExpression($node);
 			}else{
 				$result = $this->resolveAssignmentTaintEnvironment($node);
 			}
@@ -50,9 +53,25 @@ class NodeAnalyser {
 		}
 	}
 
-	protected function checkFunctionCall(Expr\FuncCall $funcCall){
-		$this->resolveExprTaint($funcCall);
-		return TaintEnvironment::getTaintEnvironmentFromEnvironment($funcCall->environment);
+	protected function isSinkExpression(Expr $exp){
+		if($exp instanceof Expr\Print_){
+			return true;
+		}else if($exp instanceof Expr\Exit_){
+			return true;
+		}else if($exp instanceof Expr\FuncCall){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	protected function checkSinkExpression(Expr $exp){
+		if($exp instanceof Expr\FuncCall){
+			$this->resolveFuncResultTaint($exp);
+		}else{
+			$this->runSinkExpressionCheck($exp);
+		}
+		return TaintEnvironment::getTaintEnvironmentFromEnvironment($exp->environment);
     }
 
 	protected function resolveAssignmentTaintEnvironment(Expr $exp){
@@ -252,6 +271,8 @@ class NodeAnalyser {
 			$result = $this->resolveTernaryTaint($exp);
 		}else if($exp instanceof Expr\Eval_){
 			$result = $this->resolveExprTaint($exp->expr);
+		}else if($exp instanceof Expr\Print_){
+			$result = $this->resolveExprTaint($exp->expr);
 		}else{
 			//Other expressions we will not handle.
 			return $this->createTaintResult(Annotation::UNKNOWN);
@@ -283,13 +304,23 @@ class NodeAnalyser {
 			return $this->resolveSanitisationFuncCall($exp);
 		}else if(Sinks::isSinkFunction($exp) && !empty($this->vulnerabilityReporter)){
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
-			$this->vulnerabilityReporter->runVulnerabilityChecks($exp, $args_with_taints);
+			$this->vulnerabilityReporter->runFuncCallVulnerabilityChecks($exp, $args_with_taints);
 		}else{
 			$func_analyser = FunctionAnalyser::getFunctionAnalyser($exp->environment, $func_name);
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
 			$analysis_res = $func_analyser->analyseFunctionCall($args_with_taints, $this->vulnerabilityReporter);
 			return $analysis_res;
 		}
+	}
+
+	protected function runSinkExpressionCheck(Expr $exp){
+		$expTaint = $this->resolveExprTaint($exp->expr);
+
+	}
+
+	protected function runEchoStatementCheck(Stmt $exp){
+		$exprs = $exp->exprs;
+
 	}
 
 	protected function getArgumentsTaintValuesForAnalysis($args){

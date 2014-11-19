@@ -110,7 +110,7 @@ class FunctionAnalyser{
 					$argTaints[] = $argTaint;
 				}
 			}
-			$reporter->runVulnerabilityChecks($funcCall, $argTaints);
+			$reporter->runFuncCallVulnerabilityChecks($funcCall, $argTaints);
 		}
 	}
 
