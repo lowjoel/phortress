@@ -78,11 +78,13 @@ class FunctionNodeAnalyser extends NodeAnalyser{
 	}
 
 	protected function runSinkExpressionCheck(Expr $exp){
-
+		$expTaint = $this->resolveExprTaint($exp->expr);
+		$this->sinkNodes[$exp->getLine()] = new FunctionSinkNode($exp, array($expTaint));
 	}
 
 	protected function runEchoStatementCheck(Stmt $exp){
-
+		$expTaints = $this->getExpressionsTaintValuesForAnalysis($exp->exprs);
+		$this->sinkNodes[$exp->getLine()] = new FunctionSinkNode($exp, $expTaints);
 	}
 
 	protected function resolveBinaryOpTaint(BinaryOp $exp){

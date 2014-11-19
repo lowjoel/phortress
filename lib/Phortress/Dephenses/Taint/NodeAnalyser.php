@@ -323,12 +323,17 @@ class NodeAnalyser {
 	protected function runEchoStatementCheck(Stmt $exp){
 		if(!empty($this->vulnerabilityReporter)){
 			$exprs = $exp->exprs;
-			$taints = array();
-			foreach($exprs as $expr){
-				$taints[] = $this->resolveExprTaint($expr);
-			}
+			$taints = $this->getExpressionsTaintValuesForAnalysis($exprs);
 			$this->vulnerabilityReporter->runNodeVulnerabilityChecks($exp, $taints);
 		}
+	}
+
+	protected function getExpressionsTaintValuesForAnalysis($exprs){
+		$taints = array();
+		foreach($exprs as $expr){
+			$taints[] = $this->resolveExprTaint($expr);
+		}
+		return $taints;
 	}
 
 	protected function getArgumentsTaintValuesForAnalysis($args){
