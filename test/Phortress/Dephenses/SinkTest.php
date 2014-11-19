@@ -42,7 +42,7 @@ class SinkTest extends \PHPUnit_Framework_TestCase {
 	public function testXSSInsideFuncCall(){
 		$taintDephense = new Taint();
 		$runResult = $taintDephense->run($this->program2->parseTree);
-//		$this->assertGreaterThan(0, count($runResult));
+		$this->assertEquals(1, count($runResult));
 		$taint = $this->getVariableTaint($this->program2->parseTree[2]->var);
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
 	}
