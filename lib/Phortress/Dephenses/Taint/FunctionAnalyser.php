@@ -97,7 +97,6 @@ class FunctionAnalyser{
 
 	private function checkSinkFunctionCalls($paramMappings, VulnerabilityReporter $reporter){
 		foreach($this->sinkFunctionCalls as $lineNum => $funcCallArr){
-			var_dump("here");
 			$argTaintMappings = $funcCallArr[0];
 			$funcCall = $funcCallArr[1];
 			$argTaints = array();
@@ -105,6 +104,7 @@ class FunctionAnalyser{
 				$argTaint = $argTaint->copy();
 				foreach($paramMappings as $paramName => $taint){
 					if($argTaint->isAffectingParameter($paramName)){
+						var_dump($taint->getTaint());
 						$argTaint->merge($taint);
 					}
 					$argTaints[] = $argTaint;
@@ -116,17 +116,20 @@ class FunctionAnalyser{
 
 	private function analyseArgumentsEffectOnReturnStmt($argTaints, Stmt\Return_ $return){
 		$retTaint = $this->returnStmtTaintResults[$return->getLine()];
-		if(empty($retTaint)){
+		return $this->mergeTaintResultsWithWithParameterTaints($retTaint, $argTaints);
+	}
+
+	private function mergeTaintResultsWithWithParameterTaints($resTaint, $argTaints){
+		if(empty($resTaint)){
 			return new TaintResult(Annotation::UNASSIGNED);
 		}
-		$taintResult = new TaintResult($retTaint->getTaint(), $retTaint->getSanitisingFunctions());
+		$taintResult = new TaintResult($resTaint->getTaint(), $resTaint->getSanitisingFunctions());
 		foreach($argTaints as $paramName => $taint){
-			if($retTaint->isAffectingParameter($paramName)){
+			if($resTaint->isAffectingParameter($paramName)){
 				$taintResult->merge($taint);
 			}
 		}
 		return $taintResult;
-
 	}
 
 	private function getParametersToTaintResultMappings($argTaints){

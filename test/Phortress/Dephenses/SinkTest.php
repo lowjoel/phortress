@@ -29,11 +29,13 @@ class SinkTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
 	}
 
-//	public function testSQLInjectionInsideFuncCall(){
-//		$taintDephense = new Taint();
-//		$runResult = $taintDephense->run($this->program1->parseTree);
+	public function testSQLInjectionInsideFuncCall(){
+		$taintDephense = new Taint();
+		$runResult = $taintDephense->run($this->program1->parseTree);
 //		$this->assertGreaterThan(0, count($runResult));
-//	}
+		$taint = $this->getVariableTaint($this->program1->parseTree[2]->var);
+		$this->assertEquals(Taint\Annotation::TAINTED, $taint);
+	}
 
 	public function getVariableTaint(Variable $var){
 		$assignEnv = $var->environment->resolveVariable($var->name)->environment;

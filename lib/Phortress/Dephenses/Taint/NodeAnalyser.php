@@ -32,16 +32,14 @@ class NodeAnalyser {
 			$result = $this->resolveStmtTaintEnvironment($node, $taintEnv);
 			assert($result != null);
 			return $result;
-		}else if($node instanceof Expr\FuncCall){
-			$result = $this->checkFunctionCall($node);
-			if(empty($result)){
-				return $taintEnv;
-			}else{
-				return $result;
-			}
 		}else if($node instanceof Expr){
 			TaintEnvironment::updateTaintEnvironmentForEnvironment($node->environment, $taintEnv);
-			$result = $this->resolveAssignmentTaintEnvironment($node);
+			if($node instanceof Expr\FuncCall){
+				$result = $this->checkFunctionCall($node);
+			}else{
+				$result = $this->resolveAssignmentTaintEnvironment($node);
+			}
+
 			if(empty($result)){
 				return $taintEnv;
 			}else{
