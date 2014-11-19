@@ -299,8 +299,9 @@ class NodeAnalyser {
 		}
 
 		$func_name_str = $func_name->getLast();
+
 		if(SanitisingFunctions::isGeneralSanitisingFunction($func_name_str)||
-			SanitisingFunctions::isSanitisingReverseFunction($func_name_str)){
+			SanitisingFunctions::isSQLSanitisingFunction($func_name_str)){
 			return $this->resolveSanitisationFuncCall($exp);
 		}else if(Sinks::isSinkFunction($exp) && !empty($this->vulnerabilityReporter)){
 			$args_with_taints = $this->getArgumentsTaintValuesForAnalysis($exp->args);
